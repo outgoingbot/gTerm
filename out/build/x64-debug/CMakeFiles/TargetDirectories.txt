@@ -1,0 +1,5 @@
+C:/dev/gTerm/out/build/x64-debug/CMakeFiles/edit_cache.dir
+C:/dev/gTerm/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
+C:/dev/gTerm/out/build/x64-debug/gTerm/CMakeFiles/gTerm.dir
+C:/dev/gTerm/out/build/x64-debug/gTerm/CMakeFiles/edit_cache.dir
+C:/dev/gTerm/out/build/x64-debug/gTerm/CMakeFiles/rebuild_cache.dir
