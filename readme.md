@@ -2,7 +2,7 @@ Building on Linux
 =================
 
 1. Install Required Tools:
-   sudo apt install build-essential gcc g++ clang cmake
+   sudo apt install build-essential gcc g++ clang cmake libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
 
 2. Install vcpkg:
    Clone vcpkg from GitHub:
