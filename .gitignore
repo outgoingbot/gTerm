@@ -36,6 +36,7 @@ bld/
 #Project Specific
 out/
 build/
+vcpkg_installed/
 
 
 
