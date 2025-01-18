@@ -1,0 +1,5 @@
+/home/mac/dev/gTerm/CMakeFiles/edit_cache.dir
+/home/mac/dev/gTerm/CMakeFiles/rebuild_cache.dir
+/home/mac/dev/gTerm/gTerm/CMakeFiles/gTerm.dir
+/home/mac/dev/gTerm/gTerm/CMakeFiles/edit_cache.dir
+/home/mac/dev/gTerm/gTerm/CMakeFiles/rebuild_cache.dir

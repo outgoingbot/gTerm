@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/gTerm.dir/gTerm.cpp.o -o gTerm  ../vcpkg_installed/x64-linux/debug/lib/libglad.a ../vcpkg_installed/x64-linux/debug/lib/libglfw3.a ../vcpkg_installed/x64-linux/debug/lib/libimguid.a ../vcpkg_installed/x64-linux/debug/lib/libglfw3.a /usr/lib/x86_64-linux-gnu/librt.a -lm -ldl 
