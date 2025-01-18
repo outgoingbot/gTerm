@@ -8,9 +8,12 @@ project(gTerm)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add vcpkg toolchain file (update the path to your vcpkg.cmake)
-set(CMAKE_TOOLCHAIN_FILE "C:\\dev\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-
+# Detect operating system for vcpkg toolchain file
+if (WIN32)
+    set(CMAKE_TOOLCHAIN_FILE "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif (UNIX)
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+endif()
 
 # Add source to this project's executable.
 add_executable (gTerm "gTerm.cpp" "gTerm.h")
