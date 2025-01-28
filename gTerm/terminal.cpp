@@ -31,15 +31,15 @@ int terminal::update(const char* title) {
         if (ImGui::InputText("##TextEntry", buffer, IM_ARRAYSIZE(buffer))) {
             // Handle text input when the field changes
         }
-        ImGui::Text("You entered: %s", buffer);
+        
 
-
+        ImGui::SameLine(); // Place the next widget on the same line
         //Button Test
         if (ImGui::Button("Click Me")) {
             // This block executes when the button is clicked
             std::cout << "Button clicked!" << std::endl;
         }
-
+        ImGui::Text("You entered: %s", buffer);
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 center = ImVec2(window_pos.x + 400, window_pos.y + 300); // Circle center relative to window

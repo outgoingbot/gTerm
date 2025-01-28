@@ -16,7 +16,7 @@ elseif (UNIX)
 endif()
 
 # Add source to this project's executable.
-add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h")
+add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(glad CONFIG REQUIRED)
@@ -27,3 +27,10 @@ target_link_libraries(gTerm PRIVATE glfw)
 
 find_package(imgui CONFIG REQUIRED)
 target_link_libraries(gTerm PRIVATE imgui::imgui)
+
+
+# Specify the path to the font file
+set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/arial.ttf")
+
+# Pass the path to your code as a preprocessor definition
+add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")

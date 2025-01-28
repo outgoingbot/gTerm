@@ -20,9 +20,10 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
+    // glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
 
 
+    
     // Create a window
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "gTerm", nullptr, nullptr);
     if (!window) {
@@ -47,14 +48,11 @@ int main() {
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
 
-    //trying to change the font, works but seems off (still blurry)
-    // Change default font size (e.g., set it to 18.0f)
-    
-    //io.Fonts->Clear(); // Clear existing fonts
-    //ImFontConfig config;
-    //config.SizePixels = 24.0f; // Set the font size
-    //io.Fonts->AddFontDefault(&config); // Load the default font with the new size
-    //
+    //Set the Default Font
+    io.Fonts->Clear(); // Clear existing fonts
+    const char* fontPath = FONT_FILE_PATH; // Defined by CMake
+    io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+    //ImGui_ImplOpenGL3_CreateFontsTexture(); // Docs say this should be called but it crashes the app
 
     ImGui::StyleColorsDark();
 
@@ -65,6 +63,7 @@ int main() {
     //glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
 
     //Create Custom GUI Object
+    mainMenu main_menu;
     terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     terminal term_B(window, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -93,9 +92,11 @@ int main() {
         }
 
         
+        main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
+        debugMenu.update();
         term.update("One");
         term_B.update("Two");
-        debugMenu.update();
+        
         
 
         // Rendering

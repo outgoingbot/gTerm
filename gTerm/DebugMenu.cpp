@@ -8,6 +8,7 @@ void DebugMenu::update() {
     // Start the debug menu window
     ImGui::Begin("Debug Menu");
 
+
     // Display the frame rate
     ImGui::Text("Frame Rate: %.1f FPS", ImGui::GetIO().Framerate);
 
