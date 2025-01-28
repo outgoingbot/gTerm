@@ -2,17 +2,10 @@
 //
 
 #include "gTerm.h"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h>
-#include <iostream>
 
 using namespace std;
 
-void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100) {
-    draw_list->AddCircle(center, radius, color, num_segments);
-}
+
 
 int main() {
     // Initialize GLFW
@@ -27,7 +20,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create a window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "ImGui Circle Example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1920, 1080, "gTerm", nullptr, nullptr);
     if (!window) {
         cerr << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -47,8 +40,9 @@ int main() {
     // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     (void)io;
+
 
     ImGui::StyleColorsDark();
 
@@ -56,24 +50,23 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    //Create Custom GUI Object
+    terminal term(window, 800, 600);
+    terminal term_B(window, 800, 600);
+
     // Main loop
     while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+        glfwPollEvents(); //I think this handles the user inputs
 
         // Start a new frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Create ImGui window
-        ImGui::Begin("Circle Drawing Example");
+        //Update Our Custom GUI elements
+        term.update("One");
+        term_B.update("Two");
 
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 center = ImVec2(window_pos.x + 400, window_pos.y + 300); // Circle center relative to window
-        drawCircle(draw_list, center, 250.0f, IM_COL32(255, 0, 0, 255));
-
-        ImGui::End();
 
         // Rendering
         ImGui::Render();
@@ -81,8 +74,9 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
+
+   
     }
 
     // Cleanup

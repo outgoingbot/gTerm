@@ -16,7 +16,7 @@ elseif (UNIX)
 endif()
 
 # Add source to this project's executable.
-add_executable (gTerm "gTerm.cpp" "gTerm.h")
+add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(glad CONFIG REQUIRED)
