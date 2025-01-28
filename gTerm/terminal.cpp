@@ -17,8 +17,16 @@ int terminal::update(const char* title) {
         // Create ImGui window
         ImGui::Begin(title);
 
+        //float scale_factor = (ImGui::GetWindowHeight() * ImGui::GetWindowWidth()) * 0.0000005f; //playing with autoscaling
+        //std::cout << scale_factor << std::endl;
+        //testing out scrolling text class
+        //ImGui::SetWindowFontScale(scale_factor);
+
+        term_out.update(); //scrolling Text class
+
         //Text Entry Test
-        ImGui::SetWindowFontScale(2.0f);
+        ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled
+        
         ImGui::Text("Enter your text below:");
         if (ImGui::InputText("##TextEntry", buffer, IM_ARRAYSIZE(buffer))) {
             // Handle text input when the field changes

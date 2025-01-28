@@ -5,7 +5,9 @@
 
 using namespace std;
 
-
+#define SCROLL_BACK 1000
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 int main() {
     // Initialize GLFW
@@ -18,9 +20,11 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
+
 
     // Create a window
-    GLFWwindow* window = glfwCreateWindow(1920, 1080, "gTerm", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "gTerm", nullptr, nullptr);
     if (!window) {
         cerr << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -43,6 +47,14 @@ int main() {
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
 
+    //trying to change the font, works but seems off (still blurry)
+    // Change default font size (e.g., set it to 18.0f)
+    
+    //io.Fonts->Clear(); // Clear existing fonts
+    //ImFontConfig config;
+    //config.SizePixels = 24.0f; // Set the font size
+    //io.Fonts->AddFontDefault(&config); // Load the default font with the new size
+    //
 
     ImGui::StyleColorsDark();
 
@@ -50,12 +62,19 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    //glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
+
     //Create Custom GUI Object
-    terminal term(window, 800, 600);
-    terminal term_B(window, 800, 600);
+    terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    terminal term_B(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    DebugMenu debugMenu;
+    //create random junk char array
+    
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
+
         glfwPollEvents(); //I think this handles the user inputs
 
         // Start a new frame
@@ -64,13 +83,24 @@ int main() {
         ImGui::NewFrame();
 
         //Update Our Custom GUI elements
+            // Simulate adding new lines to the console
+        static int counter = 0;
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "This is line %d", counter++);
+        term.term_out.addLine(buffer);
+        if (counter > SCROLL_BACK) {
+            term.term_out.rmLine();
+        }
+
+        
         term.update("One");
         term_B.update("Two");
-
+        debugMenu.update();
+        
 
         // Rendering
         ImGui::Render();
-        glViewport(0, 0, 800, 600);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
