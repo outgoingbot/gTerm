@@ -11,12 +11,14 @@ terminal_output::~terminal_output(void) {
 }
 
 void terminal_output::addLine(const char* line) {
+    //ToDo: add an upper limit to how large the queue can get.
+    //if(_lines.size < SCROLL_BACK) push_back();
     // Add the new line to the vector
     _lines.push_back(std::string(line));
 }
 
 void terminal_output::rmLine() {
-    // remove
+    // remove elements to prevent memory overflow
     _lines.pop_front();
     
 }

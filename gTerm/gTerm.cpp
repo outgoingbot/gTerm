@@ -1,5 +1,7 @@
-﻿// gTerm.cpp : Defines the entry point for the application.
-//
+﻿//gTerm entry point
+#define _CRT_SECURE_NO_WARNINGS
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "gTerm.h"
 
@@ -31,6 +33,14 @@ int main() {
         glfwTerminate();
         return -1;
     }
+
+    //Load stupid gTerm Icon that I wasted 3 hours getting to work.
+    const char* iconPath = ICON_FILE_PATH; // Defined by CMake
+    GLFWimage images[1];
+    images[0].pixels = stbi_load(iconPath, &images[0].width, &images[0].height, 0, 4); //rgba channels 
+    glfwSetWindowIcon(window, 1, images);
+    stbi_image_free(images[0].pixels);
+
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(window);
@@ -66,9 +76,8 @@ int main() {
     mainMenu main_menu;
     terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     terminal term_B(window, WINDOW_WIDTH, WINDOW_HEIGHT);
-
     DebugMenu debugMenu;
-    //create random junk char array
+    
     
 
     // Main loop
@@ -82,7 +91,7 @@ int main() {
         ImGui::NewFrame();
 
         //Update Our Custom GUI elements
-            // Simulate adding new lines to the console
+            // Simulate adding new lines to the console. Simulated Serial Data
         static int counter = 0;
         char buffer[64];
         snprintf(buffer, sizeof(buffer), "This is line %d", counter++);
@@ -90,12 +99,15 @@ int main() {
         if (counter > SCROLL_BACK) {
             term.term_out.rmLine();
         }
-
+            //End Simulated Serial Data
+        //have serial class on another thread and pull data from that
         
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
-        debugMenu.update();
-        term.update("One");
-        term_B.update("Two");
+        debugMenu.update(); //shows fps and mouse position
+        term.update("One"); //going to be the "main" terminal (realTerm like)
+        term_B.update("Two"); //remove, just for testing
+        //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
+
         
         
 
