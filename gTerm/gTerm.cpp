@@ -72,6 +72,7 @@ int main() {
 
     //glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
 
+
     //Create Custom GUI Object
     mainMenu main_menu;
     terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -92,20 +93,14 @@ int main() {
 
         //Update Our Custom GUI elements
             // Simulate adding new lines to the console. Simulated Serial Data
-        static int counter = 0;
-        char buffer[64];
-        snprintf(buffer, sizeof(buffer), "This is line %d", counter++);
-        term.term_out.addLine(buffer);
-        if (counter > SCROLL_BACK) {
-            term.term_out.rmLine();
-        }
+    
             //End Simulated Serial Data
         //have serial class on another thread and pull data from that
         
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
         debugMenu.update(); //shows fps and mouse position
         term.update("One"); //going to be the "main" terminal (realTerm like)
-        term_B.update("Two"); //remove, just for testing
+        //term_B.update("Two"); //remove, just for testing
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
 
         

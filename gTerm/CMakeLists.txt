@@ -17,7 +17,9 @@ endif()
 
 
 # Add source to this project's executable.
-add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h")
+add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h" "serial/RS232Comm.h" "serial/RS232Comm.cpp")
+#add_executable (gTerm "serial/RS232Comm.h" "serial/RS232Comm.cpp")
+
 
 # TODO: Add tests and install targets if needed.
 find_package(glad CONFIG REQUIRED)
@@ -44,7 +46,15 @@ set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/arial.ttf")
 # Pass the path to your code as a preprocessor definition
 add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")
 
+
+#I can consilidate these image loads. just put the dir and append the filename during the load call
+
 #specify icon location
 set(ICON_FILE_PATH "${CMAKE_SOURCE_DIR}/res/icon.png")
 # Pass the path to your code as a preprocessor definition
 add_definitions(-DICON_FILE_PATH=\"${ICON_FILE_PATH}\")
+
+#specify Logo location
+set(LOGO_FILE_PATH "${CMAKE_SOURCE_DIR}/res/logo.png")
+# Pass the path to your code as a preprocessor definition
+add_definitions(-DLOGO_FILE_PATH=\"${LOGO_FILE_PATH}\")

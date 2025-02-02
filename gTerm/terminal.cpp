@@ -5,6 +5,8 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
     _height = height;
     _window = window;
     memset(buffer, '\0', sizeof(char));
+    memset(input_buffer_Port, '\0', sizeof(char));
+    memset(input_buffer_Baud, '\0', sizeof(char));
 }
 
 
@@ -12,8 +14,30 @@ terminal::~terminal(void) {
 
 }
 
+int terminal::handle_connect_button() {
+    if (!(ser_obj.isConnected())) { //prevent trying to connect twice	
+        ser_obj.connect(std::string(input_buffer_Port), std::string(input_buffer_Baud));
+        return 0;
+    }
+    else {
+        return -1;
+    }
+
+}
+
 
 int terminal::update(const char* title) {
+    static int counter = 0;
+    char c = '\0';
+    if (ser_obj.popCharFromRXQue(&c) == 0) {
+        term_out.addLine(&c);
+        counter++;
+        if (counter > 1000) {
+            term_out.rmLine();
+        }
+
+    }
+
         // Create ImGui window
         ImGui::Begin(title);
 
@@ -27,19 +51,71 @@ int terminal::update(const char* title) {
         //Text Entry Test
         ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled
         
-        ImGui::Text("Enter your text below:");
-        if (ImGui::InputText("##TextEntry", buffer, IM_ARRAYSIZE(buffer))) {
+        //Text Box
+        ImGui::Text("Comm Port:");
+        ImGui::SameLine(); // Place the next widget on the same line
+        ImGui::SetNextItemWidth(200);  // Set width of the input field
+        if (ImGui::InputText("##TextEntry", input_buffer_Port, IM_ARRAYSIZE(input_buffer_Port))) {
             // Handle text input when the field changes
         }
-        
-
+        //Text Box
         ImGui::SameLine(); // Place the next widget on the same line
-        //Button Test
-        if (ImGui::Button("Click Me")) {
-            // This block executes when the button is clicked
-            std::cout << "Button clicked!" << std::endl;
+        ImGui::Text("Baud Rate:");
+        ImGui::SameLine(); // Place the next widget on the same line
+        ImGui::SetNextItemWidth(200);  // Set width of the input field
+        if (ImGui::InputText("##TextEntry2", input_buffer_Baud, IM_ARRAYSIZE(input_buffer_Baud))) {
+            // Handle text input when the field changes
         }
-        ImGui::Text("You entered: %s", buffer);
+
+        //Connect Button
+        ImGui::SameLine(); // Place the next widget on the same line
+        if (ImGui::Button("Connect")) {
+            // This block executes when the button is clicked
+            this->handle_connect_button();
+            if (ser_obj.isConnected()) {
+                std::cout << "Starting new thread for serial port " << std::endl;
+                std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
+            }
+        }
+        //Disconnect Button
+        ImGui::SameLine(); // Place the next widget on the same line
+        if (ImGui::Button("Disconnect")) {
+            // This block executes when the button is clicked
+            std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
+        }
+
+
+       // Future Popup menu maybe?
+        static bool open_popup = false;
+        static int selected_item = -1;
+        const char* items[] = { "Item 1", "Item 2", "Item 3" };
+
+        // Button to trigger the popup
+        if (ImGui::Button("Open Popup")) {
+            open_popup = true;
+            ImGui::OpenPopup("MyPopup");
+        }
+
+        // The actual popup window
+        if (ImGui::BeginPopup("MyPopup")) {
+            ImGui::Text("Select an item:");
+            ImGui::Separator();
+            for (int i = 0; i < 3; i++) {
+                if (ImGui::Selectable(items[i], selected_item == i)) {
+                    selected_item = i;
+                    open_popup = false; // Close popup after selection
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndPopup();
+        }
+        //End Popup Menu
+
+
+
+
+
+        //ImGui::Text("You entered: %s", buffer);
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 center = ImVec2(window_pos.x + 400, window_pos.y + 300); // Circle center relative to window
