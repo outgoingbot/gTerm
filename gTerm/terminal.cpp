@@ -40,23 +40,23 @@ int terminal::handle_connect_button() {
 
 
 int terminal::update(const char* title) {
-    static int counter = 0;
-    char c = '\0';
-    //if (ser_obj.popCharFromRXQue(&c) == 0) {
-    //    term_out.addLine(&c);
-    //    counter++;
-    //    if (counter > 1000) {
-    //        term_out.rmLine();
-    //    }
-    //}
+#define MAX_LINE_COUNT 1000 //Max Scroll back is 1000 lines
+    static int lineCounter = 0;
+    char lineBuff[1024];
 
     if (serialHandler->hasData()) {
-        char lineBuff[512];
-        std::deque<char> receivedData = serialHandler->getData(0);
+        std::deque<char> receivedData = serialHandler->getData(0); //need to understand this parameter better
         // Process receivedData...
         serialHandler->copyToCharArray(lineBuff, sizeof(lineBuff) - 1);
         printf("Received Data: %s\n", lineBuff);
         term_out.addLine(lineBuff);
+        lineCounter++;
+    }
+    
+    //Limit the max number of text lines in the console window
+    if (lineCounter >= MAX_LINE_COUNT) {
+        lineCounter = MAX_LINE_COUNT;
+        term_out.rmLine();
     }
 
 
@@ -141,8 +141,8 @@ int terminal::update(const char* title) {
         //ImGui::Text("You entered: %s", buffer);
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 center = ImVec2(window_pos.x + 400, window_pos.y + 300); // Circle center relative to window
-        drawCircle(draw_list, center, 250.0f, IM_COL32(255, 0, 0, 255));
+        ImVec2 center = ImVec2(window_pos.x + 800, window_pos.y + 300); // Circle center relative to window
+        drawCircle(draw_list, center, 50.0f, IM_COL32(255, 0, 0, 255));
         ImGui::End();
 
 	return 0;

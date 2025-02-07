@@ -62,7 +62,7 @@ void serial::readLoop() {
 			pushData(buffer, bytesRead);
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Prevents CPU overuse
+		std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Prevents CPU overuse (getting ~12% CPU)
 	}
 }
 

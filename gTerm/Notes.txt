@@ -1,0 +1,16 @@
+I need to fix how we connect to the Serial port. Much of it is done automatically at launch, this needs to occur on connect.
+-I can create all the serial objects but I want to Connect and start the Thread when I connect.
+-I want to Stop the Thread and Disconnect when I click Disconnect button
+
+
+I need to fuzz the serial port hard and make sure im getting good performance
+-some issues that could cause performance drop is:
+--Poor buffer handeling
+--excessive sleeps in the thread (using sleep to limit CPU usage.)
+
+Have an issue where when I CreateFile for the hSerial it throws error code 5
+-ERROR_ACCESS_DENIED (5)	
+-"Another process (like a serial monitor or another program) is already using the port.
+  Close any program that might be using the COM port (like PuTTY or Arduino Serial Monitor)."
+
+  But the resource is in fact not busy. A loose thread is not blocking access so need to look into it

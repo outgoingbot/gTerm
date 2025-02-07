@@ -3,7 +3,7 @@
 
 RS232Comm::RS232Comm(const char* portName)
 {	
-	//hSerial = CreateFileA(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	//hSerial = `A(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 	//this need to be passed into Connect(). Connect needs to be moved to the connect_button
 	//Build Baud Rate DWORD for DCB
