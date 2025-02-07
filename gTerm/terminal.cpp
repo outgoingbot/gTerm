@@ -7,21 +7,34 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
     memset(buffer, '\0', sizeof(char));
     memset(input_buffer_Port, '\0', sizeof(char));
     memset(input_buffer_Baud, '\0', sizeof(char));
+
+#ifdef IS_WINDOWS
+    serialPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
+#elif defined(IS_LINUX)
+    serialPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
+#endif
+
+    serialHandler = new serial(serialPort);
+
+
+
 }
 
 
 terminal::~terminal(void) {
-
+    delete serialPort; // Cleanup
 }
 
 int terminal::handle_connect_button() {
-    if (!(ser_obj.isConnected())) { //prevent trying to connect twice	
-        ser_obj.connect(std::string(input_buffer_Port), std::string(input_buffer_Baud));
-        return 0;
-    }
-    else {
-        return -1;
-    }
+    //if (!(ser_obj.isConnected())) { //prevent trying to connect twice	
+    //    ser_obj.connect(std::string(input_buffer_Port), std::string(input_buffer_Baud));
+    //    return 0;
+    //}
+    //else {
+    //    return -1;
+    //}
+
+    return 0;
 
 }
 
@@ -29,14 +42,24 @@ int terminal::handle_connect_button() {
 int terminal::update(const char* title) {
     static int counter = 0;
     char c = '\0';
-    if (ser_obj.popCharFromRXQue(&c) == 0) {
-        term_out.addLine(&c);
-        counter++;
-        if (counter > 1000) {
-            term_out.rmLine();
-        }
+    //if (ser_obj.popCharFromRXQue(&c) == 0) {
+    //    term_out.addLine(&c);
+    //    counter++;
+    //    if (counter > 1000) {
+    //        term_out.rmLine();
+    //    }
+    //}
 
+    if (serialHandler->hasData()) {
+        char lineBuff[512];
+        std::deque<char> receivedData = serialHandler->getData(0);
+        // Process receivedData...
+        serialHandler->copyToCharArray(lineBuff, sizeof(lineBuff) - 1);
+        printf("Received Data: %s\n", lineBuff);
+        term_out.addLine(lineBuff);
     }
+
+
 
         // Create ImGui window
         ImGui::Begin(title);
@@ -72,10 +95,10 @@ int terminal::update(const char* title) {
         if (ImGui::Button("Connect")) {
             // This block executes when the button is clicked
             this->handle_connect_button();
-            if (ser_obj.isConnected()) {
-                std::cout << "Starting new thread for serial port " << std::endl;
-                std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
-            }
+            //if (ser_obj.isConnected()) {
+            //    std::cout << "Starting new thread for serial port " << std::endl;
+            //    std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
+            //}
         }
         //Disconnect Button
         ImGui::SameLine(); // Place the next widget on the same line

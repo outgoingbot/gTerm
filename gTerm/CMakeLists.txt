@@ -10,14 +10,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Detect operating system for vcpkg toolchain file
 if (WIN32)
+    message(STATUS "Detected Windows OS")
+    add_compile_definitions(IS_WINDOWS)    
     set(CMAKE_TOOLCHAIN_FILE "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    set(SERIAL_SRC serial/RS232Comm.cpp)  # Windows serial implementation
+    set(SERIAL_INC serial/RS232Comm.h)  # Windows serial implementation
 elseif (UNIX)
+    message(STATUS "Detected Unix/Linux OS")
+    add_compile_definitions(IS_LINUX)
     set(CMAKE_TOOLCHAIN_FILE "/home/mac/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    set(SERIAL_SRC serial/LinuxSerialComm.cpp)  # Linux serial implementation
+    set(SERIAL_INC serial/LinuxSerialComm.h)  # Linux serial implementation
 endif()
 
 
 # Add source to this project's executable.
-add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h" "serial/RS232Comm.h" "serial/RS232Comm.cpp")
+#add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h" "serial/RS232Comm.h" "serial/RS232Comm.cpp" "serial/SerialComm.h" "serial/LinuxSerialComm.h" "serial/LinuxSerialComm.cpp")
+add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h"  "serial/SerialComm.h" ${SERIAL_SRC} ${SERIAL_INC})
+
 #add_executable (gTerm "serial/RS232Comm.h" "serial/RS232Comm.cpp")
 
 

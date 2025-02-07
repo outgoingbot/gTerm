@@ -1,20 +1,21 @@
 #include "RS232Comm.h"
 
 
-RS232Comm::RS232Comm(char* rx_buff, char* tx_buff, unsigned int buff_size)
+RS232Comm::RS232Comm(const char* portName)
 {	
-	if (buff_size <= 0) buff_size = DEFAULT_BUFF_SIZE;
-	char* _rx_char_buffer = (char*)calloc(buff_size, sizeof(char));
-	char* _tx_char_buffer = (char*)calloc(buff_size, sizeof(char));
+	//hSerial = CreateFileA(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
-	//memset(_rx_char_buffer, '\0', sizeof(char) * buff_size);
-	//memset(_tx_char_buffer, '\0', sizeof(char) * buff_size);
+	//this need to be passed into Connect(). Connect needs to be moved to the connect_button
+	//Build Baud Rate DWORD for DCB
+	std::string baud = "57600";
+	DWORD commBaud_DWORD = std::stoul(std::string(baud));
+	DCB dcbSerialParams; //I can add more serial parameters here instead of in the RS232 class
+	dcbSerialParams.BaudRate = commBaud_DWORD;
+	dcbSerialParams.ByteSize = 8;
 
-	//copy the value in the rs232 pointer to the value in serial pointer
-	if (_rx_char_buffer != nullptr && _tx_char_buffer != nullptr) {
-		rx_buff = _rx_char_buffer;
-		tx_buff = _tx_char_buffer;
-	}
+	this->Connect(portName, dcbSerialParams);
+
+
 	//We're not yet connected
 	this->connected = false;
 }
@@ -31,49 +32,31 @@ RS232Comm::~RS232Comm()
 		//Todo: free the buffers
 		
 		//Close the serial handler
-		CloseHandle(this->hSerial);
+		if (hSerial != INVALID_HANDLE_VALUE) {
+			CloseHandle(hSerial);
+		}
 	}
 }
 
 
-void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal){
-		static char c;
-		unsigned int toRead = 0;//Number of bytes we ask to read
-		DWORD bytesRead = 0; //Number of bytes we'll have read
-		
-		//Use the ClearCommError function to get status info on the Serial port
-		ClearCommError(this->hSerial, &this->errors, &this->status);
-		
-		//Check if there is something to read
-		if (this->status.cbInQue > 0)
-		{
-			//queueSize = this->status.cbInQue;
-			//If there is we check if there is enough data to read the required number
-			//of characters, if not we'll read only the available characters to prevent
-			//locking of the application.
-			toRead = (this->status.cbInQue > nbChar) ? nbChar : this->status.cbInQue;
-			
-			/*if (this->status.cbInQue > nbChar)
-				toRead = nbChar;
-			else
-				toRead = this->status.cbInQue;*/
+void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
+	if (!buffer || !returnVal) return;
 
-			//Try to read the require number of chars, and return the number of read bytes on success
-			if (ReadFile(this->hSerial, buffer, toRead, &bytesRead, NULL))
-			{
-			////push all chars in the llbuffer to the deque
-			//	for (uint8_t i = 0; i < bytesRead; i++) rxBuffer->push(*(buffer + i));
+	*returnVal = 0;
+	DWORD bytesRead = 0;
+	ClearCommError(hSerial, &errors, &status);
 
-			//	if (this->rxBuffer->qSizeUsed() > 0) { //if i got at least 1 byte
-			//		c = this->rxBuffer->pop();
-			//	}
-
-				*returnVal = (int)bytesRead;
-			}
-
-
+	if (status.cbInQue > 0) {
+		DWORD toRead = (status.cbInQue > nbChar) ? nbChar : status.cbInQue;
+		if (ReadFile(hSerial, buffer, toRead, &bytesRead, NULL)) {
+			*returnVal = static_cast<int>(bytesRead);
 		}
+		else {
+			*returnVal = -1; // Indicate failure
+		}
+	}
 }
+
 
 
 bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar)
@@ -130,17 +113,12 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams)
 {
 	if (this->connected == false) {
 		//Try to connect to the given port throuh CreateFile
-		this->hSerial = CreateFile(portName,
-			GENERIC_READ | GENERIC_WRITE,
-			0,
-			NULL,
-			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL,
-			NULL);
+		this->hSerial = CreateFileA(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+		//this->hSerial = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 		//Check if the connection was successfull
-		if (this->hSerial == INVALID_HANDLE_VALUE)
-		{
+		if (this->hSerial == INVALID_HANDLE_VALUE) {
+			DWORD error = GetLastError();
 			//If not success full display an Error
 			if (GetLastError() == ERROR_FILE_NOT_FOUND) {
 
@@ -150,7 +128,7 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams)
 			}
 			else
 			{
-				printf("ERROR!!!");
+				printf("ERROR!!! CreateFileA failed with error code: %lu\n", error);
 				return false;
 			}
 		}
