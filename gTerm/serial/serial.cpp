@@ -62,7 +62,7 @@ void serial::readLoop() {
 			pushData(buffer, bytesRead);
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Prevents CPU overuse (getting ~12% CPU)
+		std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Prevents CPU overuse (getting ~12% CPU)
 	}
 }
 
@@ -93,7 +93,7 @@ void serial::listBaudRates(std::deque<std::string>* queue) {
 
 
 void serial::listPorts(std::deque<std::string>* queue) {
-
+	serialComm->ListComPorts(queue);
 }
 
 

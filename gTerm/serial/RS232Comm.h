@@ -7,7 +7,7 @@ This is low level so mostly char buffers
 */
 
 
-#define ARDUINO_WAIT_TIME 1
+#define MCU_WAIT_TIME 1
 
 #include <windows.h>
 #include <stdio.h>
@@ -23,6 +23,7 @@ This is low level so mostly char buffers
 
 class RS232Comm : public SerialComm {
 private:
+
 	//Serial comm handler
 	HANDLE hSerial;
 	
@@ -35,6 +36,8 @@ private:
 	//Connection status
 	bool connected = false;
 
+	//Connection Parameters
+	DCB dcbSerialParams;
 	
 	std::string baudlist[SERIAL_NUM_BAUDS] = { "9600","57600","115200","1000000", "2000000" };
 	
@@ -46,8 +49,6 @@ private:
 public:
 	//these are the ram locations that low level tx/rx commands access
 
-
-
 	//Initialize Serial communication with the given COM port
 	RS232Comm(const char* portName);
 	//Close the connection
@@ -58,6 +59,7 @@ public:
 	//bytes available. The function return -1 when nothing could
 	//be read, the number of bytes actually read.
 	void ReadData(char* buffer, unsigned int nbChar, int* returnVal) override;
+
 	//Writes data from a buffer through the Serial connection
 	//return true on success.
 	bool WriteData(const char *buffer, unsigned int nbChar);

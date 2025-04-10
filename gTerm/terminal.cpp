@@ -107,6 +107,20 @@ int terminal::update(const char* title) {
             std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
         }
 
+        //List Comm Ports Button
+        ImGui::SameLine(); // Place the next widget on the same line
+        if (ImGui::Button("List Comm Ports")) {
+            // This block executes when the button is clicked
+            std::cout << "Getting Comm Ports from SerialComm.h " << std::endl;
+            
+            serialHandler->listPorts(&serialHandler->commPortNames);
+            for (const std::string& portName : serialHandler->commPortNames) {
+                std::cout << portName << std::endl;
+            }
+
+
+        }
+
 
        // Future Popup menu maybe?
         static bool open_popup = false;

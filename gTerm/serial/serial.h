@@ -56,6 +56,7 @@ public:
 
 	void copyToCharArray(char* outBuffer, size_t bufferSize);
 
+	std::deque<std::string> commPortNames;
 
 
 
@@ -75,6 +76,8 @@ private:
 	std::thread* readThread = nullptr;
 	std::atomic<bool> running;
 	SerialComm* serialComm;
+
+	
 
 
 	// Internal function for the background reading thread

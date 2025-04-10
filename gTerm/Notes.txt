@@ -9,8 +9,4 @@ I need to fuzz the serial port hard and make sure im getting good performance
 --excessive sleeps in the thread (using sleep to limit CPU usage.)
 
 Have an issue where when I CreateFile for the hSerial it throws error code 5
--ERROR_ACCESS_DENIED (5)	
--"Another process (like a serial monitor or another program) is already using the port.
-  Close any program that might be using the COM port (like PuTTY or Arduino Serial Monitor)."
-
-  But the resource is in fact not busy. A loose thread is not blocking access so need to look into it
+-ERROR_ACCESS_DENIED (5)	<-- Solved was opening two terminal windows but only drawing one. Only 1 Terminal per Comm Port

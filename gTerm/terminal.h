@@ -4,6 +4,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
+#include <deque>
 
 #include "serial/serial.h"
 #include "serial/SerialComm.h"
@@ -29,8 +30,11 @@ public:
 	terminal_output term_out;
 	//serial ser_obj;
 
-	SerialComm* serialPort;
-	serial* serialHandler;
+	//this is a virtual class that has access so simple Serial Functions close to hardware.
+	SerialComm* serialPort; //change name to serialVirtualdriver or something
+
+	//This is higher level serial class that has all the buffers, and higher level serial data manipulation.
+	serial* serialHandler; //change name to Serialclass
 
 private:
 	GLFWwindow* _window; // Pointer to the GLFW window

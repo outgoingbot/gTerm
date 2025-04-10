@@ -76,7 +76,6 @@ int main() {
     //Create Custom GUI Object
     mainMenu main_menu;
     terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
-    terminal term_B(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     DebugMenu debugMenu;
     
     
