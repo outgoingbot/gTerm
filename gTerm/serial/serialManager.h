@@ -7,7 +7,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include "SerialComm.h"
+#include "virtualComm.h"
 
 
 #define SERIAL_OK 0
@@ -15,7 +15,7 @@
 #define SERIAL_WARNING -2
 
 
-class serial {
+class serialManager {
 
 public:
 	//typedef struct registers {
@@ -29,9 +29,9 @@ public:
 	//
 
 
-	serial(SerialComm* comm);
+	serialManager(virtualComm* vComm);
 
-	~serial();
+	~serialManager();
 
 	void pushData(const char* data, size_t length);
 	std::deque<char> getData(size_t length);
@@ -75,7 +75,7 @@ private:
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> running;
-	SerialComm* serialComm;
+	virtualComm* vCommPort;
 
 	
 

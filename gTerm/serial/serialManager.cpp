@@ -1,28 +1,28 @@
-#include "serial.h"
+#include "serialManager.h"
 
 
 
 // Constructor: Initializes and starts the background thread
-serial::serial(SerialComm* comm) : serialComm(comm), running(true) {
+serialManager::serialManager(virtualComm* comm) : vCommPort(comm), running(true) {
 	//serialComm = comm; //I dont think I need to copy this, its being done in the Initialization List above
 
-	readThread = new std::thread(&serial::readLoop, this); ///retrieve buffer
+	readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
 
 }
 
-serial::~serial() {
+serialManager::~serialManager() {
 	stop();
 }
 
 // Push new data into the buffer
-void serial::pushData(const char* data, size_t length) {
+void serialManager::pushData(const char* data, size_t length) {
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	bufferQueue.insert(bufferQueue.end(), data, data + length);
 }
 
 
 // Retrieve a specified amount of data from the buffer
-std::deque<char> serial::getData(size_t length) {
+std::deque<char> serialManager::getData(size_t length) {
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	std::deque<char> result;
 
@@ -37,13 +37,13 @@ std::deque<char> serial::getData(size_t length) {
 }
 
 // Check if there is data in the buffer
-bool serial::hasData() {
+bool serialManager::hasData() {
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	return !bufferQueue.empty();
 }
 
 // Stop the background thread
-void serial::stop() {
+void serialManager::stop() {
 	running = false;
 	if (readThread->joinable()) {
 		readThread->join();
@@ -51,12 +51,12 @@ void serial::stop() {
 }
 
 // Thread function that continuously reads data from the serial port
-void serial::readLoop() {
+void serialManager::readLoop() {
 	while (running) {
 		char buffer[512]; // Temporary buffer for incoming data
 		int bytesRead = 0;
 
-		serialComm->ReadData(buffer, sizeof(buffer), &bytesRead);
+		vCommPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 
 		if (bytesRead > 0) {
 			pushData(buffer, bytesRead);
@@ -67,7 +67,7 @@ void serial::readLoop() {
 }
 
 
-void serial::copyToCharArray(char* outBuffer, size_t bufferSize) {
+void serialManager::copyToCharArray(char* outBuffer, size_t bufferSize) {
 	if (!outBuffer || bufferSize == 0) return; // Handle invalid input
 
 	std::lock_guard<std::mutex> lock(bufferMutex);
@@ -87,17 +87,17 @@ void serial::copyToCharArray(char* outBuffer, size_t bufferSize) {
 
 
 
-void serial::listBaudRates(std::deque<std::string>* queue) {
+void serialManager::listBaudRates(std::deque<std::string>* queue) {
 
 }
 
 
-void serial::listPorts(std::deque<std::string>* queue) {
-	serialComm->ListComPorts(queue);
+void serialManager::listPorts(std::deque<std::string>* queue) {
+	vCommPort->ListComPorts(queue);
 }
 
 
-void serial::connect(std::string port, std::string baud) {
+void serialManager::connect(std::string port, std::string baud) {
 	//if (!(_rs232comm->IsConnected())) { //prevent trying to connect twice	
 	//	//Build Comm port string and char array
 	//	std::string str = "\\\\.\\" + std::string(port);
@@ -124,13 +124,13 @@ void serial::connect(std::string port, std::string baud) {
 }
 
 
-void serial::disconnect() {
+void serialManager::disconnect() {
 
 }
 
 
 
-bool serial::isConnected() {
+bool serialManager::isConnected() {
 
 	//return _rs232comm->IsConnected();
 	return false;

@@ -16,12 +16,12 @@ This is low level so mostly char buffers
 #include <string>
 
 #include <deque>
-#include "SerialComm.h"
+#include "virtualComm.h"
 
 #define SERIAL_NUM_BAUDS 5
 #define DEFAULT_BUFF_SIZE 64
 
-class RS232Comm : public SerialComm {
+class RS232Comm : public virtualComm {
 private:
 
 	//Serial comm handler

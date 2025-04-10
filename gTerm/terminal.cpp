@@ -8,13 +8,14 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
     memset(input_buffer_Port, '\0', sizeof(char));
     memset(input_buffer_Baud, '\0', sizeof(char));
 
+//TODO: this needs to move into the serial class.
 #ifdef IS_WINDOWS
-    serialPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
+    vComPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
 #elif defined(IS_LINUX)
     serialPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
 #endif
 
-    serialHandler = new serial(serialPort);
+    serialManObj = new serialManager(vComPort);
 
 
 
@@ -22,7 +23,8 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
 
 
 terminal::~terminal(void) {
-    delete serialPort; // Cleanup
+    //TODO: this should delte the serial class and not the virtual comm class.
+    delete vComPort; // Cleanup
 }
 
 int terminal::handle_connect_button() {
@@ -44,10 +46,10 @@ int terminal::update(const char* title) {
     static int lineCounter = 0;
     char lineBuff[1024];
 
-    if (serialHandler->hasData()) {
-        std::deque<char> receivedData = serialHandler->getData(0); //need to understand this parameter better
+    if (serialManObj->hasData()) {
+        std::deque<char> receivedData = serialManObj->getData(0); //need to understand this parameter better
         // Process receivedData...
-        serialHandler->copyToCharArray(lineBuff, sizeof(lineBuff) - 1);
+        serialManObj->copyToCharArray(lineBuff, sizeof(lineBuff) - 1);
         printf("Received Data: %s\n", lineBuff);
         term_out.addLine(lineBuff);
         lineCounter++;
@@ -113,8 +115,8 @@ int terminal::update(const char* title) {
             // This block executes when the button is clicked
             std::cout << "Getting Comm Ports from SerialComm.h " << std::endl;
             
-            serialHandler->listPorts(&serialHandler->commPortNames);
-            for (const std::string& portName : serialHandler->commPortNames) {
+            serialManObj->listPorts(&serialManObj->commPortNames);
+            for (const std::string& portName : serialManObj->commPortNames) {
                 std::cout << portName << std::endl;
             }
 

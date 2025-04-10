@@ -1,3 +1,8 @@
+
+/*
+Terminal is master class for all serial related aspects of this program.
+*/
+
 #pragma once
 #include <imgui.h>
 #include <GLFW/glfw3.h>
@@ -6,8 +11,8 @@
 #include <iostream>
 #include <deque>
 
-#include "serial/serial.h"
-#include "serial/SerialComm.h"
+#include "serial/serialManager.h"
+#include "serial/virtualComm.h"
 
 //defined in CMakeLists
 #ifdef IS_WINDOWS
@@ -27,14 +32,18 @@ public:
 	int update(const char* title);
 	int render(void);
 
+	//Manages the serial data terminal display window.
 	terminal_output term_out;
-	//serial ser_obj;
+	
 
+	//TODO: This virtual comm port should not be here. All we should instantiat is the serial class.
+	// (the serial class should be the only interface to terminal class.
+	
 	//this is a virtual class that has access so simple Serial Functions close to hardware.
-	SerialComm* serialPort; //change name to serialVirtualdriver or something
+	virtualComm* vComPort; //change name to serialVirtualdriver or something
 
 	//This is higher level serial class that has all the buffers, and higher level serial data manipulation.
-	serial* serialHandler; //change name to Serialclass
+	serialManager* serialManObj; //change name to Serialclass
 
 private:
 	GLFWwindow* _window; // Pointer to the GLFW window

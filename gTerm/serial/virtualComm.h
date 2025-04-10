@@ -1,10 +1,10 @@
 // SerialComm.h - Abstract Base Class for Serial Communication (Cross-Platform)
-#ifndef SERIALCOMM_H
-#define SERIALCOMM_H
+#ifndef VIRTUALCOMM_H
+#define VIRTUALCOMM_H
 
-class SerialComm {
+class virtualComm {
 public:
-    virtual ~SerialComm() = default;
+    virtual ~virtualComm() = default;
 
     // Pure virtual function for reading data
     virtual void ReadData(char* buffer, unsigned int nbChar, int* returnVal) = 0;
@@ -13,4 +13,4 @@ public:
     virtual bool ListComPorts(std::deque<std::string>* ComPortNames) = 0;
 };
 
-#endif // SERIALCOMM_H
+#endif // VIRTUALCOMM_H

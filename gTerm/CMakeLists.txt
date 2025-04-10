@@ -26,7 +26,7 @@ endif()
 
 # Add source to this project's executable.
 #add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h" "serial/RS232Comm.h" "serial/RS232Comm.cpp" "serial/SerialComm.h" "serial/LinuxSerialComm.h" "serial/LinuxSerialComm.cpp")
-add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serial.cpp" "serial/serial.h"  "serial/SerialComm.h" ${SERIAL_SRC} ${SERIAL_INC})
+add_executable (gTerm "gTerm.cpp" "gTerm.h" "terminal.cpp" "terminal.h"  "terminal_output.cpp" "terminal_output.h" "DebugMenu.cpp" "DebugMenu.h" "mainMenu.cpp" "mainMenu.h" "serial/serialManager.cpp" "serial/serialManager.h"  "serial/virtualComm.h" ${SERIAL_SRC} ${SERIAL_INC})
 
 #add_executable (gTerm "serial/RS232Comm.h" "serial/RS232Comm.cpp")
 
