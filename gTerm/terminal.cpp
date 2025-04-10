@@ -33,6 +33,16 @@ int terminal::handle_connect_button() {
     return 0;
 }
 
+int terminal::handle_disconnect_button() {
+    if (serialManObj->isConnected() == false) {
+        std::cout << "ERROR: Already Disconnected from Serial Manager" << std::endl;
+        return -1;
+    }
+    serialManObj->stopThread();
+    serialManObj->disconnect();
+    return 0;
+}
+
 
 
 int terminal::update(const char* title) {
@@ -93,13 +103,13 @@ int terminal::update(const char* title) {
         //-----------------------------Connect Button-----------------------------|
         ImGui::SameLine(); // Place the next widget on the same line
         //THIS SUCKS THAT I HAVE TO MANAGER ALL THE GUI ELEMENT STATES.!!!
-        static bool isClicked = false;
+        static bool ConnectisClicked = false;
         bool pushingColor = false;    
         
         // ImGui is a 'Immediate Mode GUI system'
         // This means I have to set the gui element state changes before its "called". 
         // If clicked, push red style
-        if (isClicked) {
+        if (ConnectisClicked) {
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
@@ -108,7 +118,7 @@ int terminal::update(const char* title) {
 
         if (ImGui::Button("Connect")) {
             // This block executes when the button is clicked
-            isClicked=true;
+            ConnectisClicked = true;
 
             if (this->handle_connect_button() == 0) {
                 std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
@@ -129,22 +139,23 @@ int terminal::update(const char* title) {
         ImGui::SameLine(); // Place the next widget on the same line
         if (ImGui::Button("Disconnect")) {
             // This block executes when the button is clicked
-            std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
+            if (this->handle_disconnect_button() == 0) {
+                ConnectisClicked = false;
+            }
         }
         //-----------------------------Disconnect Button--------------------------|
         
         //Just getting some basic serial status stuff to the GUI. this will change
         //Text Box
         ImGui::SameLine(); // Place the next widget on the same line
-        ImGui::Text("%s", serialManObj->getCommPort().c_str());
-        ImGui::SameLine(); // Place the next widget on the same line
-        ImGui::Text("%s", serialManObj->getCBaudRate().c_str());
+        ImGui::Text("Port:%s \r\n Baud:%s \r\n isConnected %i", serialManObj->getCommPort().c_str(), serialManObj->getCBaudRate().c_str(), serialManObj->isConnected());
+        
 
 
         //List Comm Ports Button
         if (ImGui::Button("List Comm Ports")) {
             // This block executes when the button is clicked
-            std::cout << "Getting Comm Ports from SerialComm.h " << std::endl;
+            std::cout << "Getting Comm Ports from virtualComm.h " << std::endl;
             
             serialManObj->listPorts(&serialManObj->commPortNames);
             for (const std::string& portName : serialManObj->commPortNames) {

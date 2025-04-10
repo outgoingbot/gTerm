@@ -80,6 +80,8 @@ public:
 
 	bool connect();
 
+	bool disconnect();
+
 	
 };
 

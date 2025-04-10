@@ -30,6 +30,8 @@ public:
 
     virtual bool connect() = 0;
 
+    virtual bool disconnect() = 0;
+
     //Check if we are actually connected
     virtual bool IsConnected() = 0;
 

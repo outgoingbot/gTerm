@@ -46,7 +46,7 @@ public:
 	void pushData(const char* data, size_t length);
 	std::deque<char> getData(size_t length);
 	bool hasData();
-	void stop();
+	void stopThread();
 
 
 
@@ -60,7 +60,7 @@ public:
 	std::string getCBaudRate();
 	
 	bool connect();
-	void disconnect();
+	bool disconnect();
 	
 	bool isConnected();
 

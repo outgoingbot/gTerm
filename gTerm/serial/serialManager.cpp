@@ -15,7 +15,7 @@ serialManager::serialManager(){
 }
 
 serialManager::~serialManager() {
-	stop();
+	stopThread();
 }
 
 // Push new data into the buffer
@@ -40,19 +40,22 @@ std::deque<char> serialManager::getData(size_t length) {
 	return result;
 }
 
+
 // Check if there is data in the buffer
 bool serialManager::hasData() {
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	return !bufferQueue.empty();
 }
 
+
 // Stop the background thread
-void serialManager::stop() {
+void serialManager::stopThread() {
 	running = false;
 	if (readThread->joinable()) {
 		readThread->join();
 	}
 }
+
 
 // Thread function that continuously reads data from the serial port
 void serialManager::readLoop() {
@@ -87,8 +90,6 @@ void serialManager::copyToCharArray(char* outBuffer, size_t bufferSize) {
 		outBuffer[numToCopy] = '\0'; // Null-terminate to make it a valid C-string (optional)
 	}
 }
-
-
 
 
 void serialManager::listBaudRates(std::deque<std::string>* queue) {
@@ -134,10 +135,10 @@ bool serialManager::connect() {
 }
 
 
-void serialManager::disconnect() {
+bool serialManager::disconnect() {
+	return _vComPort->disconnect();
 
 }
-
 
 
 bool serialManager::isConnected() {

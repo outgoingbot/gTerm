@@ -124,10 +124,10 @@ bool RS232Comm::connect() {
 	dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
 
 	//now actually connect
-	this->Connect(portName, dcbSerialParams);
+	return this->Connect(portName, dcbSerialParams);
 
 
-	return true;
+	//return true;
 }
 
 
@@ -196,6 +196,14 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	//Simply return the connection status
 	return this->connected;
 }
+
+
+
+bool RS232Comm::disconnect() {
+
+	return this->Disconnect();
+}
+
 
 bool RS232Comm::Disconnect(){
 	if (this->connected == true) {

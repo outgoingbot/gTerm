@@ -51,5 +51,6 @@ private:
 	char input_buffer_Baud[64]; // Buffer to store the text input
 	
 	int handle_connect_button();
+	int handle_disconnect_button();
 
 };
