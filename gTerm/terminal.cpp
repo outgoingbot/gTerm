@@ -8,32 +8,31 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
     memset(input_buffer_Port, '\0', sizeof(char));
     memset(input_buffer_Baud, '\0', sizeof(char));
 
-
     //Instatiate the serialManager Object
     serialManObj = new serialManager();
-
-
-
 }
 
 
 terminal::~terminal(void) {
-    //TODO: this should delte the serial class and not the virtual comm class.
+    //TODO: this should delte the serial Manager class and not the virtual comm class.
     delete serialManObj; // Cleanup
 }
 
+
+
 int terminal::handle_connect_button() {
-    //if (!(ser_obj.isConnected())) { //prevent trying to connect twice	
-    //    ser_obj.connect(std::string(input_buffer_Port), std::string(input_buffer_Baud));
-    //    return 0;
-    //}
-    //else {
-    //    return -1;
-    //}
-
+    if (serialManObj->isConnected() == true) {
+        std::cout << "ERROR: Already Connected to Serial Manager" << std::endl;
+        return -1;
+    }
+    
+    if (serialManObj->connect()) {
+        std::cout << "SUCCESS: Serial Manager Connected!" << std::endl;
+    }
+    
     return 0;
-
 }
+
 
 
 int terminal::update(const char* title) {
@@ -73,7 +72,9 @@ int terminal::update(const char* title) {
         
         //Text Box
         ImGui::Text("Comm Port:");
+        //Input Text Box
         ImGui::SameLine(); // Place the next widget on the same line
+        
         ImGui::SetNextItemWidth(200);  // Set width of the input field
         if (ImGui::InputText("##TextEntry", input_buffer_Port, IM_ARRAYSIZE(input_buffer_Port))) {
             // Handle text input when the field changes
@@ -81,31 +82,66 @@ int terminal::update(const char* title) {
         //Text Box
         ImGui::SameLine(); // Place the next widget on the same line
         ImGui::Text("Baud Rate:");
+
+        //Input Text Box
         ImGui::SameLine(); // Place the next widget on the same line
         ImGui::SetNextItemWidth(200);  // Set width of the input field
         if (ImGui::InputText("##TextEntry2", input_buffer_Baud, IM_ARRAYSIZE(input_buffer_Baud))) {
             // Handle text input when the field changes
         }
 
-        //Connect Button
+        //-----------------------------Connect Button-----------------------------|
         ImGui::SameLine(); // Place the next widget on the same line
+        //THIS SUCKS THAT I HAVE TO MANAGER ALL THE GUI ELEMENT STATES.!!!
+        static bool isClicked = false;
+        bool pushingColor = false;    
+        
+        // ImGui is a 'Immediate Mode GUI system'
+        // This means I have to set the gui element state changes before its "called". 
+        // If clicked, push red style
+        if (isClicked) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
+            pushingColor = true;
+        }
+
         if (ImGui::Button("Connect")) {
             // This block executes when the button is clicked
-            this->handle_connect_button();
-            //if (ser_obj.isConnected()) {
-            //    std::cout << "Starting new thread for serial port " << std::endl;
-            //    std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
-            //}
+            isClicked=true;
+
+            if (this->handle_connect_button() == 0) {
+                std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
+                std::cout << "" << serialManObj->getCommPort() << std::endl;
+                std::cout << "" << serialManObj->getCBaudRate() << std::endl;
+                
+            }else {
+                std::cout << "ERROR: Terminal Class Not Connected!" << std::endl;
+            }
         }
+
+       if (pushingColor) ImGui::PopStyleColor(3);
+       //-----------------------------Connect Button-----------------------------|
+       
+
+        //-----------------------------Disconnect Button--------------------------|
         //Disconnect Button
         ImGui::SameLine(); // Place the next widget on the same line
         if (ImGui::Button("Disconnect")) {
             // This block executes when the button is clicked
             std::cout << "Connecting to " << input_buffer_Port << " @ " << input_buffer_Baud << " baud" << std::endl;
         }
+        //-----------------------------Disconnect Button--------------------------|
+        
+        //Just getting some basic serial status stuff to the GUI. this will change
+        //Text Box
+        ImGui::SameLine(); // Place the next widget on the same line
+        ImGui::Text("%s", serialManObj->getCommPort().c_str());
+        ImGui::SameLine(); // Place the next widget on the same line
+        ImGui::Text("%s", serialManObj->getCBaudRate().c_str());
+
 
         //List Comm Ports Button
-        ImGui::SameLine(); // Place the next widget on the same line
         if (ImGui::Button("List Comm Ports")) {
             // This block executes when the button is clicked
             std::cout << "Getting Comm Ports from SerialComm.h " << std::endl;

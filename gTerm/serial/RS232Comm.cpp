@@ -1,25 +1,20 @@
 #include "RS232Comm.h"
 
 
-RS232Comm::RS232Comm(const char* portName) {	
+RS232Comm::RS232Comm() {	
 	//We're not yet connected
 	this->connected = false;
+	//Initialize RS232 variables
+	hSerial = INVALID_HANDLE_VALUE;
+	errors = 0;
+	ZeroMemory(&status, sizeof(COMSTAT));
+	ZeroMemory(&dcbSerialParams, sizeof(DCB));
+	dcbSerialParams.DCBlength = sizeof(DCB);  // Required before calling SetCommState
 
-	//this need to be passed into Connect(). Connect needs to be moved to the connect_button
-	//Build Baud Rate DWORD for DCB
-	std::string baud = "57600";
-	DWORD commBaud_DWORD = std::stoul(std::string(baud));
 
-	//dcbSerialParams.BaudRate = 57600;//CBR_115200;
-	dcbSerialParams.BaudRate = commBaud_DWORD;
-	dcbSerialParams.ByteSize = 8;
-	dcbSerialParams.ByteSize = 8;
-	dcbSerialParams.StopBits = ONESTOPBIT;
-	dcbSerialParams.Parity = NOPARITY;
-	//Setting the DTR to Control_Enable ensures that the MCU is properly reset upon establishing a connection
-	dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
-
-	this->Connect(portName, dcbSerialParams);
+	//Intialize the Virtual serial port Parameters
+	vSerialParams.port = "\\\\.\\COM12";
+	vSerialParams.baud = "57600";
 }
 
 
@@ -101,6 +96,40 @@ bool RS232Comm::ListComPorts(std::deque<std::string>* ComPortNames) { //added fu
 	std::cout << "Leaving RS232COMM\r\n" << std::endl;
 	return gotPort;
 }
+
+
+
+
+
+bool RS232Comm::connect() {
+	//set serialParams
+
+	char portName[64];
+	vSerialParams.port.copy(portName, vSerialParams.port.size());
+	portName[vSerialParams.port.size()] = '\0';  // null-terminate
+
+
+	//Build Baud Rate DWORD for DCB
+	//std::string baud = serialParams->baud;
+	//DWORD commBaud_DWORD = std::stoul(std::string(baud));
+
+	//TODO: copy the serialParams struct members into the DCB struct members
+	dcbSerialParams.BaudRate = (DWORD) std::stoul(vSerialParams.baud);
+	//dcbSerialParams.BaudRate = 57600;//CBR_115200;
+	dcbSerialParams.ByteSize = 8;
+	dcbSerialParams.ByteSize = 8;
+	dcbSerialParams.StopBits = ONESTOPBIT;
+	dcbSerialParams.Parity = NOPARITY;
+	//Setting the DTR to Control_Enable ensures that the MCU is properly reset upon establishing a connection
+	dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
+
+	//now actually connect
+	this->Connect(portName, dcbSerialParams);
+
+
+	return true;
+}
+
 
 
 bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {

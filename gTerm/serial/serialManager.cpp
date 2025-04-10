@@ -4,21 +4,14 @@
 
 // Constructor: Initializes and starts the background thread
 serialManager::serialManager(){
-	//serialComm = comm; //I dont think I need to copy this, its being done in the Initialization List above
 
-	//TODO: this needs to move into Connect button.
-
-	//TODO: I NEED TO REMOVE ALOT OF STUFF FROM CONSTRUCTORS! THERE NEEDS TO BE MORE GETTERS AND SETTERS
-
+	//create the virtual Com Port Class that serialManager will interact with
 #ifdef IS_WINDOWS
-	vComPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
+	_vComPort = new RS232Comm(); // Windows serial port
 #elif defined(IS_LINUX)
-	serialPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
+	_vComPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
 #endif
 
-	//create the nonstop thread to keep reading the seria port
-	readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
-	running = true;
 }
 
 serialManager::~serialManager() {
@@ -67,7 +60,7 @@ void serialManager::readLoop() {
 		char buffer[512]; // Temporary buffer for incoming data
 		int bytesRead = 0;
 
-		vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
+		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 
 		if (bytesRead > 0) {
 			pushData(buffer, bytesRead);
@@ -104,34 +97,40 @@ void serialManager::listBaudRates(std::deque<std::string>* queue) {
 
 
 void serialManager::listPorts(std::deque<std::string>* queue) {
-	vComPort->ListComPorts(queue);
+	_vComPort->ListComPorts(queue);
 }
 
 
-void serialManager::connect(std::string port, std::string baud) {
-	//if (!(_rs232comm->IsConnected())) { //prevent trying to connect twice	
-	//	//Build Comm port string and char array
-	//	std::string str = "\\\\.\\" + std::string(port);
-	//	char commPort[32];
-	//	strcpy_s(commPort, str.c_str());
-
-	//	//Build Baud Rate DWORD for DCB
-	//	DWORD commBaud_DWORD = std::stoul(std::string(baud));
-
-	//	DCB serialParams; //I can add more serial parameters here instead of in the RS232 class
-	//	serialParams.BaudRate = commBaud_DWORD;
-	//	//serialParams.ByteSize = 8;
+void serialManager::setComPort(std::string* string) {
 
 
-	//	//rxBuffer = (char*)calloc(COMM_BUFF_RX_SIZE, sizeof(char));
-	//	// 
-	////Need to start a thread here
-	//	_rs232comm->Connect((const char*)commPort, serialParams);
-	//	if (_rs232comm->IsConnected()) { // Opens thread, need to kill in deconstructor
-	//		serial_thread = new std::thread(&serial::start_com_thread, this); ///retrieve buffer
-	//	}
-	//}
+}
 
+void serialManager::settBaudRate(std::string* string) {
+
+}
+
+std::string serialManager::getCommPort() {
+	return _vComPort->vSerialParams.port; //this in turn could be a getter
+}
+
+
+std::string serialManager::getCBaudRate() {
+	return _vComPort->vSerialParams.baud; //this in turn could be a getter function
+}
+
+
+bool serialManager::connect() {
+	//Start the RS232 or Linux Serial port (hosted by vComPort virtual class)
+	if (_vComPort->connect()) {
+		//create the nonstop thread to keep reading the seria port if connect retruns true
+		readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
+		running = true;
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 
@@ -143,8 +142,10 @@ void serialManager::disconnect() {
 
 bool serialManager::isConnected() {
 
+	///TODO: return a proper value here
+
 	//return _rs232comm->IsConnected();
-	return false;
+	return _vComPort->IsConnected();
 }
 
 

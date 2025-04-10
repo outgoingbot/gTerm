@@ -49,8 +49,8 @@ private:
 public:
 	//these are the ram locations that low level tx/rx commands access
 
-	//Initialize Serial communication with the given COM port
-	RS232Comm(const char* portName);
+	//Initialize Serial communication
+	RS232Comm();
 	//Close the connection
 	~RS232Comm();
 
@@ -65,8 +65,7 @@ public:
 	bool WriteData(const char *buffer, unsigned int nbChar);
 
 	void killThread() { _killThreadFlag = true; }
-
-	
+		
 	//get the availve com ports on the windows machine
 	bool ListComPorts(std::deque<std::string> *ComPortNames);
 
@@ -78,6 +77,9 @@ public:
 
 	//Check if we are actually connected
 	bool IsConnected();
+
+	bool connect();
+
 	
 };
 

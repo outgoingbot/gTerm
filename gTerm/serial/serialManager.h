@@ -53,8 +53,13 @@ public:
 	void listBaudRates(std::deque<std::string>* queue);
 	void listPorts(std::deque<std::string>* queue);
 
+	void setComPort(std::string* string);
+	void settBaudRate(std::string* string);
+
+	std::string getCommPort();
+	std::string getCBaudRate();
 	
-	void connect(std::string port, std::string baud);
+	bool connect();
 	void disconnect();
 	
 	bool isConnected();
@@ -85,10 +90,8 @@ private:
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> running;
-	virtualComm* vComPort;
 
-	
-
+	virtualComm* _vComPort; //the virtualComport class is local to serialManager class.
 
 	// Internal function for the background reading thread
 	void readLoop();
