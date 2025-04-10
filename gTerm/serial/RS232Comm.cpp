@@ -84,7 +84,8 @@ bool RS232Comm::ListComPorts(std::deque<std::string>* ComPortNames) { //added fu
 
 		// Test the return value and error if any
 		if (test != 0) { //QueryDosDevice returns zero if it didn't find an object
-			ComPortNames->push_back(str);
+			std::string windowsFormatComPort = "\\\\.\\" + str;
+			ComPortNames->push_back(windowsFormatComPort);
 			std::cout << str << ": " << lpTargetPath << std::endl;
 			gotPort = true;
 		}

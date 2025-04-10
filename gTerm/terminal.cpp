@@ -145,53 +145,56 @@ int terminal::update(const char* title) {
         }
         //-----------------------------Disconnect Button--------------------------|
         
+
+
+
+
+        //------------------------------COM Status Text-------------------------------|
         //Just getting some basic serial status stuff to the GUI. this will change
         //Text Box
         ImGui::SameLine(); // Place the next widget on the same line
         ImGui::Text("Port:%s \r\n Baud:%s \r\n isConnected %i", serialManObj->getCommPort().c_str(), serialManObj->getCBaudRate().c_str(), serialManObj->isConnected());
-        
+        //------------------------------COM Status Text-------------------------------|
 
 
-        //List Comm Ports Button
-        if (ImGui::Button("List Comm Ports")) {
-            // This block executes when the button is clicked
-            std::cout << "Getting Comm Ports from virtualComm.h " << std::endl;
-            
-            serialManObj->listPorts(&serialManObj->commPortNames);
-            for (const std::string& portName : serialManObj->commPortNames) {
-                std::cout << portName << std::endl;
-            }
 
-
-        }
-
-
-       // Future Popup menu maybe?
+        //------------------------------COM Port Drop Down-------------------------------|
         static bool open_popup = false;
-        static int selected_item = -1;
-        const char* items[] = { "Item 1", "Item 2", "Item 3" };
-
-        // Button to trigger the popup
-        if (ImGui::Button("Open Popup")) {
-            open_popup = true;
-            ImGui::OpenPopup("MyPopup");
-        }
-
-        // The actual popup window
-        if (ImGui::BeginPopup("MyPopup")) {
-            ImGui::Text("Select an item:");
-            ImGui::Separator();
-            for (int i = 0; i < 3; i++) {
-                if (ImGui::Selectable(items[i], selected_item == i)) {
-                    selected_item = i;
-                    open_popup = false; // Close popup after selection
-                    ImGui::CloseCurrentPopup();
-                }
+        if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+            // Button to trigger port scan and open popup
+            if (ImGui::Button("Open COM Ports")) {
+                serialManObj->commPortNames.clear();   
+                //Build the list of comports
+                serialManObj->listPorts(&serialManObj->commPortNames);
+                open_popup = true;
+                ImGui::OpenPopup("SerialPortPopup");
             }
-            ImGui::EndPopup();
-        }
-        //End Popup Menu
 
+            // The popup itself
+            if (ImGui::BeginPopup("SerialPortPopup")) {
+                ImGui::Text("Select a COM port:");
+                ImGui::Separator();
+                for (const auto& port : serialManObj->commPortNames) {
+                    if (ImGui::Selectable(port.c_str(), serialManObj->selectedPort == port)) {
+                        serialManObj->selectedPort = port;
+                        open_popup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::EndPopup();
+            }
+
+        // Display selected result
+            if (serialManObj->selectedPort.empty() == false) {
+                ImGui::Text("Selected port: %s", serialManObj->selectedPort.c_str());
+
+                if (serialManObj->selectedPort != serialManObj->getCommPort()) {
+                    serialManObj->setComPort(&serialManObj->selectedPort);
+                }
+
+            }
+        }
+        //------------------------------COM Port Drop Down-------------------------------|
 
 
 

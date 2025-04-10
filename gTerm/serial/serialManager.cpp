@@ -12,6 +12,9 @@ serialManager::serialManager(){
 	_vComPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
 #endif
 
+
+	selectedPort = "NONE";
+
 }
 
 serialManager::~serialManager() {
@@ -104,10 +107,11 @@ void serialManager::listPorts(std::deque<std::string>* queue) {
 
 void serialManager::setComPort(std::string* string) {
 
-
+	_vComPort->vSerialParams.port = *string;
 }
 
 void serialManager::settBaudRate(std::string* string) {
+	_vComPort->vSerialParams.baud = *string;
 
 }
 

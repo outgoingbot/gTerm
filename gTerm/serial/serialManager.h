@@ -72,7 +72,7 @@ public:
 	void copyToCharArray(char* outBuffer, size_t bufferSize);
 
 	std::deque<std::string> commPortNames;
-
+	std::string selectedPort;
 
 
 private:
