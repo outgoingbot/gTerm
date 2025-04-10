@@ -3,11 +3,22 @@
 
 
 // Constructor: Initializes and starts the background thread
-serialManager::serialManager(virtualComm* comm) : vCommPort(comm), running(true) {
+serialManager::serialManager(){
 	//serialComm = comm; //I dont think I need to copy this, its being done in the Initialization List above
 
-	readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
+	//TODO: this needs to move into Connect button.
 
+	//TODO: I NEED TO REMOVE ALOT OF STUFF FROM CONSTRUCTORS! THERE NEEDS TO BE MORE GETTERS AND SETTERS
+
+#ifdef IS_WINDOWS
+	vComPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
+#elif defined(IS_LINUX)
+	serialPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
+#endif
+
+	//create the nonstop thread to keep reading the seria port
+	readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
+	running = true;
 }
 
 serialManager::~serialManager() {
@@ -56,7 +67,7 @@ void serialManager::readLoop() {
 		char buffer[512]; // Temporary buffer for incoming data
 		int bytesRead = 0;
 
-		vCommPort->ReadData(buffer, sizeof(buffer), &bytesRead);
+		vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 
 		if (bytesRead > 0) {
 			pushData(buffer, bytesRead);
@@ -93,7 +104,7 @@ void serialManager::listBaudRates(std::deque<std::string>* queue) {
 
 
 void serialManager::listPorts(std::deque<std::string>* queue) {
-	vCommPort->ListComPorts(queue);
+	vComPort->ListComPorts(queue);
 }
 
 

@@ -8,14 +8,9 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
     memset(input_buffer_Port, '\0', sizeof(char));
     memset(input_buffer_Baud, '\0', sizeof(char));
 
-//TODO: this needs to move into the serial class.
-#ifdef IS_WINDOWS
-    vComPort = new RS232Comm("\\\\.\\COM12"); // Windows serial port
-#elif defined(IS_LINUX)
-    serialPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
-#endif
 
-    serialManObj = new serialManager(vComPort);
+    //Instatiate the serialManager Object
+    serialManObj = new serialManager();
 
 
 
@@ -24,7 +19,7 @@ terminal::terminal(GLFWwindow* window, int width, int height) {
 
 terminal::~terminal(void) {
     //TODO: this should delte the serial class and not the virtual comm class.
-    delete vComPort; // Cleanup
+    delete serialManObj; // Cleanup
 }
 
 int terminal::handle_connect_button() {

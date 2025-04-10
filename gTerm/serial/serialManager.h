@@ -8,6 +8,16 @@
 #include <mutex>
 #include <atomic>
 #include "virtualComm.h"
+#include <algorithm>
+
+
+//TODO: Should this be moved into the virtualComm class?
+//Choose what Serial Driver Header to #include. ifdef Variables defined in CMakeLists
+#ifdef IS_WINDOWS
+	#include "RS232Comm.h"
+#elif defined(IS_LINUX)
+	#include "LinuxSerialComm.h"
+#endif
 
 
 #define SERIAL_OK 0
@@ -29,7 +39,7 @@ public:
 	//
 
 
-	serialManager(virtualComm* vComm);
+	serialManager();
 
 	~serialManager();
 
@@ -75,7 +85,7 @@ private:
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> running;
-	virtualComm* vCommPort;
+	virtualComm* vComPort;
 
 	
 

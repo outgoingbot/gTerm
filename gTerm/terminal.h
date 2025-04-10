@@ -12,14 +12,9 @@ Terminal is master class for all serial related aspects of this program.
 #include <deque>
 
 #include "serial/serialManager.h"
-#include "serial/virtualComm.h"
+//#include "serial/virtualComm.h"
 
-//defined in CMakeLists
-#ifdef IS_WINDOWS
-#include "serial/RS232Comm.h"
-#elif defined(IS_LINUX)
-#include "serial/LinuxSerialComm.h"
-#endif
+
 
 #include "terminal_output.h" //Scolling Text Window
 
@@ -39,8 +34,7 @@ public:
 	//TODO: This virtual comm port should not be here. All we should instantiat is the serial class.
 	// (the serial class should be the only interface to terminal class.
 	
-	//this is a virtual class that has access so simple Serial Functions close to hardware.
-	virtualComm* vComPort; //change name to serialVirtualdriver or something
+
 
 	//This is higher level serial class that has all the buffers, and higher level serial data manipulation.
 	serialManager* serialManObj; //change name to Serialclass

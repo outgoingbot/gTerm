@@ -8,7 +8,7 @@ This is low level so mostly char buffers
 
 
 #define MCU_WAIT_TIME 1
-
+#define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
