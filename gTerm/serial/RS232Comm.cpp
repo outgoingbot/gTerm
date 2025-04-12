@@ -158,7 +158,7 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 				}else{
 					//If everything went fine we're connected
 					this->connected = true;
-					this->_killThreadFlag = false;
+					//this->_killThreadFlag = false;
 					//Flush any remaining characters in the buffers 
 					PurgeComm(this->hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
 					//We wait as the arduino board will be reseting
@@ -197,7 +197,7 @@ bool RS232Comm::disconnect() {
 bool RS232Comm::Disconnect(){
 	if (this->connected == true) {
 		//ToDo: RS232Comm Object still exists. has not been deconstructed. possible mem leak?
-		this->_killThreadFlag = true;
+		//this->_killThreadFlag = true;
 		this->connected = false;
 		CloseHandle(this->hSerial);
 	}

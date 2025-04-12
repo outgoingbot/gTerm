@@ -1,7 +1,12 @@
 #include "dataParser.h"
 
 dataParser::dataParser() {
+    
+    _window_params.min_height = 100.0f;
+    _window_params.width; // Window width
+    _window_params.height = 600.f; // Window height
 
+    _window_params.drag_bar_height = 20.f;
     _autoScroll = true;
 }
 
@@ -31,7 +36,15 @@ int dataParser::update() {
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x); // wrap at the edge
 
+    ImGui::Checkbox("Parser Enabled", &dataParse_enable);
+
     std::string tempString = "PLACE HOLDER STRING";
+    if (dataParse_enable) {
+        tempString = "True";
+    }
+    else {
+        tempString = "False";
+    }
 
     ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());  // safer for large logs
     ImGui::PopTextWrapPos();  // Always pair it
@@ -46,5 +59,3 @@ int dataParser::update() {
 
     return 0;
 }
-
-

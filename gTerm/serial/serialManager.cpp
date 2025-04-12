@@ -17,7 +17,7 @@ serialManager::serialManager(){
 
 
 serialManager::~serialManager() {
-	stopThread();
+	this->stopThread();
 	delete _vComPort;
 }
 
@@ -128,6 +128,7 @@ bool serialManager::connect() {
 
 
 bool serialManager::disconnect() {
+	this->stopThread();
 	return _vComPort->disconnect();
 }
 

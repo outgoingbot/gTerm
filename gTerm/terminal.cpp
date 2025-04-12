@@ -37,7 +37,6 @@ int terminal::handle_disconnect_button() {
         std::cout << "ERROR: Already Disconnected from Serial Manager" << std::endl;
         return -1;
     }
-    serialManObj->stopThread();
     serialManObj->disconnect();
     return 0;
 }

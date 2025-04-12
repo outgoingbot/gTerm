@@ -2,20 +2,34 @@
 #ifndef LINUXSERIALCOMM_H
 #define LINUXSERIALCOMM_H
 
-#include "SerialComm.h"
+#include "virtualComm.h"
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
+#include <deque>
 
-class LinuxSerialComm : public SerialComm {
+class LinuxSerialComm : public virtualComm {
 private:
-    int serialPort;
+    int serialPort = -1;
+    struct termios tty;
 
 public:
-    LinuxSerialComm(const char* portName);
+    LinuxSerialComm();
     ~LinuxSerialComm();
     void ReadData(char* buffer, unsigned int nbChar, int* returnVal) override;
+    bool ListBaudRates(std::deque<std::string>* BaudRateNames);
+
+    //Check if we are actually connected
+    bool IsConnected();
+
+    bool connect();
+
+    bool disconnect();
+
+    //Connection status
+    bool connected = false;
+
 };
 
 #endif // LINUXSERIALCOMM_H

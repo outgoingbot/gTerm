@@ -41,7 +41,7 @@ private:
 	
 	std::string baudlist[SERIAL_NUM_BAUDS] = { "9600","57600","115200","1000000", "2000000" };
 	
-	bool _killThreadFlag = false;
+	//bool _killThreadFlag = false;
 
 	//char* _rx_char_buffer = nullptr;
 	//char* _tx_char_buffer = nullptr;
@@ -64,7 +64,7 @@ public:
 	//return true on success.
 	bool WriteData(const char *buffer, unsigned int nbChar);
 
-	void killThread() { _killThreadFlag = true; }
+	//void killThread() { _killThreadFlag = true; }
 		
 	//get the availve com ports on the windows machine
 	bool ListComPorts(std::deque<std::string> *ComPortNames);
