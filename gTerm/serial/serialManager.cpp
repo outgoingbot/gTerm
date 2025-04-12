@@ -21,11 +21,6 @@ serialManager::~serialManager() {
 	stopThread();
 }
 
-// Push new data into the buffer
-void serialManager::pushData(const char* data, size_t length) {
-	std::lock_guard<std::mutex> lock(bufferMutex);
-	bufferQueue.insert(bufferQueue.end(), data, data + length);
-}
 
 
 // Retrieve a specified amount of data from the buffer
@@ -33,12 +28,12 @@ std::deque<char> serialManager::getData(size_t length) {
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	std::deque<char> result;
 
-	if (bufferQueue.size() < length) {
-		length = bufferQueue.size();
+	if (rxBufferQueue.size() < length) {
+		length = rxBufferQueue.size();
 	}
 
-	result.insert(result.end(), bufferQueue.begin(), bufferQueue.begin() + length);
-	bufferQueue.erase(bufferQueue.begin(), bufferQueue.begin() + length);
+	result.insert(result.end(), rxBufferQueue.begin(), rxBufferQueue.begin() + length);
+	rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + length);
 
 	return result;
 }
@@ -47,7 +42,7 @@ std::deque<char> serialManager::getData(size_t length) {
 // Check if there is data in the buffer
 bool serialManager::hasData() {
 	std::lock_guard<std::mutex> lock(bufferMutex);
-	return !bufferQueue.empty();
+	return !rxBufferQueue.empty();
 }
 
 
@@ -60,39 +55,66 @@ void serialManager::stopThread() {
 }
 
 
-// Thread function that continuously reads data from the serial port
+// Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
 void serialManager::readLoop() {
+	//DEBUG_TO_TERMINAL
 	while (running) {
-		char buffer[512]; // Temporary buffer for incoming data
+		char buffer[512]; // Temporary buffer for RX serial data
 		int bytesRead = 0;
 
+		//get the chars from the windows comm handler file. put them in a temportary char buufer.
 		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 
+		//move the char array elements to the deque<char> array.
 		if (bytesRead > 0) {
 			pushData(buffer, bytesRead);
+			#if DEBUG_TO_TERMINAL
+				//DEBUG the serial data to the console.
+				for (unsigned int i = 0; i < bytesRead; ++i) {
+					std::cout << buffer[i];
+				}
+			#endif			
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Prevents CPU overuse (getting ~12% CPU)
 	}
 }
 
-
-void serialManager::copyToCharArray(char* outBuffer, size_t bufferSize) {
-	if (!outBuffer || bufferSize == 0) return; // Handle invalid input
-
+//Todo: move this inside of readLoop. no point for this to be its own function
+// Push new data into the deque<char> array
+void serialManager::pushData(const char* data, size_t length) {
+	#define MAX_CHAR_COUNT 1000 //Max Scroll back is 1000 lines
+	
 	std::lock_guard<std::mutex> lock(bufferMutex);
+	this->rxBufferQueue.insert(this->rxBufferQueue.end(), data, data + length);
 
-	size_t numToCopy = std::min(bufferSize, bufferQueue.size()); // Copy up to bufferSize elements
-
-	for (size_t i = 0; i < numToCopy; ++i) {
-		outBuffer[i] = bufferQueue.front(); // Copy from deque to char array
-		bufferQueue.pop_front(); // Remove from deque
+	const size_t maxSize = 10000;
+	if (rxBufferQueue.size() > maxSize) {
+		std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
+		size_t toRemove = rxBufferQueue.size() - maxSize;
+		rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + toRemove);
 	}
 
-	if (numToCopy < bufferSize) {
-		outBuffer[numToCopy] = '\0'; // Null-terminate to make it a valid C-string (optional)
-	}
 }
+
+
+//Why do I need this function?
+//void serialManager::copyToCharArray(char* outBuffer, size_t bufferSize) {
+//	if (!outBuffer || bufferSize == 0) return; // Handle invalid input
+//
+//	std::lock_guard<std::mutex> lock(bufferMutex);
+//
+//	size_t numToCopy = std::min(bufferSize, rxBufferQueue.size()); // Copy up to bufferSize elements
+//
+//	for (size_t i = 0; i < numToCopy; ++i) {
+//		outBuffer[i] = rxBufferQueue.front(); // Copy from deque to char array
+//		rxBufferQueue.pop_front(); // Remove from deque
+//	}
+//
+//	if (numToCopy < bufferSize) {
+//		outBuffer[numToCopy] = '\0'; // Null-terminate to make it a valid C-string (optional)
+//	}
+//}
 
 
 void serialManager::listBaudRates(std::deque<std::string>* queue) {

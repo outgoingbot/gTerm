@@ -33,9 +33,10 @@ RS232Comm::~RS232Comm() {
 	}
 }
 
-
+//trys to read the requested number of bytes (chars) into char* buffer. Returns number of bytes actually read.
 void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
 	if (!buffer || !returnVal) return;
+	if (!nbChar) return;
 
 	*returnVal = 0;
 	DWORD bytesRead = 0;
@@ -51,7 +52,6 @@ void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
 		}
 	}
 }
-
 
 
 bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar)
@@ -109,11 +109,6 @@ bool RS232Comm::connect() {
 	vSerialParams.port.copy(portName, vSerialParams.port.size());
 	portName[vSerialParams.port.size()] = '\0';  // null-terminate
 
-
-	//Build Baud Rate DWORD for DCB
-	//std::string baud = serialParams->baud;
-	//DWORD commBaud_DWORD = std::stoul(std::string(baud));
-
 	//TODO: copy the serialParams struct members into the DCB struct members
 	dcbSerialParams.BaudRate = (DWORD) std::stoul(vSerialParams.baud);
 	//dcbSerialParams.BaudRate = 57600;//CBR_115200;
@@ -126,13 +121,10 @@ bool RS232Comm::connect() {
 
 	//now actually connect
 	return this->Connect(portName, dcbSerialParams);
-
-
-	//return true;
 }
 
 
-
+//TODO: This function name Connect() should be changed something like low level Connected.
 bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	if (this->connected == false) {
 		//Try to connect to the given port throuh CreateFile

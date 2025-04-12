@@ -69,11 +69,12 @@ public:
 
 	//int pushCharToTXQue(char* key);
 
-	void copyToCharArray(char* outBuffer, size_t bufferSize);
+	//void copyToCharArray(char* outBuffer, size_t bufferSize);
 
 	std::deque<std::string> commPortNames;
 	std::string selectedPort;
 
+	std::deque<char> rxBufferQueue;
 
 private:
 	//these are used just for access. I can access the RS232Comm class char buffer
@@ -86,7 +87,7 @@ private:
 	//std::thread* serial_thread = nullptr;
 
 	//new Test
-	std::deque<char> bufferQueue;
+	
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> running;

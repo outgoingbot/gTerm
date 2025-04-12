@@ -12,7 +12,6 @@ Terminal is master class for all serial related aspects of this program.
 #include <deque>
 
 #include "serial/serialManager.h"
-//#include "serial/virtualComm.h"
 
 
 

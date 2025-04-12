@@ -46,24 +46,27 @@ int terminal::handle_disconnect_button() {
 
 
 int terminal::update(const char* title) {
-#define MAX_LINE_COUNT 1000 //Max Scroll back is 1000 lines
-    static int lineCounter = 0;
-    char lineBuff[1024];
+    
+    //static int lineCounter = 0;
+    //char lineBuff[1024];
 
-    if (serialManObj->hasData()) {
+    //if (serialManObj->hasData()) {
+    
+        //testing
+    /*    
+        //Why am i making a new deque class object. I alrady have one!
         std::deque<char> receivedData = serialManObj->getData(0); //need to understand this parameter better
         // Process receivedData...
         serialManObj->copyToCharArray(lineBuff, sizeof(lineBuff) - 1);
-        printf("Received Data: %s\n", lineBuff);
+        //printf("Received Data: %s\n", lineBuff);
         term_out.addLine(lineBuff);
         lineCounter++;
     }
     
     //Limit the max number of text lines in the console window
-    if (lineCounter >= MAX_LINE_COUNT) {
-        lineCounter = MAX_LINE_COUNT;
-        term_out.rmLine();
-    }
+
+
+    */
 
 
 
@@ -75,7 +78,9 @@ int terminal::update(const char* title) {
         //testing out scrolling text class
         //ImGui::SetWindowFontScale(scale_factor);
 
-        term_out.update(); //scrolling Text class
+        //have to always draw the entire rxBuffer to the screen.
+        term_out.update(serialManObj->rxBufferQueue); //scrolling Text class
+
 
         //Text Entry Test
         ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled
