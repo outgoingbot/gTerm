@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <cstring>
 #include <deque>
+#include <iostream>
+
 
 class LinuxSerialComm : public virtualComm {
 private:
@@ -18,7 +20,7 @@ public:
     LinuxSerialComm();
     ~LinuxSerialComm();
     void ReadData(char* buffer, unsigned int nbChar, int* returnVal) override;
-    bool ListBaudRates(std::deque<std::string>* BaudRateNames);
+    bool ListComPorts(std::deque<std::string>* ComPortNames);
 
     //Check if we are actually connected
     bool IsConnected();

@@ -9,7 +9,7 @@ serialManager::serialManager(){
 #ifdef IS_WINDOWS
 	_vComPort = new RS232Comm(); // Windows serial port
 #elif defined(IS_LINUX)
-	_vComPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
+	_vComPort = new LinuxSerialComm(); // Linux serial port
 #endif
 
 	selectedPort = "NONE";

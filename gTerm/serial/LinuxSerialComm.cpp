@@ -34,8 +34,13 @@ bool LinuxSerialComm::IsConnected() {
 
 
 bool LinuxSerialComm::connect() {
-    
-    serialPort = open(vSerialParams.port.c_str(), O_RDWR | O_NOCTTY);
+    char portName[64];
+    vSerialParams.port.copy(portName, vSerialParams.port.size());
+    portName[vSerialParams.port.size()] = '\0';  // null-terminate
+
+    std::cout << "connecting to: " << portName << std::endl;
+
+    serialPort = open(portName, O_RDWR | O_NOCTTY);
     if (serialPort == -1) {
         return false; // Failed to open port
     }
@@ -73,7 +78,7 @@ bool LinuxSerialComm::connect() {
 
 
 bool LinuxSerialComm::disconnect() {
-    this->connect = false;
+    this->connected = false;
 
     if (serialPort != -1) {
         close(serialPort);
@@ -85,6 +90,6 @@ bool LinuxSerialComm::disconnect() {
 
 
 
-bool LinuxSerialComm::ListBaudRates(std::deque<std::string>* BaudRateNames) {
+bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
 
 }
