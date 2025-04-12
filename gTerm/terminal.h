@@ -20,7 +20,7 @@ Terminal is master class for all serial related aspects of this program.
 class terminal{
 
 public:
-	terminal(GLFWwindow* window, int width, int height);
+	terminal(int width, int height);
 	~terminal();
 
 	int update(const char* title);
@@ -29,17 +29,11 @@ public:
 	//Manages the serial data terminal display window.
 	terminal_output term_out;
 	
-
-	//TODO: This virtual comm port should not be here. All we should instantiat is the serial class.
-	// (the serial class should be the only interface to terminal class.
-	
-
-
-	//This is higher level serial class that has all the buffers, and higher level serial data manipulation.
-	serialManager* serialManObj; //change name to Serialclass
+	//serial Manager class that has all the buffers, and higher level serial data manipulation.
+	serialManager* serialManObj; //Serial Manager
 
 private:
-	GLFWwindow* _window; // Pointer to the GLFW window
+	//GLFWwindow* _window; // Pointer to the GLFW window
 	int _width;          // Window width
 	int _height;         // Window height
 	void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100);

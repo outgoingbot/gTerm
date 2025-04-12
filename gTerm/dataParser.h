@@ -1,3 +1,8 @@
+
+/*
+Data parsing class.
+*/
+
 #pragma once
 #include <imgui.h>
 #include <GLFW/glfw3.h>
@@ -13,7 +18,8 @@ public:
 	dataParser();
 	~dataParser();
 
-	int update(std::deque<char> charArray);
+	//int update(std::deque<char> charArray);
+	int update();
 
 
 private:
@@ -29,6 +35,5 @@ private:
 		float drag_bar_height = 20.f;
 	};
 	window_params_t _window_params;
-
 
 };

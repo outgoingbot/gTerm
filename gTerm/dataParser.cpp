@@ -11,7 +11,8 @@ dataParser::~dataParser(void) {
 }
 
 
-int dataParser::update(std::deque<char> rxDequeObj) {
+//int dataParser::update(std::deque<char> rxDequeObj) {
+int dataParser::update() {
 
     //static float child_height = 600.0f; // Initial height
     //float min_size = 50.0f;             // Minimum allowed size
@@ -21,7 +22,7 @@ int dataParser::update(std::deque<char> rxDequeObj) {
     // Begin a scrollable child region
     //ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
     // Begin a NON-scrollable child region
-    ImGui::BeginChild("Data_Manipulation_Region", ImVec2(0, _window_params.height), true);
+    ImGui::Begin("Data_Manipulation_Region");
 
     // Display all lines in the console
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));        // Light Gray
@@ -34,7 +35,6 @@ int dataParser::update(std::deque<char> rxDequeObj) {
 
     ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());  // safer for large logs
     ImGui::PopTextWrapPos();  // Always pair it
-
     ImGui::PopStyleColor(1); // Restore previous colors
 
     // Auto-scroll to the bottom if enabled
@@ -42,7 +42,7 @@ int dataParser::update(std::deque<char> rxDequeObj) {
         ImGui::SetScrollHereY(1.0f);
     }
 
-    ImGui::EndChild();
+    ImGui::End();
 
     return 0;
 }

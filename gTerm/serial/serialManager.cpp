@@ -12,30 +12,13 @@ serialManager::serialManager(){
 	_vComPort = new LinuxSerialComm("/dev/ttyS0"); // Linux serial port
 #endif
 
-
 	selectedPort = "NONE";
-
 }
+
 
 serialManager::~serialManager() {
 	stopThread();
-}
-
-
-
-// Retrieve a specified amount of data from the buffer
-std::deque<char> serialManager::getData(size_t length) {
-	std::lock_guard<std::mutex> lock(bufferMutex);
-	std::deque<char> result;
-
-	if (rxBufferQueue.size() < length) {
-		length = rxBufferQueue.size();
-	}
-
-	result.insert(result.end(), rxBufferQueue.begin(), rxBufferQueue.begin() + length);
-	rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + length);
-
-	return result;
+	delete _vComPort;
 }
 
 
@@ -80,6 +63,7 @@ void serialManager::readLoop() {
 	}
 }
 
+
 //Todo: move this inside of readLoop. no point for this to be its own function
 // Push new data into the deque<char> array
 void serialManager::pushData(const char* data, size_t length) {
@@ -97,24 +81,6 @@ void serialManager::pushData(const char* data, size_t length) {
 
 }
 
-
-//Why do I need this function?
-//void serialManager::copyToCharArray(char* outBuffer, size_t bufferSize) {
-//	if (!outBuffer || bufferSize == 0) return; // Handle invalid input
-//
-//	std::lock_guard<std::mutex> lock(bufferMutex);
-//
-//	size_t numToCopy = std::min(bufferSize, rxBufferQueue.size()); // Copy up to bufferSize elements
-//
-//	for (size_t i = 0; i < numToCopy; ++i) {
-//		outBuffer[i] = rxBufferQueue.front(); // Copy from deque to char array
-//		rxBufferQueue.pop_front(); // Remove from deque
-//	}
-//
-//	if (numToCopy < bufferSize) {
-//		outBuffer[numToCopy] = '\0'; // Null-terminate to make it a valid C-string (optional)
-//	}
-//}
 
 
 void serialManager::listBaudRates(std::deque<std::string>* queue) {
@@ -163,36 +129,9 @@ bool serialManager::connect() {
 
 bool serialManager::disconnect() {
 	return _vComPort->disconnect();
-
 }
 
 
 bool serialManager::isConnected() {
-
-	///TODO: return a proper value here
-
-	//return _rs232comm->IsConnected();
 	return _vComPort->IsConnected();
 }
-
-
-//int serial::popCharFromRXQue(char* key) {
-//	if (!_register.rx_char_que.empty()) {
-//		char key = _register.rx_char_que.front();
-//		_register.rx_char_que.pop_front();
-//		return SERIAL_OK;
-//	}
-//	return SERIAL_ERROR;
-//}
-//
-//
-//int serial::pushCharToTXQue(char* key){
-//	_register.tx_char_que.push_back(*key);
-//	return 0;
-//}
-//
-//
-//int serial::pushCharToRXQue(char* key) {
-//	_register.rx_char_que.push_back(*key);
-//	return 0;
-//}

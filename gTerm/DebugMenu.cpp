@@ -6,7 +6,11 @@ DebugMenu::DebugMenu() {
 
 void DebugMenu::update(){
     // Start the debug menu window
-    ImGui::Begin("Debug Menu");
+    //ImGui::Begin("Debug Menu");
+    ImGui::Begin("Debug Menu", nullptr,
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse);
 
 
     // Display the frame rate

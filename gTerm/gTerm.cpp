@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define SCROLL_BACK 1000
+//#define SCROLL_BACK 1000
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
@@ -56,6 +56,7 @@ int main() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
+    io.IniFilename = nullptr; // disables loading/saving window layout
     (void)io;
 
     //Set the Default Font
@@ -75,9 +76,9 @@ int main() {
 
     //Create Custom GUI Object
     mainMenu main_menu;
-    terminal term(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT);
     DebugMenu debugMenu;
-    
+    dataParser dataParsObj;
     
 
     // Main loop
@@ -89,21 +90,23 @@ int main() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        //Update Our Custom GUI elements
-            // Simulate adding new lines to the console. Simulated Serial Data
-    
-            //End Simulated Serial Data
-        //have serial class on another thread and pull data from that
         
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
-        debugMenu.update(); //shows fps and mouse position
-        term.update("One"); //going to be the "main" terminal (realTerm like)
-        //term_B.update("Two"); //remove, just for testing
+        
+        term.update("Terminal"); //going to be the "main" terminal (realTerm like)
+
+        ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
+        dataParsObj.update();
+        
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
 
-        
-        
+        ImVec2 windowSize(400, 150);
+        ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
+        ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
+        debugMenu.update(); //shows fps and mouse position
+
 
         // Rendering
         ImGui::Render();
@@ -111,9 +114,7 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
-
-   
+        glfwSwapBuffers(window);   
     }
 
     // Cleanup

@@ -14,6 +14,7 @@ public:
     typedef struct serialParameters {
         std::string port;
         std::string baud;
+        uint8_t byteSize;
         //TODO: add other params like: 8,N,1
     } serialParameters;
 

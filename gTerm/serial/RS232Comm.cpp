@@ -15,6 +15,7 @@ RS232Comm::RS232Comm() {
 	//Intialize the Virtual serial port Parameters
 	vSerialParams.port = "\\\\.\\COM12";
 	vSerialParams.baud = "57600";
+	vSerialParams.byteSize = 8;
 }
 
 
@@ -23,11 +24,8 @@ RS232Comm::~RS232Comm() {
 	if (this->connected) {
 		//We're no longer connected
 		this->connected = false;
-
-		//Todo: free the buffers
-		
-		//Close the serial handler
-		if (hSerial != INVALID_HANDLE_VALUE) {
+		//Todo: free the buffers. what buffers?
+		if (hSerial != INVALID_HANDLE_VALUE) { //Close the serial handler
 			CloseHandle(hSerial);
 		}
 	}
@@ -109,11 +107,9 @@ bool RS232Comm::connect() {
 	vSerialParams.port.copy(portName, vSerialParams.port.size());
 	portName[vSerialParams.port.size()] = '\0';  // null-terminate
 
-	//TODO: copy the serialParams struct members into the DCB struct members
+	//Copy the serialParams struct members into the DCB struct members
 	dcbSerialParams.BaudRate = (DWORD) std::stoul(vSerialParams.baud);
-	//dcbSerialParams.BaudRate = 57600;//CBR_115200;
-	dcbSerialParams.ByteSize = 8;
-	dcbSerialParams.ByteSize = 8;
+	dcbSerialParams.ByteSize = (BYTE) vSerialParams.byteSize;
 	dcbSerialParams.StopBits = ONESTOPBIT;
 	dcbSerialParams.Parity = NOPARITY;
 	//Setting the DTR to Control_Enable ensures that the MCU is properly reset upon establishing a connection
