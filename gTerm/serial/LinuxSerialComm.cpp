@@ -17,14 +17,25 @@ LinuxSerialComm::~LinuxSerialComm() {
     }
 }
 
+//void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
+//    if (!buffer || !returnVal || serialPort == -1) return;
+//
+//    *returnVal = read(serialPort, buffer, nbChar);
+//    if (*returnVal == -1) {
+//        *returnVal = -1; // Indicate failure
+//    }
+//}
+
 void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
     if (!buffer || !returnVal || serialPort == -1) return;
 
-    *returnVal = read(serialPort, buffer, nbChar);
-    if (*returnVal == -1) {
-        *returnVal = -1; // Indicate failure
-    }
+    ssize_t bytesRead = read(serialPort, buffer, nbChar);
+    *returnVal = static_cast<int>(bytesRead); // cast ssize_t to int
+
+    // Optional: you could check for errno or log if bytesRead == -1
 }
+
+
 
 //Check if we are actually connected
 bool LinuxSerialComm::IsConnected() {
@@ -32,18 +43,18 @@ bool LinuxSerialComm::IsConnected() {
     return this->connected;
 }
 
-
 bool LinuxSerialComm::connect() {
+    vSerialParams.port = "/dev/ttyS0";
+    vSerialParams.baud = "57600";
+
     char portName[64];
-    vSerialParams.port.copy(portName, vSerialParams.port.size());
-    portName[vSerialParams.port.size()] = '\0';  // null-terminate
+    strncpy(portName, vSerialParams.port.c_str(), sizeof(portName) - 1);
+    portName[sizeof(portName) - 1] = '\0';
 
     std::cout << "connecting to: " << portName << std::endl;
 
     serialPort = open(portName, O_RDWR | O_NOCTTY);
-    if (serialPort == -1) {
-        return false; // Failed to open port
-    }
+    if (serialPort == -1) return false;
 
     if (tcgetattr(serialPort, &tty) != 0) {
         close(serialPort);
@@ -51,9 +62,17 @@ bool LinuxSerialComm::connect() {
         return false;
     }
 
-    // Configure settings
-    cfsetospeed(&tty, B57600);
-    cfsetispeed(&tty, B57600);
+    int baud = std::stoi(vSerialParams.baud);
+    speed_t speed;
+    if (baud == 9600)   speed = B9600;
+    else if (baud == 19200)  speed = B19200;
+    else if (baud == 38400)  speed = B38400;
+    else if (baud == 57600)  speed = B57600;
+    else if (baud == 115200) speed = B115200;
+    else return false;
+
+    cfsetospeed(&tty, speed);
+    cfsetispeed(&tty, speed);
 
     tty.c_cflag |= (CLOCAL | CREAD);
     tty.c_cflag &= ~PARENB;
@@ -61,7 +80,7 @@ bool LinuxSerialComm::connect() {
     tty.c_cflag &= ~CSIZE;
     tty.c_cflag |= CS8;
 
-    tty.c_lflag = 0; // No canonical mode, no echo
+    tty.c_lflag = 0;
     tty.c_oflag = 0;
     tty.c_iflag = 0;
     tty.c_cc[VMIN] = 1;
@@ -75,6 +94,7 @@ bool LinuxSerialComm::connect() {
 
     return true;
 }
+
 
 
 bool LinuxSerialComm::disconnect() {

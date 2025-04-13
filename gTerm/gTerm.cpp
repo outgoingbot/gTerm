@@ -8,8 +8,8 @@
 using namespace std;
 
 //#define SCROLL_BACK 1000
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
+#define WINDOW_WIDTH 1200
+#define WINDOW_HEIGHT 800
 
 int main() {
     // Initialize GLFW
@@ -76,10 +76,13 @@ int main() {
 
     //Create Custom GUI Object
     mainMenu main_menu;
-    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT);
+    terminal term(WINDOW_WIDTH/8, WINDOW_HEIGHT/8); //I dont think these size params are doing anything
     DebugMenu debugMenu;
     dataParser dataParsObj;
     
+    //Scale the entire glfw window with this function
+   // glfwSetWindowSize(window, WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8);
+
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -92,7 +95,8 @@ int main() {
         ImGui::NewFrame();
         
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
-        
+        ImGui::SetNextWindowPos(ImVec2(10, 50), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowSize(ImVec2(1200, 800), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //going to be the "main" terminal (realTerm like)
 
         ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once

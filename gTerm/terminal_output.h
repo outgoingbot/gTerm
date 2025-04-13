@@ -25,8 +25,8 @@ private:
 	
 	typedef struct window_params_t {
 		float min_height = 100.0f;
-		float width; // Window width
-		float height = 600.f; // Window height
+		float width = 1000; // Window width
+		float height = 300.f; // Window height
 
 		float drag_bar_height = 20.f;
 	};

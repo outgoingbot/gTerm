@@ -39,29 +39,53 @@ void serialManager::stopThread() {
 
 
 // Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
+//void serialManager::readLoop() {
+//	//DEBUG_TO_TERMINAL
+//	while (running) {
+//		char buffer[512]; // Temporary buffer for RX serial data
+//		int bytesRead = 0;
+//
+//		//get the chars from the windows comm handler file. put them in a temportary char buufer.
+//		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
+//
+//		//move the char array elements to the deque<char> array.
+//		if (bytesRead > 0) {
+//			pushData(buffer, bytesRead);
+//			#if DEBUG_TO_TERMINAL
+//				//DEBUG the serial data to the console.
+//				for (unsigned int i = 0; i < bytesRead; ++i) {
+//					std::cout << buffer[i];
+//				}
+//			#endif			
+//		}
+//
+//		std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Prevents CPU overuse (getting ~12% CPU)
+//	}
+//}
+
 void serialManager::readLoop() {
-	//DEBUG_TO_TERMINAL
+#define DEBUG_TO_TERMINAL 1
 	while (running) {
-		char buffer[512]; // Temporary buffer for RX serial data
+		char buffer[512];
 		int bytesRead = 0;
-
-		//get the chars from the windows comm handler file. put them in a temportary char buufer.
+		//Scrape everything off the top of the kernel serial file
 		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
-
-		//move the char array elements to the deque<char> array.
+		//Push the char buffer elements onto a rxDeque Object acting as a char queue
 		if (bytesRead > 0) {
 			pushData(buffer, bytesRead);
-			#if DEBUG_TO_TERMINAL
-				//DEBUG the serial data to the console.
-				for (unsigned int i = 0; i < bytesRead; ++i) {
-					std::cout << buffer[i];
-				}
-			#endif			
+
+		#if DEBUG_TO_TERMINAL
+			for (int i = 0; i < bytesRead; ++i)	std::cout << buffer[i];
+		#endif
+		}
+		else if (bytesRead == -1) {
+			perror("Serial read failed");
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Prevents CPU overuse (getting ~12% CPU)
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 }
+
 
 
 //Todo: move this inside of readLoop. no point for this to be its own function
