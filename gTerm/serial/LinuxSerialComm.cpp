@@ -7,7 +7,7 @@ LinuxSerialComm::LinuxSerialComm() {
     memset(&tty, 0, sizeof tty);
 
     //this is dumb but just saving here anyways
-    vSerialParams.port = "/dev/ttyS0";
+    vSerialParams.port = "/dev/ttyUSB0";
     vSerialParams.baud = "57600";
 }
 
@@ -44,7 +44,7 @@ bool LinuxSerialComm::IsConnected() {
 }
 
 bool LinuxSerialComm::connect() {
-    vSerialParams.port = "/dev/ttyS0";
+    vSerialParams.port = "/dev/USB0";
     vSerialParams.baud = "57600";
 
     char portName[64];
@@ -54,7 +54,10 @@ bool LinuxSerialComm::connect() {
     std::cout << "connecting to: " << portName << std::endl;
 
     serialPort = open(portName, O_RDWR | O_NOCTTY);
-    if (serialPort == -1) return false;
+    if (serialPort == -1) {
+        std::cout << "ERROR: Could not open port: " << portName << std::endl;
+        return false;
+    }
 
     if (tcgetattr(serialPort, &tty) != 0) {
         close(serialPort);
@@ -69,7 +72,10 @@ bool LinuxSerialComm::connect() {
     else if (baud == 38400)  speed = B38400;
     else if (baud == 57600)  speed = B57600;
     else if (baud == 115200) speed = B115200;
-    else return false;
+    else {
+        std::cout << "ERROR: Bad Baud: " << baud << std::endl;
+        return false;
+    }
 
     cfsetospeed(&tty, speed);
     cfsetispeed(&tty, speed);
@@ -91,7 +97,8 @@ bool LinuxSerialComm::connect() {
         serialPort = -1;
         return false;
     }
-
+    std::cout << "SUCCESS: Linux Serial Connected " << std::endl;
+    this->connected = true;
     return true;
 }
 

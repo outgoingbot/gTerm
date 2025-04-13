@@ -68,7 +68,7 @@ public:
 private:
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
-	std::atomic<bool> running;
+	std::atomic<bool> threadIsRunning;
 
 	virtualComm* _vComPort; //the virtualComport class is local to serialManager class.
 

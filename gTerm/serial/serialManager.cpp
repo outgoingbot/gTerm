@@ -29,11 +29,29 @@ bool serialManager::hasData() {
 }
 
 
-// Stop the background thread
+//// Stop the background thread
+//void serialManager::stopThread() {
+//	running = false; //TODO: rename this to threadRunning or something
+//	if (readThread->joinable()) {
+//		readThread->join();
+//	}
+//}
+
 void serialManager::stopThread() {
-	running = false;
-	if (readThread->joinable()) {
-		readThread->join();
+	threadIsRunning = false;
+
+	if (readThread) {
+		if (std::this_thread::get_id() == readThread->get_id()) {
+			std::cerr << "ERROR: Attempted to join thread from itself!" << std::endl;
+			return;
+		}
+
+		if (readThread->joinable()) {
+			readThread->join(); //ERROR: Crashing Here on join on Linux Machine
+		}
+
+		delete readThread;
+		readThread = nullptr;
 	}
 }
 
@@ -65,7 +83,7 @@ void serialManager::stopThread() {
 
 void serialManager::readLoop() {
 #define DEBUG_TO_TERMINAL 1
-	while (running) {
+	while (threadIsRunning) {
 		char buffer[512];
 		int bytesRead = 0;
 		//Scrape everything off the top of the kernel serial file
@@ -142,7 +160,7 @@ bool serialManager::connect() {
 	if (_vComPort->connect()) {
 		//create the nonstop thread to keep reading the seria port if connect retruns true
 		readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
-		running = true;
+		threadIsRunning = true;
 		return true;
 	}
 	else {
