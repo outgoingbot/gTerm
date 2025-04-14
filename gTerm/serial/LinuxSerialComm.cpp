@@ -17,34 +17,57 @@ LinuxSerialComm::~LinuxSerialComm() {
     }
 }
 
-//void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
-//    if (!buffer || !returnVal || serialPort == -1) return;
-//
-//    *returnVal = read(serialPort, buffer, nbChar);
-//    if (*returnVal == -1) {
-//        *returnVal = -1; // Indicate failure
-//    }
-//}
 
 void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
-    if (!buffer || !returnVal || serialPort == -1) return;
+    if (!buffer || !returnVal || serialPort == -1) {
+        if (returnVal) *returnVal = -1;
+        return;
+    }
 
-    ssize_t bytesRead = read(serialPort, buffer, nbChar);
-    *returnVal = static_cast<int>(bytesRead); // cast ssize_t to int
+    *returnVal = 0;
 
-    // Optional: you could check for errno or log if bytesRead == -1
+    // Set up the file descriptor set
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(serialPort, &readfds);
+
+    // Set timeout to 100 ms
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 100000;  // 100ms
+
+    int sel = select(serialPort + 1, &readfds, NULL, NULL, &timeout);
+    if (sel > 0) {
+        // Data is available
+        ssize_t bytesRead = read(serialPort, buffer, nbChar);
+        if (bytesRead >= 0) {
+            *returnVal = static_cast<int>(bytesRead);
+        }
+        else {
+            perror("read");
+            *returnVal = -1;
+        }
+    }
+    else if (sel == 0) {
+        // Timeout, no data
+        *returnVal = 0;
+    }
+    else {
+        // Error in select
+        perror("select");
+        *returnVal = -1;
+    }
 }
-
 
 
 //Check if we are actually connected
 bool LinuxSerialComm::IsConnected() {
-
     return this->connected;
 }
 
+
 bool LinuxSerialComm::connect() {
-    vSerialParams.port = "/dev/USB0";
+    vSerialParams.port = "/dev/ttyUSB0";
     vSerialParams.baud = "57600";
 
     char portName[64];
@@ -54,6 +77,8 @@ bool LinuxSerialComm::connect() {
     std::cout << "connecting to: " << portName << std::endl;
 
     serialPort = open(portName, O_RDWR | O_NOCTTY);
+    //serialPort = open(portName, O_RDWR | O_NOCTTY | O_NONBLOCK);
+
     if (serialPort == -1) {
         std::cout << "ERROR: Could not open port: " << portName << std::endl;
         return false;
@@ -89,10 +114,14 @@ bool LinuxSerialComm::connect() {
     tty.c_lflag = 0;
     tty.c_oflag = 0;
     tty.c_iflag = 0;
-    tty.c_cc[VMIN] = 1;
-    tty.c_cc[VTIME] = 0;
+    //Adding a Timout
+    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VTIME] = 1; //100ms Timeout
+
+    std::cout << "VMIN: " << (int)tty.c_cc[VMIN] << ", VTIME: " << (int)tty.c_cc[VTIME] << std::endl;
 
     if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
+        std::cout << "Failed to set linux com attributes" << std::endl;
         close(serialPort);
         serialPort = -1;
         return false;
@@ -119,4 +148,5 @@ bool LinuxSerialComm::disconnect() {
 
 bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
 
+    return false;
 }

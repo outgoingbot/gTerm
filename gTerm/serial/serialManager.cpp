@@ -11,8 +11,8 @@ serialManager::serialManager(){
 #elif defined(IS_LINUX)
 	_vComPort = new LinuxSerialComm(); // Linux serial port
 #endif
-
-	selectedPort = "NONE";
+	//TODO: THIS NEEDS TO BE FIXED!
+	selectedPort = _vComPort->vSerialParams.port;
 }
 
 
@@ -47,9 +47,10 @@ void serialManager::stopThread() {
 		}
 
 		if (readThread->joinable()) {
-			readThread->join(); //ERROR: Crashing Here on join on Linux Machine
+			readThread->join();
 		}
-
+		
+		std::cout << "readThread Joined" << std::endl;
 		delete readThread;
 		readThread = nullptr;
 	}
@@ -102,6 +103,8 @@ void serialManager::readLoop() {
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
+
+	std::cout << "Serial thread exiting cleanly.\n";
 }
 
 
