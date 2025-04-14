@@ -5,10 +5,6 @@ LinuxSerialComm::LinuxSerialComm() {
 
     // Optional: zero out tty here if you want
     memset(&tty, 0, sizeof tty);
-
-    //this is dumb but just saving here anyways
-    vSerialParams.port = "/dev/ttyUSB0";
-    vSerialParams.baud = "57600";
 }
 
 LinuxSerialComm::~LinuxSerialComm() {
@@ -67,7 +63,7 @@ bool LinuxSerialComm::IsConnected() {
 
 
 bool LinuxSerialComm::connect() {
-    vSerialParams.port = "/dev/ttyUSB0";
+    //vSerialParams.port = "/dev/ttyUSB0";
     vSerialParams.baud = "57600";
 
     char portName[64];
@@ -147,6 +143,32 @@ bool LinuxSerialComm::disconnect() {
 
 
 bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
+    if (!ComPortNames) return false;
 
-    return false;
+    namespace fs = std::filesystem;
+    const std::string devDir = "/dev";
+    const std::vector<std::string> patterns = { "ttyS", "ttyUSB", "ttyACM" };
+    bool gotPort = false;
+
+    try {
+        for (const auto& entry : fs::directory_iterator(devDir)) {
+            std::string filename = entry.path().filename();
+            for (const auto& prefix : patterns) {
+                if (filename.rfind(prefix, 0) == 0) { // starts with
+                    std::string fullPath = entry.path();
+                    ComPortNames->push_back(fullPath);
+                    std::cout << fullPath << std::endl;
+                    gotPort = true;
+                    break;
+                }
+            }
+        }
+    }
+    catch (const fs::filesystem_error& e) {
+        std::cerr << "Error listing serial ports: " << e.what() << std::endl;
+        return false;
+    }
+
+    std::cout << "Leaving LinuxSerialComm::ListComPorts\n" << std::endl;
+    return gotPort;
 }

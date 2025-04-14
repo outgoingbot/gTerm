@@ -8,8 +8,8 @@
 using namespace std;
 
 //#define SCROLL_BACK 1000
-#define WINDOW_WIDTH 1200
-#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 1400
+#define WINDOW_HEIGHT 900
 
 int main() {
     // Initialize GLFW
@@ -76,7 +76,7 @@ int main() {
 
     //Create Custom GUI Object
     mainMenu main_menu;
-    terminal term(WINDOW_WIDTH/8, WINDOW_HEIGHT/8); //I dont think these size params are doing anything
+    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
     DebugMenu debugMenu;
     dataParser dataParsObj;
     

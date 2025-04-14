@@ -12,7 +12,7 @@ terminal_output::~terminal_output(void) {
 
 int terminal_output::update(std::deque<char> rxDequeObj) {
     // Begin a scrollable child region
-    ImGui::BeginChild("ConsoleRegion", ImVec2(_window_params.width, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
   
     // Display all lines in the console
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));        // Light Gray

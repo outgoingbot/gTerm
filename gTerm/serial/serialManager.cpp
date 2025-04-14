@@ -11,8 +11,8 @@ serialManager::serialManager(){
 #elif defined(IS_LINUX)
 	_vComPort = new LinuxSerialComm(); // Linux serial port
 #endif
-	//TODO: THIS NEEDS TO BE FIXED!
-	selectedPort = _vComPort->vSerialParams.port;
+	//TODO: This variable should only be used for presentation
+	selectedPort = "SELECT_PORT";
 }
 
 
