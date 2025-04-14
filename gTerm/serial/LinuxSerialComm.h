@@ -3,11 +3,13 @@
 #define LINUXSERIALCOMM_H
 
 #include "virtualComm.h"
+#include <filesystem>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
 #include <deque>
+#include <vector>
 #include <iostream>
 
 
