@@ -50,7 +50,7 @@ int terminal::update(const char* title) {
 
 
     //have to always draw the entire rxBuffer to the screen.
-    term_out.update(serialManObj->rxBufferQueue); //scrolling Text class
+    term_out.update(serialManObj->rxBufferQueue, serialManObj->isConnected()); //scrolling Text class
 
 
     //Text Entry Test

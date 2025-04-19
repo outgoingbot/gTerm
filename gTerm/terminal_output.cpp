@@ -10,7 +10,7 @@ terminal_output::~terminal_output(void) {
 }
 
 
-int terminal_output::update(std::deque<char> rxDequeObj) {
+int terminal_output::update(std::deque<char> rxDequeObj, bool isConnected) {
     // Begin a scrollable child region
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
   
@@ -25,7 +25,7 @@ int terminal_output::update(std::deque<char> rxDequeObj) {
     // === FUN: Update and draw the ball ===
     float deltaTime = ImGui::GetIO().DeltaTime;
     ImVec2 childMin = ImGui::GetWindowPos(); // top-left corner of child window
-    UpdateBall(deltaTime, region, childMin);
+    UpdateBall(deltaTime, region, childMin, isConnected);
     // === FUN: Update and draw the ball ===
 
     //TODO: I should have a mutex lock here I think
@@ -79,7 +79,11 @@ void terminal_output::clear() {
 }
 
 
-void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin) {
+void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
+#define BALL_SPEED_SCALE 2.0f
+    
+    deltaTime *= BALL_SPEED_SCALE; // Scale deltaTime for ball speed adjustment
+
     ball.pos.x += ball.vel.x * deltaTime;
     ball.pos.y += ball.vel.y * deltaTime;
 
@@ -100,7 +104,8 @@ void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin
         ball.vel.y = -ball.vel.y;
     }
 
+    ImU32 ballColor = connected ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255); // Green if connected, Red if disconnected
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 ballScreenPos = ImVec2(childMin.x + ball.pos.x, childMin.y + ball.pos.y);
-    draw_list->AddCircleFilled(ballScreenPos, ball.radius, IM_COL32(255, 0, 0, 255));
+    draw_list->AddCircleFilled(ballScreenPos, ball.radius, ballColor);
 }

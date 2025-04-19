@@ -7,13 +7,15 @@
 #include <deque>
 #include <algorithm>
 
+#include "serial/serialManager.h"
+
 class terminal_output {
 
 public:
 	terminal_output();
 	~terminal_output();
 
-	int update(std::deque<char> charArray);
+	int update(std::deque<char> charArray, bool isConnected);
 	int render(void);
 	void addLine(const char* line); // Add a new line to the console
 	void rmLine();
@@ -39,6 +41,6 @@ private:
 	};
 	BallState ball;
 
-	void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin);
+	void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
 
 };

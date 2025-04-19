@@ -14,4 +14,10 @@ Have an issue where when I CreateFile for the hSerial it throws error code 5
 I think there is some bug with connecting to the com port on windows. something needs to be force closed or a buffer cleared or something
 I sometimes have to open the serial port ,im trying to use with gTerm, to 'clean' the comm port so it works
 
+THere are issues with hardware unplug disconnects and ports no longer existing. there need to be a mechanism that
+checks the serial port is still connected/exists (polling 100ms is OK, interrrupt better)
+
+So DO i need to constatly read the serial port list and compare any changes ?
+-OR-
+is there a kernel interrupt (thru Linux and Win OS drivers)?
 
