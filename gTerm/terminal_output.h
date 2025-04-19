@@ -39,6 +39,6 @@ private:
 	};
 	BallState ball;
 
-	void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin);
+	void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin);
 
 };
