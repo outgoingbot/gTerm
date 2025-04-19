@@ -3,12 +3,11 @@
 
 terminal_output::terminal_output() {
     _autoScroll = true;
-    memset(inputBuffer, 0, sizeof(inputBuffer));
 }
 
 terminal_output::~terminal_output() {}
 
-int terminal_output::update(std::deque<char> rxDequeObj, bool isConnected) {
+int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
@@ -20,15 +19,10 @@ int terminal_output::update(std::deque<char> rxDequeObj, bool isConnected) {
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
 
-    // If new serial data received, add it to logBuffer
+    // Display incoming serial data
     if (!rxDequeObj.empty()) {
         std::string textString(rxDequeObj.begin(), rxDequeObj.end());
-        addLine(textString.c_str());
-    }
-
-    // Draw all terminal lines
-    for (const auto& line : logBuffer) {
-        ImGui::TextUnformatted(line.c_str());
+        ImGui::TextUnformatted(textString.c_str(), textString.c_str() + textString.size());
     }
 
     ImGui::PopStyleColor(1);
@@ -38,15 +32,6 @@ int terminal_output::update(std::deque<char> rxDequeObj, bool isConnected) {
     }
 
     ImGui::EndChild();
-
-    // Input text field
-    ImGui::Separator();
-    if (ImGui::InputText("Input", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-        if (strlen(inputBuffer) > 0) {
-            addLine((std::string("> ") + inputBuffer).c_str());
-            memset(inputBuffer, 0, sizeof(inputBuffer));
-        }
-    }
 
     // Resizable drag bar
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
@@ -63,17 +48,6 @@ int terminal_output::update(std::deque<char> rxDequeObj, bool isConnected) {
     }
 
     return 0;
-}
-
-void terminal_output::addLine(const char* line) {
-    logBuffer.push_back(std::string(line));
-    if (logBuffer.size() > 500) {
-        logBuffer.pop_front();
-    }
-}
-
-void terminal_output::clear() {
-    logBuffer.clear();
 }
 
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {

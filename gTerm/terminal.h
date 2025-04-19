@@ -46,4 +46,7 @@ private:
 	int handle_connect_button();
 	int handle_disconnect_button();
 
+	//this will hold a copy of the serial Manager deque. this copy does not need to be mutex locked when accessed.
+	//It will not grow above 10000 chars (a value set in the serial manager pushData()
+	std::deque<char> _Term_rxBufferQueue;
 };

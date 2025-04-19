@@ -1,4 +1,3 @@
-// terminal_output.h
 #pragma once
 
 #include <imgui.h>
@@ -7,7 +6,6 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <deque>
-#include <string>
 #include <algorithm>
 
 class terminal_output {
@@ -15,9 +13,7 @@ public:
     terminal_output();
     ~terminal_output();
 
-    int update(std::deque<char> rxDequeObj, bool isConnected);
-    void addLine(const char* line); // Add a new line to the console
-    void clear();
+    int update(std::deque<char>& rxDequeObj, bool isConnected);
 
 private:
     bool _autoScroll;
@@ -36,9 +32,6 @@ private:
         float radius = 5.0f;
     };
     BallState ball;
-
-    std::deque<std::string> logBuffer;
-    char inputBuffer[256];
 
     void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
 };

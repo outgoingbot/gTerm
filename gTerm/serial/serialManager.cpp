@@ -75,7 +75,7 @@ void serialManager::readLoop() {
 }
 
 
-// Push new data into the deque<char> array
+// Push new char data into the deque<char> array
 void serialManager::pushData(const char* data, size_t length) {
 	#define MAX_CHAR_COUNT 10000 //Max number if chars in the deque object
 	
@@ -84,10 +84,16 @@ void serialManager::pushData(const char* data, size_t length) {
 
 	const size_t maxSize = MAX_CHAR_COUNT;
 	if (rxBufferQueue.size() > maxSize) {
-		std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
+		//std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
 		size_t toRemove = rxBufferQueue.size() - maxSize;
 		rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + toRemove);
 	}
+}
+
+//Copies the deque<char> to another. I want to keep the mutex only in serialManager
+void serialManager::copyData(std::deque<char>* rxBufferQueue_public) {
+    std::lock_guard<std::mutex> lock(bufferMutex);
+    *rxBufferQueue_public = rxBufferQueue;  // Assignment operator does a full copy
 }
 
 

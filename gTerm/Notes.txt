@@ -23,3 +23,9 @@ is there a kernel interrupt (thru Linux and Win OS drivers)?
 
  The text in the terminal_output window needs to be selectable.
  100% cursor interaction (i.e. click postion and text selection)
+
+ I fuzzed the srial pore hard. there is a bug
+ - i think i overflow a deque array somehow. I blame chatGPT.
+ Not for nothin, theres some low level serial bugs. (data too fast, burst, actually is connected,disconnected() etc)
+
+ also, when I click the narduino nano resets. The DTR pulse is sent on RS232comm connect()

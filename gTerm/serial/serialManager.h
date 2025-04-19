@@ -39,8 +39,7 @@ public:
 
 	std::deque<std::string> commPortNames;
 	std::string selectedPort;
-	std::deque<char> rxBufferQueue;
-	//std::deque<char> txBufferQueue;
+
 
 
 	serialManager();
@@ -61,11 +60,16 @@ public:
 	bool hasData();
 	void pushData(const char* data, size_t length);
 
+	void copyData(std::deque<char> *rxBufferQueue_public);
+
 	bool isConnected();
 
 	void stopThread();
 
 private:
+	std::deque<char> rxBufferQueue;
+	//std::deque<char> txBufferQueue;
+
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> threadIsRunning;
