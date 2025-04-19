@@ -21,3 +21,5 @@ So DO i need to constatly read the serial port list and compare any changes ?
 -OR-
 is there a kernel interrupt (thru Linux and Win OS drivers)?
 
+ The text in the terminal_output window needs to be selectable.
+ 100% cursor interaction (i.e. click postion and text selection)
