@@ -22,9 +22,14 @@ int terminal_output::update(std::deque<char> rxDequeObj) {
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x); // wrap at the edge
 
-    //TODO I should have a mutex lock here I think
-    //copy all the chars in the deque<char> object into a string
-    std::string textString(rxDequeObj.begin(), rxDequeObj.end());
+    // === FUN: Update and draw the ball ===
+    float deltaTime = ImGui::GetIO().DeltaTime;
+    ImVec2 childMin = ImGui::GetWindowPos(); // top-left corner of child window
+    UpdateBall(deltaTime, region, childMin);
+    // === FUN: Update and draw the ball ===
+
+    //TODO: I should have a mutex lock here I think
+    std::string textString(rxDequeObj.begin(), rxDequeObj.end());//copy all the chars in the deque<char> object into a string
     ImGui::TextUnformatted(textString.c_str(), textString.c_str() + textString.size());  // safer for large logs
     ImGui::PopTextWrapPos();  // Always pair i
     ImGui::PopStyleColor(1); // Restore previous colors
@@ -71,4 +76,31 @@ void terminal_output::rmLine() {
 
 
 void terminal_output::clear() {
+}
+
+
+void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin) {
+    ball.pos.x += ball.vel.x * deltaTime;
+    ball.pos.y += ball.vel.y * deltaTime;
+
+    if (ball.pos.x - ball.radius < 0.0f) {
+        ball.pos.x = ball.radius;
+        ball.vel.x = -ball.vel.x;
+    }
+    if (ball.pos.x + ball.radius > region.x) {
+        ball.pos.x = region.x - ball.radius;
+        ball.vel.x = -ball.vel.x;
+    }
+    if (ball.pos.y - ball.radius < 0.0f) {
+        ball.pos.y = ball.radius;
+        ball.vel.y = -ball.vel.y;
+    }
+    if (ball.pos.y + ball.radius > region.y) {
+        ball.pos.y = region.y - ball.radius;
+        ball.vel.y = -ball.vel.y;
+    }
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 ballScreenPos = ImVec2(childMin.x + ball.pos.x, childMin.y + ball.pos.y);
+    draw_list->AddCircleFilled(ballScreenPos, ball.radius, IM_COL32(255, 0, 0, 255));
 }

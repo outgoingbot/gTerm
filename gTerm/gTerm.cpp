@@ -7,9 +7,8 @@
 
 using namespace std;
 
-//#define SCROLL_BACK 1000
-#define WINDOW_WIDTH 1400
-#define WINDOW_HEIGHT 900
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 int main() {
     // Initialize GLFW
@@ -23,7 +22,6 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
-
 
     
     // Create a window
@@ -56,7 +54,12 @@ int main() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
+    
+ #define IGNORE_SAVED_IMU_INI 0
+    #if IGNORE_SAVED_IMU_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
+    #endif
+    
     (void)io;
 
     //Set the Default Font
@@ -95,12 +98,12 @@ int main() {
         ImGui::NewFrame();
         
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
-        ImGui::SetNextWindowPos(ImVec2(10, 50), ImGuiCond_FirstUseEver); // initial position only once
-        ImGui::SetNextWindowSize(ImVec2(1200, 800), ImGuiCond_FirstUseEver); // optional size
+        //ImGui::SetNextWindowPos(ImVec2(10, 50), ImGuiCond_FirstUseEver); // initial position only once
+        //ImGui::SetNextWindowSize(ImVec2(1200, 800), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //going to be the "main" terminal (realTerm like)
 
-        ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
-        ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
+        //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
+        //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
         dataParsObj.update();
         
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)

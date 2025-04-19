@@ -175,10 +175,10 @@ int terminal::update(const char* title) {
 
 
     //ImGui::Text("You entered: %s", buffer);
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImVec2 window_pos = ImGui::GetWindowPos();
-    ImVec2 center = ImVec2(window_pos.x + 800, window_pos.y + 300); // Circle center relative to window
-    drawCircle(draw_list, center, 50.0f, IM_COL32(255, 0, 0, 255));
+    //ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    //ImVec2 window_pos = ImGui::GetWindowPos();
+    //ImVec2 center = ImVec2(window_pos.x + 800, window_pos.y + 300); // Circle center relative to window
+    //drawCircle(draw_list, center, 50.0f, IM_COL32(255, 0, 0, 255));
     ImGui::End();
 
 	return 0;

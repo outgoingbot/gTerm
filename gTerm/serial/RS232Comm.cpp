@@ -119,71 +119,59 @@ bool RS232Comm::connect() {
 	return this->Connect(portName, dcbSerialParams);
 }
 
-
-//TODO: This function name Connect() should be changed something like low level Connected.
 bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
-	if (this->connected == false) {
-		//Try to connect to the given port throuh CreateFile
-		this->hSerial = CreateFileA(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-		//this->hSerial = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (this->connected)
+		return true; // Already connected
 
-		//Check if the connection was successfull
-		if (this->hSerial == INVALID_HANDLE_VALUE) {
-			DWORD error = GetLastError();
-			//If not success full display an Error
-			if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+	this->hSerial = CreateFileA(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
-				//Print Error if neccessary
-				printf("ERROR: Handle was not attached. Reason: %s not available.\n", portName);
-				return false;
-			}else{
-				printf("ERROR!!! CreateFileA failed with error code: %lu\n", error);
-				return false;
-			}
-		}else{
-			//If connected we try to set the comm parameters
-			//DCB dcbSerialParams = { 0 };
-
-			//Try to get the current
-			if (!GetCommState(this->hSerial, &dcbSerialParams)) {
-				//If impossible, show an error
-				printf("failed to get current serial parameters!");
-				return false;
-			}else{
-				//DCB Paramaters must be configured be setting the Comm State
-				//Set the parameters and check for their proper application
-				if (!SetCommState(hSerial, &dcbSerialParams)) {
-					printf("ALERT: Could not set Serial Port parameters");
-					return false;
-				}else{
-					//If everything went fine we're connected
-					this->connected = true;
-					//this->_killThreadFlag = false;
-					//Flush any remaining characters in the buffers 
-					PurgeComm(this->hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
-					//We wait as the arduino board will be reseting
-					Sleep(MCU_WAIT_TIME);
-				}
-
-				//now set the timeouts ( we control the timeout overselves using WaitForXXX()
-				COMMTIMEOUTS timeouts;
-
-				timeouts.ReadIntervalTimeout = MAXDWORD;
-				timeouts.ReadTotalTimeoutMultiplier = 0;
-				timeouts.ReadTotalTimeoutConstant = 0;
-				timeouts.WriteTotalTimeoutMultiplier = 0;
-				timeouts.WriteTotalTimeoutConstant = 0;
-
-				if (!SetCommTimeouts(hSerial, &timeouts)) {
-					printf("ALERT: Could not set Serial Port parameters");
-					return false;
-				}
-
-			}
+	if (this->hSerial == INVALID_HANDLE_VALUE) {
+		DWORD error = GetLastError();
+		if (error == ERROR_FILE_NOT_FOUND) {
+			printf("ERROR: Handle was not attached. Reason: %s not available.\n", portName);
 		}
+		else {
+			printf("ERROR: CreateFileA failed with error code: %lu\n", error);
+		}
+		return false;
 	}
-	//Simply return the connection status
-	return this->connected;
+
+	// Get current serial port settings
+	DCB currentParams = { 0 };
+	if (!GetCommState(this->hSerial, &currentParams)) {
+		printf("ERROR: Failed to get current serial parameters!\n");
+		return false;
+	}
+
+	// Apply the new settings from the caller
+	if (!SetCommState(this->hSerial, &dcbSerialParams)) {
+		printf("ERROR: Could not set Serial Port parameters!\n");
+		return false;
+	}
+
+	// Successfully connected
+	this->connected = true;
+
+	// Clear buffers
+	PurgeComm(this->hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
+
+	// Wait for MCU reset
+	Sleep(MCU_WAIT_TIME);
+
+	// Set timeouts
+	COMMTIMEOUTS timeouts;
+	timeouts.ReadIntervalTimeout = MAXDWORD;
+	timeouts.ReadTotalTimeoutMultiplier = 0;
+	timeouts.ReadTotalTimeoutConstant = 0;
+	timeouts.WriteTotalTimeoutMultiplier = 0;
+	timeouts.WriteTotalTimeoutConstant = 0;
+
+	if (!SetCommTimeouts(this->hSerial, &timeouts)) {
+		printf("ERROR: Could not set Serial Port timeouts!\n");
+		return false;
+	}
+
+	return true;
 }
 
 

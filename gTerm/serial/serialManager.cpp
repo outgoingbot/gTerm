@@ -1,7 +1,6 @@
 #include "serialManager.h"
 
 
-
 // Constructor: Initializes and starts the background thread
 serialManager::serialManager(){
 
@@ -29,14 +28,6 @@ bool serialManager::hasData() {
 }
 
 
-//// Stop the background thread
-//void serialManager::stopThread() {
-//	running = false; //TODO: rename this to threadRunning or something
-//	if (readThread->joinable()) {
-//		readThread->join();
-//	}
-//}
-
 void serialManager::stopThread() {
 	threadIsRunning = false;
 
@@ -58,30 +49,6 @@ void serialManager::stopThread() {
 
 
 // Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
-//void serialManager::readLoop() {
-//	//DEBUG_TO_TERMINAL
-//	while (running) {
-//		char buffer[512]; // Temporary buffer for RX serial data
-//		int bytesRead = 0;
-//
-//		//get the chars from the windows comm handler file. put them in a temportary char buufer.
-//		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
-//
-//		//move the char array elements to the deque<char> array.
-//		if (bytesRead > 0) {
-//			pushData(buffer, bytesRead);
-//			#if DEBUG_TO_TERMINAL
-//				//DEBUG the serial data to the console.
-//				for (unsigned int i = 0; i < bytesRead; ++i) {
-//					std::cout << buffer[i];
-//				}
-//			#endif			
-//		}
-//
-//		std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Prevents CPU overuse (getting ~12% CPU)
-//	}
-//}
-
 void serialManager::readLoop() {
 #define DEBUG_TO_TERMINAL 1
 	while (threadIsRunning) {
@@ -108,24 +75,20 @@ void serialManager::readLoop() {
 }
 
 
-
-//Todo: move this inside of readLoop. no point for this to be its own function
 // Push new data into the deque<char> array
 void serialManager::pushData(const char* data, size_t length) {
-	#define MAX_CHAR_COUNT 1000 //Max Scroll back is 1000 lines
+	#define MAX_CHAR_COUNT 10000 //Max number if chars in the deque object
 	
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	this->rxBufferQueue.insert(this->rxBufferQueue.end(), data, data + length);
 
-	const size_t maxSize = 10000;
+	const size_t maxSize = MAX_CHAR_COUNT;
 	if (rxBufferQueue.size() > maxSize) {
 		std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
 		size_t toRemove = rxBufferQueue.size() - maxSize;
 		rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + toRemove);
 	}
-
 }
-
 
 
 void serialManager::listBaudRates(std::deque<std::string>* queue) {
