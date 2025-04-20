@@ -1,5 +1,5 @@
 #include "terminal_output.h"
-#include <cstring>
+
 
 terminal_output::terminal_output() {
     _autoScroll = true;
@@ -8,7 +8,7 @@ terminal_output::terminal_output() {
 terminal_output::~terminal_output() {}
 
 int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
-    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true); // No HorizontalScrollbar flag anymore
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
 
@@ -22,7 +22,12 @@ int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
     // Display incoming serial data
     if (!rxDequeObj.empty()) {
         std::string textString(rxDequeObj.begin(), rxDequeObj.end());
+
+        ImGui::PushTextWrapPos(0.0f); // <--- ADD this: wrap text at the window right edge
+
         ImGui::TextUnformatted(textString.c_str(), textString.c_str() + textString.size());
+
+        ImGui::PopTextWrapPos(); // <--- Always pop after wrapping
     }
 
     ImGui::PopStyleColor(1);
@@ -49,6 +54,7 @@ int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
 
     return 0;
 }
+
 
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
 #define BALL_SPEED_SCALE 2.0f

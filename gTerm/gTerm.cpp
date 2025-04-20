@@ -62,10 +62,17 @@ int main() {
     
     (void)io;
 
-    //Set the Default Font
+    //resize the default font
+    //ImFontConfig config;
+    //config.SizePixels = 24.0f; // make ProggyClean bigger
+    //io.Fonts->AddFontDefault(&config);
+
+
+    //Set the Arial Font
     io.Fonts->Clear(); // Clear existing fonts
     const char* fontPath = FONT_FILE_PATH; // Defined by CMake
     io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+
     //ImGui_ImplOpenGL3_CreateFontsTexture(); // Docs say this should be called but it crashes the app
 
     ImGui::StyleColorsDark();

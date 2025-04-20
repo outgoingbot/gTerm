@@ -7,6 +7,7 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
+#include <cstring>
 
 class terminal_output {
 public:
