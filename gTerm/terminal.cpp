@@ -48,6 +48,7 @@ int terminal::update(const char* title) {
     // Create ImGui window
     ImGui::Begin(title);
     
+    //copy the serialBuffer into a the Terminal Class
     serialManObj->copyData(&_Term_rxBufferQueue);
     
     //have to always draw the entire rxBuffer to the screen.
@@ -130,10 +131,19 @@ int terminal::update(const char* title) {
     //Just getting some basic serial status stuff to the GUI. this will change
     //Text Box
     ImGui::SameLine(); // Place the next widget on the same line
-    ImGui::Text("Port:%s \r\n Baud:%s \r\n isConnected %i", serialManObj->getCommPort().c_str(), serialManObj->getCBaudRate().c_str(), serialManObj->isConnected());
+    ImGui::Text("isConnected %i", serialManObj->isConnected());
     //------------------------------COM Status Text-------------------------------|
 
+    if (serialManObj->isConnected() == true) {
+        std::string portString = serialManObj->getCommPort();
+        strncpy(input_buffer_Port, portString.c_str(), sizeof(input_buffer_Port) - 1);
+        input_buffer_Port[sizeof(input_buffer_Port) - 1] = '\0'; // Always null-terminate
 
+        std::string baudString = serialManObj->getCBaudRate();
+        strncpy(input_buffer_Baud, baudString.c_str(), sizeof(input_buffer_Baud) - 1);
+        input_buffer_Baud[sizeof(input_buffer_Baud) - 1] = '\0'; // Always null-terminate
+    }
+    
 
     //------------------------------COM Port Drop Down-------------------------------|
     static bool open_popup = false;

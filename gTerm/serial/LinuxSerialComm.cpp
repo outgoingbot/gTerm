@@ -156,10 +156,27 @@ bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
             for (const auto& prefix : patterns) {
                 if (filename.rfind(prefix, 0) == 0) { // starts with
                     std::string fullPath = entry.path();
-                    ComPortNames->push_back(fullPath);
-                    std::cout << fullPath << std::endl;
-                    gotPort = true;
-                    break;
+
+                    // Try to open the device
+                    int fd = open(fullPath.c_str(), O_RDWR | O_NOCTTY);
+                    if (fd != -1) {
+                        struct termios tio;
+                        if (tcgetattr(fd, &tio) == 0) {
+                            // tcgetattr success — it's a real serial device
+                            ComPortNames->push_back(fullPath);
+                            std::cout << "Available: " << fullPath << std::endl;
+                            gotPort = true;
+                        }
+                        else {
+                            std::cout << "Invalid serial device: " << fullPath << std::endl;
+                        }
+                        close(fd);
+                    }
+                    else {
+                        std::cout << "Cannot open: " << fullPath << std::endl;
+                    }
+
+                    break; // Already matched a pattern, no need to check others
                 }
             }
         }
