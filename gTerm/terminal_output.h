@@ -14,10 +14,11 @@ public:
     terminal_output();
     ~terminal_output();
 
-    int update(std::deque<char>& rxDequeObj, bool isConnected);
+    int update(const char* dispCharBuff, bool isConnected);
 
 private:
     bool _autoScroll;
+    bool _showControlChars;
 
     typedef struct window_params_t {
         float min_height = 100.0f;
@@ -35,4 +36,6 @@ private:
     BallState ball;
 
     void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
+
+    
 };

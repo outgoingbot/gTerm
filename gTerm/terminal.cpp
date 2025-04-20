@@ -49,10 +49,46 @@ int terminal::update(const char* title) {
     ImGui::Begin(title);
     
     //copy the serialBuffer into a the Terminal Class
-    serialManObj->copyData(&_Term_rxBufferQueue);
+    std::deque<char> tempRxDeque;
+    serialManObj->copyData(&tempRxDeque);
     
+    //need to feed _Term_rxBufferQueue into a function that returns a new buffer
+    char filteredBuffer[12000] = { 0 };
+    size_t bufferIndex = 0;
+    size_t charCount = 0;
+
+    if (!tempRxDeque.empty()) {
+        while (!tempRxDeque.empty() && bufferIndex < sizeof(filteredBuffer) - 1) {
+            char c = tempRxDeque.front();
+            tempRxDeque.pop_front();
+
+            filteredBuffer[bufferIndex++] = c;
+            charCount++;
+            if (c == '\n' || c == '\0') {
+                charCount = 1;
+            }
+
+            int regionWidth = static_cast<int>(ImGui::GetWindowWidth());
+
+            //insert a new line character every 100 chars
+            if (!(charCount % (regionWidth/12))) {
+                filteredBuffer[bufferIndex++] = '\n';
+            }
+
+            
+        }
+
+        if (bufferIndex >= sizeof(filteredBuffer) - 1) {
+            // Reset buffer if full
+            bufferIndex = 0;
+            memset(filteredBuffer, 0, sizeof(filteredBuffer));
+        }
+    }
+
+
+
     //have to always draw the entire rxBuffer to the screen.
-    term_out.update(_Term_rxBufferQueue, serialManObj->isConnected()); //scrolling Text class
+    term_out.update(filteredBuffer, serialManObj->isConnected()); //scrolling Text class
 
 
     //Text Entry Test

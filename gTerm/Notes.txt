@@ -28,4 +28,24 @@ is there a kernel interrupt (thru Linux and Win OS drivers)?
  - i think i overflow a deque array somehow. I blame chatGPT.
  Not for nothin, theres some low level serial bugs. (data too fast, burst, actually is connected,disconnected() etc)
 
- also, when I click the narduino nano resets. The DTR pulse is sent on RS232comm connect()
+ also, when I click the narduino nano resets. The DTR pulse is sent on RS232comm connect() <- GREAT!
+
+ --SERIAL PARSING ETC--
+	/// I NEED TO PUT BETTER THOUGHT ON HOW IM GOING TO HANDLE THE CHARACTER-BY-CHARACTER EVALUATION IN GENERAL BEFORE I IMPLENET CONTROL BUTTONS
+	//  I THINK IM GOING TO, YET AGAIN :( , NEED A ANOTHER RX DATA BUFFER. IT WILL BE A DISPLAY BUFFER
+
+	1)OS SERIAL DRIVER has 'FiLE' that acts as a kernel level buffer. (auto emptied on FILE READ)
+	2)SERIAL MANANAGER pulls the chars from the kernel FILE into a temporary fixed size buffer
+	3)SERIAL MANANAGER pushes that buffer contents in to a dynamic deque<char> array
+	4)SERIAL MANANAGER must mutex lock that deque<char> array when reading and writing
+	  -Therefore, we have void pushData(char*) and void getData(deque<char>*) to implement the mutex
+	5) This means Terminal.cpp must also have a deque<char> buffer to serialManObj->copyData() into.
+	6) Terminal now has a exact copy of the 10000 characters.
+
+	I need to constantly:
+		-Read each character, starting at deque.big() to deque.end().
+		-keep track of the character postion index AND evaluate the character (to performs some logic)
+		  THIS NEEDS TO BE A STATE MACHINE !?
+		-Now the important part, we will build a new std::string for display in terminal_outptut on every loop
+			1)We will insert characters and maybe remove characters (modify the string)
+			2) Based on our character evaluation, we can perform ImGui operations (PushStyle and PopStyle)

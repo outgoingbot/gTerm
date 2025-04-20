@@ -3,12 +3,14 @@
 
 terminal_output::terminal_output() {
     _autoScroll = true;
+    _showControlChars = false;
 }
 
 terminal_output::~terminal_output() {}
 
-int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
-    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true); // No HorizontalScrollbar flag anymore
+int terminal_output::update(const char* rxBuff, bool isConnected) {
+    
+    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true);
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
 
@@ -18,24 +20,33 @@ int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
     // Draw bouncing ball
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
+    // Draw bouncing ball
 
-    // Display incoming serial data
-    if (!rxDequeObj.empty()) {
-        std::string textString(rxDequeObj.begin(), rxDequeObj.end());
+    if (rxBuff && rxBuff[0] != '\0') {
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_NoHorizontalScroll;
 
-        ImGui::PushTextWrapPos(0.0f); // <--- ADD this: wrap text at the window right edge
+        //Why am i copyinf 
+        static char inputTextBuffer[10000] = { 0 };
+        strncpy(inputTextBuffer, rxBuff, sizeof(inputTextBuffer) - 1);
+        inputTextBuffer[sizeof(inputTextBuffer) - 1] = '\0';
 
-        ImGui::TextUnformatted(textString.c_str(), textString.c_str() + textString.size());
+        ImGui::InputTextMultiline(
+            "##SerialOutput",
+            inputTextBuffer,
+            IM_ARRAYSIZE(inputTextBuffer),
+            ImVec2(-FLT_MIN, region.y),
+            flags
+        );
 
-        ImGui::PopTextWrapPos(); // <--- Always pop after wrapping
+        if (_autoScroll) {
+            ImGui::BeginChild(ImGui::GetID("##SerialOutput"));
+            float scrollMaxY = ImGui::GetScrollMaxY();
+            ImGui::SetScrollY(1.0f); // Force scroll to bottom
+            ImGui::EndChild();
+        }
     }
 
     ImGui::PopStyleColor(1);
-
-    if (_autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
-        ImGui::SetScrollHereY(1.0f);
-    }
-
     ImGui::EndChild();
 
     // Resizable drag bar
@@ -54,7 +65,6 @@ int terminal_output::update(std::deque<char>& rxDequeObj, bool isConnected) {
 
     return 0;
 }
-
 
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
 #define BALL_SPEED_SCALE 2.0f
