@@ -53,7 +53,7 @@ int terminal::update(const char* title) {
     serialManObj->copyData(&tempRxDeque);
     
     //need to feed _Term_rxBufferQueue into a function that returns a new buffer
-    char filteredBuffer[12000] = { 0 };
+    char filteredBuffer[10000] = { 0 };
     size_t bufferIndex = 0;
     size_t charCount = 0;
 

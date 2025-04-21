@@ -49,3 +49,6 @@ is there a kernel interrupt (thru Linux and Win OS drivers)?
 		-Now the important part, we will build a new std::string for display in terminal_outptut on every loop
 			1)We will insert characters and maybe remove characters (modify the string)
 			2) Based on our character evaluation, we can perform ImGui operations (PushStyle and PopStyle)
+
+We are close, but the auto scrolling doesnt work.
+Ive decreased the serialManager char buffer size. this reduced scrolling activitity in ImGui::InputTextMultipleLines() function

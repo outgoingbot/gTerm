@@ -8,7 +8,7 @@ terminal_output::terminal_output() {
 
 terminal_output::~terminal_output() {}
 
-int terminal_output::update(const char* rxBuff, bool isConnected) {
+int terminal_output::update(const char* _rxBuff, bool isConnected) {
     
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true);
 
@@ -22,27 +22,28 @@ int terminal_output::update(const char* rxBuff, bool isConnected) {
     UpdateBall(deltaTime, region, childMin, isConnected);
     // Draw bouncing ball
 
-    if (rxBuff && rxBuff[0] != '\0') {
+    if (_rxBuff && _rxBuff[0] != '\0') {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_NoHorizontalScroll;
 
-        //Why am i copyinf 
+        //need to copy buffer or else imgui crashes when trying to select the text.
         static char inputTextBuffer[10000] = { 0 };
-        strncpy(inputTextBuffer, rxBuff, sizeof(inputTextBuffer) - 1);
+        strncpy(inputTextBuffer, _rxBuff, sizeof(inputTextBuffer) - 1);
         inputTextBuffer[sizeof(inputTextBuffer) - 1] = '\0';
 
+        //Draw the entire buffer. terminal.cpp is doint the heavy lifting to modify the display data for this multiline function
         ImGui::InputTextMultiline(
             "##SerialOutput",
-            inputTextBuffer,
+            (char*)inputTextBuffer,
             IM_ARRAYSIZE(inputTextBuffer),
             ImVec2(-FLT_MIN, region.y),
             flags
         );
 
         if (_autoScroll) {
-            ImGui::BeginChild(ImGui::GetID("##SerialOutput"));
-            float scrollMaxY = ImGui::GetScrollMaxY();
-            ImGui::SetScrollY(1.0f); // Force scroll to bottom
-            ImGui::EndChild();
+            //ImGui::BeginChild(ImGui::GetID("##SerialOutput"));
+            //float scrollMaxY = ImGui::GetScrollMaxY();
+            //ImGui::SetScrollY(1.0f); // Force scroll to bottom
+            //ImGui::EndChild();
         }
     }
 
