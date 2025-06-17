@@ -14,7 +14,7 @@ public:
     terminal_output();
     ~terminal_output();
 
-    int update(const char* dispCharBuff, bool isConnected);
+    int update(const char* dispCharBuff, size_t size, bool isConnected);
 
 private:
     bool _autoScroll;

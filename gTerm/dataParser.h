@@ -11,6 +11,8 @@ Data parsing class.
 #include <iostream>
 #include <deque>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 class dataParser {
 
@@ -21,6 +23,7 @@ public:
 	//int update(std::deque<char> charArray);
 	int update();
 
+	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
 
 	bool dataParse_enable = false;
 	
@@ -39,4 +42,6 @@ private:
 	} window_params_t;
 
 	window_params_t _window_params;
+
+	std::deque<std::deque<char>> float_buffer_2d;
 };

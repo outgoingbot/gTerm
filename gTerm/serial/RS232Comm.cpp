@@ -14,7 +14,7 @@ RS232Comm::RS232Comm() {
 
 	//Intialize the Virtual serial port Parameters
 	vSerialParams.port = "\\\\.\\COM12";
-	vSerialParams.baud = "57600";
+	vSerialParams.baud = "921600";
 	vSerialParams.byteSize = 8;
 }
 

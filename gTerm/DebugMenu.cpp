@@ -12,6 +12,7 @@ void DebugMenu::update(){
         ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoCollapse);
 
+    ImGui::Text("ImGui Version: %s", IMGUI_VERSION);
 
     // Display the frame rate
     ImGui::Text("Frame Rate: %.1f FPS", ImGui::GetIO().Framerate);

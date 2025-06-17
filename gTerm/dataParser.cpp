@@ -59,3 +59,33 @@ int dataParser::update() {
 
     return 0;
 }
+
+std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
+{
+    std::deque<float> result;
+    std::string token;
+    std::stringstream ss;
+
+    // Build a full string from the deque
+    for (char ch : asciiBuffer)
+        ss << ch;
+
+    // Parse comma-separated values
+    while (std::getline(ss, token, ','))
+    {
+        try {
+            // Convert to float and store
+            result.push_back(std::stof(token));
+        }
+        catch (const std::invalid_argument& e) {
+            // Ignore invalid tokens (non-numeric)
+            continue;
+        }
+        catch (const std::out_of_range& e) {
+            // Ignore values that don't fit in float
+            continue;
+        }
+    }
+
+    return result;
+}

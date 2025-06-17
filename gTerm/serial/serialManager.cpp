@@ -77,7 +77,7 @@ void serialManager::readLoop() {
 
 // Push new char data into the deque<char> array
 void serialManager::pushData(const char* data, size_t length) {
-	#define MAX_CHAR_COUNT 1500 //Max number if chars in the deque object
+	#define MAX_CHAR_COUNT 10000 //Max number if chars in the deque object
 	
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	this->rxBufferQueue.insert(this->rxBufferQueue.end(), data, data + length);

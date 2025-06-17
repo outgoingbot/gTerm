@@ -5,6 +5,7 @@ Terminal is master class for all serial related aspects of this program.
 
 #pragma once
 #include <imgui.h>
+#include "implot.h"
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -12,7 +13,7 @@ Terminal is master class for all serial related aspects of this program.
 #include <deque>
 
 #include "serial/serialManager.h"
-
+#include "dataParser.h"
 
 
 #include "terminal_output.h" //Scolling Text Window
@@ -31,6 +32,8 @@ public:
 	
 	//serial Manager class that has all the buffers, and higher level serial data manipulation.
 	serialManager* serialManObj; //Serial Manager
+
+	dataParser dParser;
 
 private:
 	//GLFWwindow* _window; // Pointer to the GLFW window

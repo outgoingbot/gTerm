@@ -1,4 +1,6 @@
 #include "terminal.h"
+#define IMPLOT_IMPLEMENTATION
+
 
 terminal::terminal(int width, int height) {
     _width = width;
@@ -69,27 +71,78 @@ int terminal::update(const char* title) {
             }
 
             int regionWidth = static_cast<int>(ImGui::GetWindowWidth());
-
             //insert a new line character every 100 chars
+           /*
             if (!(charCount % (regionWidth/12))) {
-                filteredBuffer[bufferIndex++] = '\n';
+                //filteredBuffer[bufferIndex++] = '\n';
             }
-
+            */
             
         }
 
-        if (bufferIndex >= sizeof(filteredBuffer) - 1) {
-            // Reset buffer if full
-            bufferIndex = 0;
-            memset(filteredBuffer, 0, sizeof(filteredBuffer));
-        }
+        //if (bufferIndex >= sizeof(filteredBuffer) - 1) {
+        //    // Reset buffer if full
+        //    bufferIndex = 0;
+        //    memset(filteredBuffer, 0, sizeof(filteredBuffer));
+        //}
     }
 
 
 
     //have to always draw the entire rxBuffer to the screen.
-    term_out.update(filteredBuffer, serialManObj->isConnected()); //scrolling Text class
+    term_out.update(filteredBuffer, strlen(filteredBuffer), serialManObj->isConnected()); //scrolling Text class
 
+//GRAPH TESTING
+#define NUM_POINTS_TO_DISPLAY 256  // Easily changeable display size
+
+    ImGui::Begin("Live Serial Plot");
+    //Y axis scaling control
+    static bool autoScale = true;
+    ImGui::Checkbox("Auto Y Scale", &autoScale);
+   
+    static float y_min = -10.0f;
+    static float y_max = 10.0f;
+    ImGui::SliderFloat("Y Min", &y_min, -100.0f, 0.0f);
+    ImGui::SliderFloat("Y Max", &y_max, 0.0f, 100.0f);
+
+
+
+    std::deque<char> asciiBuffer;
+    serialManObj->copyData(&asciiBuffer);
+    std::deque<float> floatBuffer = dParser.ParseFloatArrayFromAscii(asciiBuffer);
+
+    static float x[NUM_POINTS_TO_DISPLAY], y[NUM_POINTS_TO_DISPLAY];
+    int numFloats = static_cast<int>(floatBuffer.size());
+    int startIndex = std::max(0, numFloats - NUM_POINTS_TO_DISPLAY);
+    int count = std::min(NUM_POINTS_TO_DISPLAY, numFloats);
+
+    for (int i = 0; i < count; ++i) {
+        x[i] = static_cast<float>(i);
+        y[i] = floatBuffer[startIndex + i];
+    }
+
+    ImVec2 contentSize = ImGui::GetContentRegionAvail();
+    if (ImPlot::BeginPlot("Serial Data", contentSize)) {
+        ImPlot::SetupAxes("Sample", "Value", ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, NUM_POINTS_TO_DISPLAY, ImPlotCond_Always);
+        
+
+        if (autoScale) {
+            ImPlot::SetupAxisLimits(ImAxis_Y1, FLT_MAX, FLT_MAX, ImPlotCond_Always);  // auto scale
+        }
+        else {
+            ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImPlotCond_Always);  // manual range
+        }
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(255, 255, 0, 255));  // RGBA yellow
+        ImPlot::PlotLine("Live Data", x, y, count);
+        ImPlot::PopStyleColor();  // Restore previous color
+        ImPlot::EndPlot();
+    }
+
+    ImGui::End();
+
+
+ //GRAPH TESTING
 
     //Text Entry Test
     ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled

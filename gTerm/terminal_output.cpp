@@ -1,6 +1,5 @@
 #include "terminal_output.h"
 
-
 terminal_output::terminal_output() {
     _autoScroll = true;
     _showControlChars = false;
@@ -8,12 +7,10 @@ terminal_output::terminal_output() {
 
 terminal_output::~terminal_output() {}
 
-int terminal_output::update(const char* _rxBuff, bool isConnected) {
+int terminal_output::update(const char* _rxBuff, size_t size, bool isConnected) {
     
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true);
-
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
-
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImVec2 childMin = ImGui::GetWindowPos();
 
@@ -23,14 +20,16 @@ int terminal_output::update(const char* _rxBuff, bool isConnected) {
     // Draw bouncing ball
 
     if (_rxBuff && _rxBuff[0] != '\0') {
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_NoHorizontalScroll;
-
-        //need to copy buffer or else imgui crashes when trying to select the text.
+        //need to copy buffer or else imgui crashes when trying to select the text. (I DONT THINK I NEED THIS.)
         static char inputTextBuffer[10000] = { 0 };
         strncpy(inputTextBuffer, _rxBuff, sizeof(inputTextBuffer) - 1);
         inputTextBuffer[sizeof(inputTextBuffer) - 1] = '\0';
 
+        //THIS IS SELECTABLE TEXT. BUT IT CAUSING ISSUES (WELL KNOWN ISSUE TO THE IMGUI DEVS)
         //Draw the entire buffer. terminal.cpp is doint the heavy lifting to modify the display data for this multiline function
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly;//ImGuiInputTextFlags_NoHorizontalScroll;
+        ImGui::PushTextWrapPos(0.0f);
+        /*
         ImGui::InputTextMultiline(
             "##SerialOutput",
             (char*)inputTextBuffer,
@@ -38,17 +37,23 @@ int terminal_output::update(const char* _rxBuff, bool isConnected) {
             ImVec2(-FLT_MIN, region.y),
             flags
         );
+        */
+
+        //THIS TEXT IS NOT SELECTABLE. IT WORKS VERY GOOD
+        ImGui::TextUnformatted(_rxBuff, _rxBuff+size);
+        //ImGui::Selectable(_rxBuff);
+        //ImGui::PopTextWrapPos();
+
+      
 
         if (_autoScroll) {
-            //ImGui::BeginChild(ImGui::GetID("##SerialOutput"));
-            //float scrollMaxY = ImGui::GetScrollMaxY();
-            //ImGui::SetScrollY(1.0f); // Force scroll to bottom
-            //ImGui::EndChild();
+            ImGui::SetScrollY(ImGui::GetScrollMaxY());
         }
     }
 
     ImGui::PopStyleColor(1);
     ImGui::EndChild();
+    
 
     // Resizable drag bar
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));

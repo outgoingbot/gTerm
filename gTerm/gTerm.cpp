@@ -53,6 +53,7 @@ int main() {
     // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     
  #define IGNORE_SAVED_IMU_INI 0
@@ -69,9 +70,9 @@ int main() {
 
 
     //Set the Arial Font
-    io.Fonts->Clear(); // Clear existing fonts
-    const char* fontPath = FONT_FILE_PATH; // Defined by CMake
-    io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+    //io.Fonts->Clear(); // Clear existing fonts
+    //const char* fontPath = FONT_FILE_PATH; // Defined by CMake
+    //io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
 
     //ImGui_ImplOpenGL3_CreateFontsTexture(); // Docs say this should be called but it crashes the app
 
@@ -93,6 +94,7 @@ int main() {
     //Scale the entire glfw window with this function
    // glfwSetWindowSize(window, WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8);
 
+ 
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -135,6 +137,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+    ImPlot::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
