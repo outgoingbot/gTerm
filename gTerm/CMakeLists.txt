@@ -5,26 +5,20 @@ project(gTerm)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#
 # ─── OS Detection ────────────────────────────────────────────────────────────────
-#
 if (WIN32)
     message(STATUS "Detected Windows OS")
-    add_compile_definitions(IS_WINDOWS)    
-    set(CMAKE_TOOLCHAIN_FILE "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+    add_compile_definitions(IS_WINDOWS)
     set(SERIAL_SRC serial/RS232Comm.cpp)
     set(SERIAL_INC serial/RS232Comm.h)
 elseif (UNIX)
     message(STATUS "Detected Unix/Linux OS")
     add_compile_definitions(IS_LINUX)
-    set(CMAKE_TOOLCHAIN_FILE "/home/mac/dev/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
     set(SERIAL_SRC serial/LinuxSerialComm.cpp)
     set(SERIAL_INC serial/LinuxSerialComm.h)
 endif()
 
-#
 # ─── Source Files ────────────────────────────────────────────────────────────────
-#
 add_executable(gTerm
     gTerm.cpp gTerm.h
     terminal.cpp terminal.h
@@ -38,9 +32,7 @@ add_executable(gTerm
     ${SERIAL_INC}
 )
 
-#
 # ─── Vcpkg Packages ──────────────────────────────────────────────────────────────
-#
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -51,9 +43,7 @@ target_link_libraries(gTerm PRIVATE
     imgui::imgui
 )
 
-#
 # ─── ImPlot (submodule, built manually) ──────────────────────────────────────────
-#
 add_library(implot STATIC
     ${CMAKE_SOURCE_DIR}/external/implot/implot.cpp
     ${CMAKE_SOURCE_DIR}/external/implot/implot_items.cpp
@@ -61,16 +51,20 @@ add_library(implot STATIC
     # ${CMAKE_SOURCE_DIR}/external/implot/implot_demo.cpp
 )
 
+# Use ImGui target's include path so it works across platforms and modes
+get_target_property(IMGUI_INCLUDE_DIR imgui::imgui INTERFACE_INCLUDE_DIRECTORIES)
+
+# ImPlot needs its own headers plus ImGui’s headers
 target_include_directories(implot PUBLIC
     ${CMAKE_SOURCE_DIR}/external/implot
-    ${VCPKG_INSTALLED_DIR}/x64-windows/include  # Windows vcpkg path
+    ${IMGUI_INCLUDE_DIR}
 )
+
+message(STATUS "ImPlot will look for ImGui headers in: ${IMGUI_INCLUDE_DIR}")
 
 target_link_libraries(gTerm PRIVATE implot)
 
-#
 # ─── Resource Paths as Defines ───────────────────────────────────────────────────
-#
 set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/arial.ttf")
 add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")
 
@@ -80,8 +74,6 @@ add_definitions(-DICON_FILE_PATH=\"${ICON_FILE_PATH}\")
 set(LOGO_FILE_PATH "${CMAKE_SOURCE_DIR}/res/logo.png")
 add_definitions(-DLOGO_FILE_PATH=\"${LOGO_FILE_PATH}\")
 
-#
 # ─── (Optional) Debug notes and cleanup ──────────────────────────────────────────
-#
 # If stb_image or other headers crash, clean up how you include them
 # You no longer need global include_directories() thanks to target_*
