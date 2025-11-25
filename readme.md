@@ -24,7 +24,7 @@ Building on Linux
    ```
 4. Install Dependencies:
    ```bash
-   ./vcpkg install glad imgui glfw3
+   ./vcpkg install glad glfw3
    ```
 
 5. Clone gTerm and submodules
