@@ -2,8 +2,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
 #include "gTerm.h"
+
+//TODO: update imgui to 1.92.3 (Beta - this has inputTextMultiLine() as wrapping and selectable)
 
 using namespace std;
 
@@ -21,7 +22,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
+    glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
 
     
     // Create a window

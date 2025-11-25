@@ -6,15 +6,18 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <deque>
+#include <vector>
+#include <string>
 #include <algorithm>
 #include <cstring>
+#include "textselect.hpp"
 
 class terminal_output {
 public:
     terminal_output();
     ~terminal_output();
 
-    int update(const char* dispCharBuff, size_t size, bool isConnected);
+    int update(const std::vector<std::string>& new_lines, bool isConnected);
 
 private:
     bool _autoScroll;
@@ -37,5 +40,14 @@ private:
 
     void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
 
+    //Text slect methods
+    std::string_view getLineAtIdx(size_t idx);
+
+    size_t getNumLines();
+
+    //Decalare Selectable text object
+    TextSelect* textSelect;
+
+    std::vector<std::string> lines; //TODO: we want to remove this if possible
     
 };

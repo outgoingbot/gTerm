@@ -44,88 +44,84 @@ int terminal::handle_disconnect_button() {
 }
 
 
-
 int terminal::update(const char* title) {
-    
-    // Create ImGui window
+ 
+    // Create ImGui window for terminal
     ImGui::Begin(title);
-    
-    //copy the serialBuffer into a the Terminal Class
+
+    // 1. Get raw serial data
     std::deque<char> tempRxDeque;
     serialManObj->copyData(&tempRxDeque);
-    
-    //need to feed _Term_rxBufferQueue into a function that returns a new buffer
-    char filteredBuffer[10000] = { 0 };
-    size_t bufferIndex = 0;
-    size_t charCount = 0;
 
-    if (!tempRxDeque.empty()) {
-        while (!tempRxDeque.empty() && bufferIndex < sizeof(filteredBuffer) - 1) {
-            char c = tempRxDeque.front();
-            tempRxDeque.pop_front();
+    // 2. Convert deque<char> -> vector<string> (split on \n, ignore \r)
+    std::vector<std::string> display_lines;
+    std::string current_line;
 
-            filteredBuffer[bufferIndex++] = c;
-            charCount++;
-            if (c == '\n' || c == '\0') {
-                charCount = 1;
-            }
-
-            int regionWidth = static_cast<int>(ImGui::GetWindowWidth());
-            //insert a new line character every 100 chars
-           /*
-            if (!(charCount % (regionWidth/12))) {
-                //filteredBuffer[bufferIndex++] = '\n';
-            }
-            */
-            
+    for (char c : tempRxDeque) {
+        if (c == '\n') {
+            display_lines.push_back(std::move(current_line));
+            current_line.clear();
         }
-
-        //if (bufferIndex >= sizeof(filteredBuffer) - 1) {
-        //    // Reset buffer if full
-        //    bufferIndex = 0;
-        //    memset(filteredBuffer, 0, sizeof(filteredBuffer));
-        //}
+        else if (c != '\r') {
+            current_line += c;
+        }
+    }
+    if (!current_line.empty()) {
+        display_lines.push_back(std::move(current_line));
     }
 
+    // 3. Send perfect lines to terminal_output
+    term_out.update(display_lines, serialManObj->isConnected());
 
 
-    //have to always draw the entire rxBuffer to the screen.
-    term_out.update(filteredBuffer, strlen(filteredBuffer), serialManObj->isConnected()); //scrolling Text class
 
-//GRAPH TESTING
-#define NUM_POINTS_TO_DISPLAY 256  // Easily changeable display size
+    // GRAPH TESTING ########################################################################
+#define MAX_BUFFER_SIZE 8192  // Max number of float samples ever kept
 
     ImGui::Begin("Live Serial Plot");
-    //Y axis scaling control
-    static bool autoScale = true;
+
+    // === Y Axis Controls ===
+    static bool autoScale = false;
     ImGui::Checkbox("Auto Y Scale", &autoScale);
-   
+
     static float y_min = -10.0f;
     static float y_max = 10.0f;
     ImGui::SliderFloat("Y Min", &y_min, -100.0f, 0.0f);
     ImGui::SliderFloat("Y Max", &y_max, 0.0f, 100.0f);
 
+    // === Persistent buffer and sliders ===
+    static int pointsToDisplay = 2048;  // how many samples to show
+    static int scrollOffset = 0;        // how far back from the end
 
+    ImGui::SliderInt("Points to Display (Zoom)", &pointsToDisplay, 100, MAX_BUFFER_SIZE);
+    ImGui::SliderInt("Scroll Offset (Scroll)", &scrollOffset, 0, MAX_BUFFER_SIZE - pointsToDisplay);
 
+    // === Copy serial buffer and parse floats ===
     std::deque<char> asciiBuffer;
     serialManObj->copyData(&asciiBuffer);
     std::deque<float> floatBuffer = dParser.ParseFloatArrayFromAscii(asciiBuffer);
 
-    static float x[NUM_POINTS_TO_DISPLAY], y[NUM_POINTS_TO_DISPLAY];
+    // === Clamp zoom and scroll to current data size ===
     int numFloats = static_cast<int>(floatBuffer.size());
-    int startIndex = std::max(0, numFloats - NUM_POINTS_TO_DISPLAY);
-    int count = std::min(NUM_POINTS_TO_DISPLAY, numFloats);
+    pointsToDisplay = std::min(pointsToDisplay, numFloats);
+    scrollOffset = std::min(scrollOffset, numFloats - pointsToDisplay);
 
+    // === Compute range to show ===
+    int startIndex = std::max(0, numFloats - pointsToDisplay - scrollOffset);
+    int count = std::min(pointsToDisplay, numFloats - startIndex);
+
+    // === Fill x/y arrays ===
+    static float x[MAX_BUFFER_SIZE], y[MAX_BUFFER_SIZE];
     for (int i = 0; i < count; ++i) {
         x[i] = static_cast<float>(i);
         y[i] = floatBuffer[startIndex + i];
     }
 
+    // === Plot ===
     ImVec2 contentSize = ImGui::GetContentRegionAvail();
     if (ImPlot::BeginPlot("Serial Data", contentSize)) {
         ImPlot::SetupAxes("Sample", "Value", ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, NUM_POINTS_TO_DISPLAY, ImPlotCond_Always);
-        
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, pointsToDisplay, ImPlotCond_Always);
 
         if (autoScale) {
             ImPlot::SetupAxisLimits(ImAxis_Y1, FLT_MAX, FLT_MAX, ImPlotCond_Always);  // auto scale
@@ -133,16 +129,18 @@ int terminal::update(const char* title) {
         else {
             ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImPlotCond_Always);  // manual range
         }
-        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(255, 255, 0, 255));  // RGBA yellow
+        
+        ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
+        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(255, 255, 0, 255));  // Yellow line4
         ImPlot::PlotLine("Live Data", x, y, count);
-        ImPlot::PopStyleColor();  // Restore previous color
+        ImPlot::PopStyleColor();
+        ImPlot::PopStyleVar();
         ImPlot::EndPlot();
     }
 
     ImGui::End();
+    // END GRAPH TESTING
 
-
- //GRAPH TESTING
 
     //Text Entry Test
     ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled

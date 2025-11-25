@@ -15,8 +15,14 @@ Terminal is master class for all serial related aspects of this program.
 #include "serial/serialManager.h"
 #include "dataParser.h"
 
-
 #include "terminal_output.h" //Scolling Text Window
+
+//testing imguitextselect library
+#include <string_view>
+#include <vector>
+#include "textselect.hpp"
+
+
 
 class terminal{
 
@@ -35,12 +41,15 @@ public:
 
 	dataParser dParser;
 
+
 private:
 	//GLFWwindow* _window; // Pointer to the GLFW window
 	int _width;          // Window width
 	int _height;         // Window height
 	void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100);
 
+
+	
 	char buffer[128]; // Buffer to store the text input
 
 	char input_buffer_Port[64]; // Buffer to store the text input

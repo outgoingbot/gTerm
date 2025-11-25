@@ -3,13 +3,38 @@
 terminal_output::terminal_output() {
     _autoScroll = true;
     _showControlChars = false;
+
+    //allocate Selactable Text object
+    textSelect = new TextSelect(
+        [this](size_t idx) { return this->getLineAtIdx(idx); },
+        [this]() { return this->getNumLines();     },
+        true
+    );
+
 }
 
 terminal_output::~terminal_output() {}
 
-int terminal_output::update(const char* _rxBuff, size_t size, bool isConnected) {
-    
-    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true);
+
+//these fucking dumb and need to be removed or changed. why are we forced to have a hard coded variable type here?
+// It look like they are needed to be pushed into the selectText constructor but we need a better solution
+// Prob need to modify the selectText class
+//Text slect methods
+std::string_view terminal_output::getLineAtIdx(size_t idx) {
+    return lines[idx];
+}
+
+size_t terminal_output::getNumLines() {
+    return lines.size();
+}
+
+
+int terminal_output::update(const std::vector<std::string>& new_lines, bool isConnected) {
+    // Store the lines for TextSelect
+    lines = new_lines; //TODO: I dont like this copy!!!!
+
+    // Create a window to contain the text
+    ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_NoMove);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImVec2 childMin = ImGui::GetWindowPos();
@@ -17,43 +42,42 @@ int terminal_output::update(const char* _rxBuff, size_t size, bool isConnected) 
     // Draw bouncing ball
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
-    // Draw bouncing ball
 
-    if (_rxBuff && _rxBuff[0] != '\0') {
-        //need to copy buffer or else imgui crashes when trying to select the text. (I DONT THINK I NEED THIS.)
-        static char inputTextBuffer[10000] = { 0 };
-        strncpy(inputTextBuffer, _rxBuff, sizeof(inputTextBuffer) - 1);
-        inputTextBuffer[sizeof(inputTextBuffer) - 1] = '\0';
 
-        //THIS IS SELECTABLE TEXT. BUT IT CAUSING ISSUES (WELL KNOWN ISSUE TO THE IMGUI DEVS)
-        //Draw the entire buffer. terminal.cpp is doint the heavy lifting to modify the display data for this multiline function
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_ReadOnly;//ImGuiInputTextFlags_NoHorizontalScroll;
-        ImGui::PushTextWrapPos(0.0f);
-        /*
-        ImGui::InputTextMultiline(
-            "##SerialOutput",
-            (char*)inputTextBuffer,
-            IM_ARRAYSIZE(inputTextBuffer),
-            ImVec2(-FLT_MIN, region.y),
-            flags
-        );
-        */
+    // Update TextSelect instance (all text selection is handled in this method)
+    textSelect->update(); //Moved this above the for loop below
 
-        //THIS TEXT IS NOT SELECTABLE. IT WORKS VERY GOOD
-        ImGui::TextUnformatted(_rxBuff, _rxBuff+size);
-        //ImGui::Selectable(_rxBuff);
-        //ImGui::PopTextWrapPos();
-
-      
-
-        if (_autoScroll) {
-            ImGui::SetScrollY(ImGui::GetScrollMaxY());
-        }
+    //send the lines into
+    for (const auto& line : lines) {
+        ImGui::TextWrapped("%s", line.c_str());
     }
 
+    // Register a context menu (optional)
+    if (ImGui::BeginPopupContextWindow()) {
+        ImGui::BeginDisabled(!textSelect->hasSelection());
+        if (ImGui::MenuItem("Copy", "Ctrl+C")) {
+            textSelect->copy();
+        }
+        ImGui::EndDisabled();
+
+        if (ImGui::MenuItem("Select all", "Ctrl+A")) {
+            textSelect->selectAll();
+        }
+
+        if (ImGui::MenuItem("Clear selection")) {
+            textSelect->clearSelection();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (_autoScroll) {
+        ImGui::SetScrollY(ImGui::GetScrollMaxY());
+    }
+    
     ImGui::PopStyleColor(1);
     ImGui::EndChild();
-    
+    //------------------------Selectable and wrapable text!!!! lets go-------------------------------------------
+
 
     // Resizable drag bar
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
