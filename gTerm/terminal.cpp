@@ -7,7 +7,7 @@ terminal::terminal(int width, int height) {
     _height = height;
     //_window = window;
     memset(buffer, '\0', sizeof(char));
-    memset(input_buffer_Port, '\0', sizeof(char));
+    memset(input_buffer_Port, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
     memset(input_buffer_Baud, '\0', sizeof(char));
 
     //Instatiate the serialManager Object
@@ -75,71 +75,100 @@ int terminal::update(const char* title) {
 
 
 
-    // GRAPH TESTING ########################################################################
-#define MAX_BUFFER_SIZE 8192  // Max number of float samples ever kept
+    // 3-WAVEFORM LIVE PLOT - FINAL, NO-CRASH, NO-RETURN VERSION ==============================================================
+#define MAX_BUFFER_SIZE 8192
 
     ImGui::Begin("Live Serial Plot");
 
-    // === Y Axis Controls ===
-    static bool autoScale = false;
+    static bool autoScale = true;
     ImGui::Checkbox("Auto Y Scale", &autoScale);
 
-    static float y_min = -10.0f;
-    static float y_max = 10.0f;
-    ImGui::SliderFloat("Y Min", &y_min, -100.0f, 0.0f);
-    ImGui::SliderFloat("Y Max", &y_max, 0.0f, 100.0f);
+    static float y_min = -1.5f;
+    static float y_max = 1.5f;
+    if (!autoScale) {
+        ImGui::SliderFloat("Y Min", &y_min, -5.0f, 0.0f);
+        ImGui::SliderFloat("Y Max", &y_max, 0.0f, 5.0f);
+    }
 
-    // === Persistent buffer and sliders ===
-    static int pointsToDisplay = 2048;  // how many samples to show
-    static int scrollOffset = 0;        // how far back from the end
+    static int pointsToDisplay = 2048;
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, MAX_BUFFER_SIZE);
+    pointsToDisplay = pointsToDisplay < 1 ? 1 : (pointsToDisplay > MAX_BUFFER_SIZE ? MAX_BUFFER_SIZE : pointsToDisplay);
 
-    ImGui::SliderInt("Points to Display (Zoom)", &pointsToDisplay, 100, MAX_BUFFER_SIZE);
-    ImGui::SliderInt("Scroll Offset (Scroll)", &scrollOffset, 0, MAX_BUFFER_SIZE - pointsToDisplay);
-
-    // === Copy serial buffer and parse floats ===
+    // Grab data
     std::deque<char> asciiBuffer;
     serialManObj->copyData(&asciiBuffer);
-    std::deque<float> floatBuffer = dParser.ParseFloatArrayFromAscii(asciiBuffer);
 
-    // === Clamp zoom and scroll to current data size ===
-    int numFloats = static_cast<int>(floatBuffer.size());
-    pointsToDisplay = std::min(pointsToDisplay, numFloats);
-    scrollOffset = std::min(scrollOffset, numFloats - pointsToDisplay);
+    // Static ring buffer - no vector, no heap, no exceptions
+    static struct Sample { float sin, sq, saw; } samples[MAX_BUFFER_SIZE];
+    static int sampleCount = 0;
+    sampleCount = 0;
 
-    // === Compute range to show ===
-    int startIndex = std::max(0, numFloats - pointsToDisplay - scrollOffset);
-    int count = std::min(pointsToDisplay, numFloats - startIndex);
+    if (!asciiBuffer.empty()) {
+        std::string temp(asciiBuffer.begin(), asciiBuffer.end());
+        const char* p = temp.c_str();
 
-    // === Fill x/y arrays ===
-    static float x[MAX_BUFFER_SIZE], y[MAX_BUFFER_SIZE];
-    for (int i = 0; i < count; ++i) {
-        x[i] = static_cast<float>(i);
-        y[i] = floatBuffer[startIndex + i];
+        while (p && *p && sampleCount < MAX_BUFFER_SIZE) {
+            float a = 0, b = 0, c = 0;
+            if (sscanf(p, "%f,%f,%f", &a, &b, &c) == 3) {
+                samples[sampleCount++] = { a, b, c };
+            }
+            const char* nl = strchr(p, '\n');
+            if (!nl) break;
+            p = nl + 1;
+        }
     }
 
-    // === Plot ===
-    ImVec2 contentSize = ImGui::GetContentRegionAvail();
-    if (ImPlot::BeginPlot("Serial Data", contentSize)) {
-        ImPlot::SetupAxes("Sample", "Value", ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, pointsToDisplay, ImPlotCond_Always);
+    // Nothing to plot?
+    if (sampleCount == 0) {
+        ImGui::Text("No valid data received");
+    }
+    else {
+        int count = sampleCount < pointsToDisplay ? sampleCount : pointsToDisplay;
+        int start = sampleCount - count;
 
-        if (autoScale) {
-            ImPlot::SetupAxisLimits(ImAxis_Y1, FLT_MAX, FLT_MAX, ImPlotCond_Always);  // auto scale
+        static float x[MAX_BUFFER_SIZE];
+        static float y1[MAX_BUFFER_SIZE];
+        static float y2[MAX_BUFFER_SIZE];
+        static float y3[MAX_BUFFER_SIZE];
+
+        for (int i = 0; i < count; i++) {
+            int idx = start + i;
+            x[i] = (float)i;
+            y1[i] = samples[idx].sin;
+            y2[i] = samples[idx].sq;
+            y3[i] = samples[idx].saw;
         }
-        else {
-            ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImPlotCond_Always);  // manual range
+
+        ImVec2 sz = ImGui::GetContentRegionAvail();
+        if (sz.x < 100) sz.x = 1000;
+        if (sz.y < 100) sz.y = 500;
+
+        if (ImPlot::BeginPlot("Waveforms", sz)) {
+            ImPlot::SetupAxes("Samples", "Value");
+            ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, autoScale ? -1.6f : y_min, autoScale ? 1.6f : y_max);
+
+            ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.0f);
+
+            ImPlot::SetNextLineStyle(ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+            ImPlot::PlotLine("Sine", x, y1, count);
+
+            ImPlot::SetNextLineStyle(ImVec4(0.3f, 1.0f, 0.3f, 1.0f));
+            ImPlot::PlotLine("Square", x, y2, count);
+
+            ImPlot::SetNextLineStyle(ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+            ImPlot::PlotLine("Saw", x, y3, count);
+
+            ImPlot::PopStyleVar();
+            ImPlot::EndPlot();
         }
-        
-        ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
-        ImPlot::PushStyleColor(ImPlotCol_Line, IM_COL32(255, 255, 0, 255));  // Yellow line4
-        ImPlot::PlotLine("Live Data", x, y, count);
-        ImPlot::PopStyleColor();
-        ImPlot::PopStyleVar();
-        ImPlot::EndPlot();
     }
 
-    ImGui::End();
-    // END GRAPH TESTING
+    ImGui::End();   // This closes "Live Serial Plot" - never skip this
+    // NO return; HERE - THIS WAS KILLING YOUR TERMINAL WINDOW
+    // END FINAL NO-CRASH PLOT =====================================================================================================
+
+
 
 
     //Text Entry Test
@@ -269,6 +298,8 @@ int terminal::update(const char* title) {
         }
     }
     //------------------------------COM Port Drop Down-------------------------------|
+
+
 
 
 

@@ -18,6 +18,7 @@ public:
     ~terminal_output();
 
     int update(const std::vector<std::string>& new_lines, bool isConnected);
+    void SetTextColor(float r, float g, float b, float a = 1.0f);
 
 private:
     bool _autoScroll;
@@ -39,6 +40,12 @@ private:
     BallState ball;
 
     void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
+
+
+    float mTextColorR = 0.0f;
+    float mTextColorG = 0.8f;
+    float mTextColorB = 0.3f;
+    float mTextColorA = 1.0f;
 
     //Text slect methods
     std::string_view getLineAtIdx(size_t idx);

@@ -64,18 +64,38 @@ int main() {
     
     (void)io;
 
+    //========================================= FONT TESTING ==============================================
     //resize the default font
     //ImFontConfig config;
     //config.SizePixels = 24.0f; // make ProggyClean bigger
     //io.Fonts->AddFontDefault(&config);
 
 
-    //Set the Arial Font
-    //io.Fonts->Clear(); // Clear existing fonts
-    //const char* fontPath = FONT_FILE_PATH; // Defined by CMake
-    //io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+    //Set the Glass_TTY_VT220 Font
+    /*
+    io.Fonts->Clear(); // Clear existing fonts
+    const char* fontPath = FONT_FILE_PATH; // Defined by CMake
+    io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+    */
 
     //ImGui_ImplOpenGL3_CreateFontsTexture(); // Docs say this should be called but it crashes the app
+
+    // Keep ImGui default font (automatically added by AddFontDefault)
+    ImFont* fontDefault = io.Fonts->AddFontDefault();
+
+    // Add your custom font
+    const char* fontPath = FONT_FILE_PATH;  // e.g. "assets/Glass_TTY_VT220.ttf"
+    ImFont* fontVT220 = io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
+
+    // (Optional) Add more sizes or variants
+    ImFont* fontVT220_Large = io.Fonts->AddFontFromFileTTF(fontPath, 32.0f);
+    ImFont* fontVT220_Small = io.Fonts->AddFontFromFileTTF(fontPath, 16.0f);
+
+    // Build the font atlas
+    //io.Fonts->Build(); <-- causing crash on start
+    //========================================= FONT TESTING ==============================================
+
+
 
     ImGui::StyleColorsDark();
 
@@ -127,7 +147,10 @@ int main() {
 
         // Rendering
         ImGui::Render();
-        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

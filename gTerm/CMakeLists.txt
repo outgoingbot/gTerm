@@ -80,7 +80,7 @@ target_link_libraries(implot PUBLIC imgui)
 target_link_libraries(gTerm PRIVATE imgui implot)
 
 # ─── Resource Paths as Defines ───────────────────────────────────────────────────
-set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/arial.ttf")
+set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/Glass_TTY_VT220.ttf")
 add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")
 
 set(ICON_FILE_PATH "${CMAKE_SOURCE_DIR}/res/icon.png")

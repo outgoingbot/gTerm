@@ -35,7 +35,8 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
 
     // Create a window to contain the text
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_NoMove);
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+    //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mTextColorR, mTextColorG, mTextColorB, mTextColorA));
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImVec2 childMin = ImGui::GetWindowPos();
 
@@ -43,7 +44,8 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
 
-
+    //ImGui::PushFont(fontVT220); //<--- need to pass this thru terminal -> terminal_output constructors. terminal(ImFont* font);
+    
     // Update TextSelect instance (all text selection is handled in this method)
     textSelect->update(); //Moved this above the for loop below
 
@@ -51,6 +53,8 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     for (const auto& line : lines) {
         ImGui::TextWrapped("%s", line.c_str());
     }
+
+    //ImGui::PopFont();
 
     // Register a context menu (optional)
     if (ImGui::BeginPopupContextWindow()) {
@@ -67,6 +71,29 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
         if (ImGui::MenuItem("Clear selection")) {
             textSelect->clearSelection();
         }
+
+        //------------------------------set the text color-------------------------------|
+        // Local static values so sliders remember their positions
+        static float r = 0.0f;
+        static float g = 0.8f;
+        static float b = 0.3f;
+        static float a = 1.0f;
+
+        // Wrap in a collapsible header or your own UI block
+        ImGui::Separator();
+        ImGui::Text("Text Color Controls");
+        ImGui::PushItemWidth(150.0f);
+        // Four sliders (each 0.0 -> 1.0)
+        ImGui::SliderFloat("Red", &r, 0.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat("Green", &g, 0.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat("Blue", &b, 0.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat("Alpha", &a, 0.0f, 1.0f, "%.3f");
+        ImGui::PopItemWidth();
+        SetTextColor(r, g, b, a);
+        //END ------------------------------set the text color-------------------------------|
+
+
+
         ImGui::EndPopup();
     }
 
@@ -97,7 +124,7 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
 }
 
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
-#define BALL_SPEED_SCALE 2.0f
+#define BALL_SPEED_SCALE 3.0f
 
     deltaTime *= BALL_SPEED_SCALE;
 
@@ -125,4 +152,12 @@ void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 ballScreenPos = ImVec2(childMin.x + ball.pos.x, childMin.y + ball.pos.y);
     draw_list->AddCircleFilled(ballScreenPos, ball.radius, ballColor);
+}
+
+void terminal_output::SetTextColor(float r, float g, float b, float a)
+{
+    mTextColorR = r;
+    mTextColorG = g;
+    mTextColorB = b;
+    mTextColorA = a;
 }
