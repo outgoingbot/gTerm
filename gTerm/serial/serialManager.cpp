@@ -12,6 +12,13 @@ serialManager::serialManager(){
 #endif
 	//TODO: This variable should only be used for presentation
 	selectedPort = "SELECT_PORT";
+	selectedBaud = "SELECT_BAUD";
+
+	//TODO: used for debug during deveopment Hard COded
+#if DEBUG_COMM_DEFAULTS
+	selectedPort = "\\\\.\\COM11";
+	selectedBaud = "115200";
+#endif
 }
 
 
@@ -98,7 +105,7 @@ void serialManager::copyData(std::deque<char>* rxBufferQueue_public) {
 
 
 void serialManager::listBaudRates(std::deque<std::string>* queue) {
-
+	_vComPort->ListBaudRates(queue);
 }
 
 
@@ -122,7 +129,7 @@ std::string serialManager::getCommPort() {
 }
 
 
-std::string serialManager::getCBaudRate() {
+std::string serialManager::getBaudRate() {
 	return _vComPort->vSerialParams.baud; //this in turn could be a getter function
 }
 

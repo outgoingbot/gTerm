@@ -196,7 +196,11 @@ int terminal::update(const char* title) {
 
     //-----------------------------Connect Button-----------------------------|
     ImGui::SameLine(); // Place the next widget on the same line
+
     //THIS SUCKS THAT I HAVE TO MANAGER ALL THE GUI ELEMENT STATES.!!!
+    //I Think there are callback that can associated with events on gui elememnts. should use those instead
+    //of keeping static vars all over the place
+
     static bool ConnectisClicked = false;
     bool pushingColor = false;    
         
@@ -217,7 +221,7 @@ int terminal::update(const char* title) {
         if (this->handle_connect_button() == 0) {
             std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
             std::cout << "" << serialManObj->getCommPort() << std::endl;
-            std::cout << "" << serialManObj->getCBaudRate() << std::endl;
+            std::cout << "" << serialManObj->getBaudRate() << std::endl;
                 
         }else {
             std::cout << "ERROR: Terminal Class Not Connected!" << std::endl;
@@ -255,21 +259,21 @@ int terminal::update(const char* title) {
         strncpy(input_buffer_Port, portString.c_str(), sizeof(input_buffer_Port) - 1);
         input_buffer_Port[sizeof(input_buffer_Port) - 1] = '\0'; // Always null-terminate
 
-        std::string baudString = serialManObj->getCBaudRate();
+        std::string baudString = serialManObj->getBaudRate();
         strncpy(input_buffer_Baud, baudString.c_str(), sizeof(input_buffer_Baud) - 1);
         input_buffer_Baud[sizeof(input_buffer_Baud) - 1] = '\0'; // Always null-terminate
     }
     
 
     //------------------------------COM Port Drop Down-------------------------------|
-    static bool open_popup = false;
+    static bool open_popup_port = false;
     if (serialManObj != nullptr && serialManObj->isConnected() == false) {
         // Button to trigger port scan and open popup
         if (ImGui::Button("Open COM Ports")) {
             serialManObj->commPortNames.clear();   
             //Build the list of comports
             serialManObj->listPorts(&serialManObj->commPortNames);
-            open_popup = true;
+            open_popup_port = true;
             ImGui::OpenPopup("SerialPortPopup");
         }
 
@@ -280,7 +284,7 @@ int terminal::update(const char* title) {
             for (const auto& port : serialManObj->commPortNames) {
                 if (ImGui::Selectable(port.c_str(), serialManObj->selectedPort == port)) {
                     serialManObj->selectedPort = port;
-                    open_popup = false;
+                    open_popup_port = false;
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -288,6 +292,7 @@ int terminal::update(const char* title) {
         }
 
     // Display selected result
+        ImGui::SameLine(); // Place the next widget on the same line
         if (serialManObj->selectedPort.empty() == false) {
             ImGui::Text("Selected port: %s", serialManObj->selectedPort.c_str());
 
@@ -298,8 +303,48 @@ int terminal::update(const char* title) {
         }
     }
     //------------------------------COM Port Drop Down-------------------------------|
+    
+    ImGui::SameLine(); // Place the next widget on the same line
 
+    //------------------------------BAUD Port Drop Down-------------------------------|
+    static bool open_popup_baud = false;
+    if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+        // Button to trigger port scan and open popup
+        if (ImGui::Button("Open BAUD Ports")) {
+            //Clear the deque<std::string> vector of all elements
+            serialManObj->commBaudNames.clear();
+            //Build the list of baud rates. copy them from serial mamanger
+            serialManObj->listBaudRates(&serialManObj->commBaudNames);
+            open_popup_baud = true;
+            ImGui::OpenPopup("SerialBaudPopup");
+        }
 
+        // The popup itself
+        if (ImGui::BeginPopup("SerialBaudPopup")) {
+            ImGui::Text("Select a BAUD port:");
+            ImGui::Separator();
+            for (const auto& baud : serialManObj->commBaudNames) {
+                if (ImGui::Selectable(baud.c_str(), serialManObj->selectedBaud == baud)) {
+                    serialManObj->selectedBaud = baud;
+                    open_popup_baud = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndPopup();
+        }
+
+        // Display selected result
+        ImGui::SameLine(); // Place the next widget on the same line
+        if (serialManObj->selectedPort.empty() == false) {
+            ImGui::Text("Selected baud: %s", serialManObj->selectedBaud.c_str());
+
+            if (serialManObj->selectedBaud != serialManObj->getBaudRate()) {
+                serialManObj->settBaudRate(&serialManObj->selectedBaud);
+            }
+
+        }
+    }
+    //------------------------------BAUD Port Drop Down-------------------------------|
 
 
 

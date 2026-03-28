@@ -26,8 +26,11 @@ public:
     // Pure virtual function for reading data
     virtual void ReadData(char* buffer, unsigned int nbChar, int* returnVal) = 0;
 
-    // Pure virtual function for reading data
+    // Pure virtual function for Listing Comm Ports
     virtual bool ListComPorts(std::deque<std::string>* ComPortNames) = 0;
+
+    // Pure virtual function for Listing baud rates
+    virtual bool ListBaudRates(std::deque<std::string>* ComPortNames) = 0;
 
     virtual bool connect() = 0;
 

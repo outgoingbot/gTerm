@@ -10,6 +10,11 @@
 #include "virtualComm.h"
 #include <algorithm>
 
+//DEBUG to prevent me having to select the port and baud during development
+//Set to zero to remove default Comm port and baud settings
+#define DEBUG_COMM_DEFAULTS 1
+
+
 //Choose what Serial Driver Header to #include. ifdef Variables defined in CMakeLists
 #ifdef IS_WINDOWS
 	#include "RS232Comm.h"
@@ -38,8 +43,9 @@ public:
 	//};
 
 	std::deque<std::string> commPortNames;
+	std::deque<std::string> commBaudNames;
 	std::string selectedPort;
-
+	std::string selectedBaud;
 
 
 	serialManager();
@@ -52,7 +58,7 @@ public:
 	void settBaudRate(std::string* string);
 
 	std::string getCommPort();
-	std::string getCBaudRate();
+	std::string getBaudRate();
 	
 	bool connect();
 	bool disconnect();
