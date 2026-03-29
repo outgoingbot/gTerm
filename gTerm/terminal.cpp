@@ -1,5 +1,7 @@
 #include "terminal.h"
-#define IMPLOT_IMPLEMENTATION
+#define IMPLOT_IMPLEMENTATION //<is this needed by implot?
+#define SHOW_PLOT 1
+
 
 
 terminal::terminal(int width, int height) {
@@ -49,14 +51,16 @@ int terminal::update(const char* title) {
     // Create ImGui window for terminal
     ImGui::Begin(title);
 
-    // 1. Get raw serial data
-    std::deque<char> tempRxDeque;
-    serialManObj->copyData(&tempRxDeque);
+    // 1. Get raw serial data <- uh oh, this looks like shitty AI code
+    std::deque<char> tempRxDeque; //This is seeminly one of the xtra buffers that is unnessesary
+    //We must copy the entire buffer like this.
+    serialManObj->copyData(&tempRxDeque); //copying
 
     // 2. Convert deque<char> -> vector<string> (split on \n, ignore \r)
     std::vector<std::string> display_lines;
     std::string current_line;
 
+    //Rules for handeling certain characters in the serial data
     for (char c : tempRxDeque) {
         if (c == '\n') {
             display_lines.push_back(std::move(current_line));
@@ -76,12 +80,16 @@ int terminal::update(const char* title) {
 
 
     // 3-WAVEFORM LIVE PLOT - FINAL, NO-CRASH, NO-RETURN VERSION ==============================================================
-#define MAX_BUFFER_SIZE 8192
+#if SHOW_PLOT
+#define MAX_BUFFER_SIZE MAX_CHAR_COUNT
 
     ImGui::Begin("Live Serial Plot");
 
-    static bool autoScale = true;
+    static bool autoScale = false; //default autoscale off
     ImGui::Checkbox("Auto Y Scale", &autoScale);
+
+    static bool follow_x = true;
+    ImGui::Checkbox("Follow X", &follow_x);
 
     static float y_min = -1.5f;
     static float y_max = 1.5f;
@@ -90,21 +98,17 @@ int terminal::update(const char* title) {
         ImGui::SliderFloat("Y Max", &y_max, 0.0f, 5.0f);
     }
 
-    static int pointsToDisplay = 2048;
+    static int pointsToDisplay = MAX_BUFFER_SIZE;
     ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, MAX_BUFFER_SIZE);
     pointsToDisplay = pointsToDisplay < 1 ? 1 : (pointsToDisplay > MAX_BUFFER_SIZE ? MAX_BUFFER_SIZE : pointsToDisplay);
-
-    // Grab data
-    std::deque<char> asciiBuffer;
-    serialManObj->copyData(&asciiBuffer);
 
     // Static ring buffer - no vector, no heap, no exceptions
     static struct Sample { float sin, sq, saw; } samples[MAX_BUFFER_SIZE];
     static int sampleCount = 0;
     sampleCount = 0;
 
-    if (!asciiBuffer.empty()) {
-        std::string temp(asciiBuffer.begin(), asciiBuffer.end());
+    if (!tempRxDeque.empty()) {
+        std::string temp(tempRxDeque.begin(), tempRxDeque.end());
         const char* p = temp.c_str();
 
         while (p && *p && sampleCount < MAX_BUFFER_SIZE) {
@@ -143,10 +147,14 @@ int terminal::update(const char* title) {
         if (sz.x < 100) sz.x = 1000;
         if (sz.y < 100) sz.y = 500;
 
-        if (ImPlot::BeginPlot("Waveforms", sz)) {
+        if (ImPlot::BeginPlot("Waveforms", sz, ImPlotFlags_Crosshairs)) {
             ImPlot::SetupAxes("Samples", "Value");
-            ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1);
             ImPlot::SetupAxisLimits(ImAxis_Y1, autoScale ? -1.6f : y_min, autoScale ? 1.6f : y_max);
+
+            if (follow_x) {
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1, ImGuiCond_Always);
+            }
 
             ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.0f);
 
@@ -166,8 +174,41 @@ int terminal::update(const char* title) {
 
     ImGui::End();   // This closes "Live Serial Plot" - never skip this
     // NO return; HERE - THIS WAS KILLING YOUR TERMINAL WINDOW
-    // END FINAL NO-CRASH PLOT =====================================================================================================
+    // END FINAL NO-CRASH PLOTImGui::End();================================================================
+#endif
 
+
+
+    //Buffer size debug plot ================================= START
+    ImGui::Begin("Kernel Buffer chars copied per thread loop Plot");
+
+    static float history[1000] = { 0 };
+    size_t len = 0;
+
+    if (serialManObj) {
+        serialManObj->debug_getKernelcharCount(&len);
+    }
+
+    // Shift and insert data
+    memmove(&history[0], &history[1], sizeof(float) * 999);
+    history[999] = (float)len;
+
+    // This makes the plot resize dynamically when you drag the window edges
+    ImVec2 fill_size = ImVec2(-1, -1);
+
+    if (ImPlot::BeginPlot("##FullSizePlot", fill_size)) {
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
+
+        ImPlot::SetupAxis(ImAxis_X1, "Samples");
+        // Auto-scale Y based on the 1000 points currently in history
+        ImPlot::SetupAxis(ImAxis_Y1, "Bytes", ImPlotAxisFlags_AutoFit);
+
+        ImPlot::PlotLine("Size", history, 1000);
+        ImPlot::EndPlot();
+    }
+
+    ImGui::End();
+    //Buffer size debug plot ================================= END
 
 
 
@@ -197,7 +238,7 @@ int terminal::update(const char* title) {
     //-----------------------------Connect Button-----------------------------|
     ImGui::SameLine(); // Place the next widget on the same line
 
-    //THIS SUCKS THAT I HAVE TO MANAGER ALL THE GUI ELEMENT STATES.!!!
+    //TODO: THIS SUCKS THAT I HAVE TO MANAGER ALL THE GUI ELEMENT STATES.!!!
     //I Think there are callback that can associated with events on gui elememnts. should use those instead
     //of keeping static vars all over the place
 

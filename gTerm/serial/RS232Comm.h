@@ -18,7 +18,7 @@ This is low level so mostly char buffers
 #include <deque>
 #include "virtualComm.h"
 
-#define SERIAL_NUM_BAUDS 5
+//#define SERIAL_NUM_BAUDS 5
 //#define DEFAULT_BUFF_SIZE 64
 
 class RS232Comm : public virtualComm {
@@ -38,8 +38,6 @@ private:
 
 	//Connection Parameters
 	DCB dcbSerialParams;
-	
-	std::string baudlist[SERIAL_NUM_BAUDS] = { "9600","57600","115200","1000000", "2000000" };
 	
 	//bool _killThreadFlag = false;
 
@@ -68,8 +66,6 @@ public:
 		
 	//get the availve com ports on the windows machine
 	bool ListComPorts(std::deque<std::string> *ComPortNames);
-
-	bool ListBaudRates(std::deque<std::string>* BaudRateNames);
 
 	bool Connect(const char* portName, DCB dcbSerialParams = { 0 });
 

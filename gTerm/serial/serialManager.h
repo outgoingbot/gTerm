@@ -1,8 +1,5 @@
 #pragma once
 
-//Need to figure out a way to build using the correct serial driver
-//I think Rs232 includes <windows>. maybe RS232 is cross platform? that easier to change?
-
 #include <deque>
 #include <thread>
 #include <mutex>
@@ -27,6 +24,8 @@
 #define SERIAL_ERROR -1
 #define SERIAL_WARNING -2
 
+//TODO: Setting this too high kills FPS
+#define MAX_CHAR_COUNT 20000 //Max number if chars in the deque object
 
 class serialManager {
 
@@ -68,12 +67,15 @@ public:
 
 	void copyData(std::deque<char> *rxBufferQueue_public);
 
+	void debug_getKernelcharCount(size_t* len);
+
 	bool isConnected();
 
 	void stopThread();
 
 private:
-	std::deque<char> rxBufferQueue;
+	size_t deubug_kernel_num_chars_copied;
+	std::deque<char> rxBufferQueue; //this is the master rx buffer to be used by all other classes
 	//std::deque<char> txBufferQueue;
 
 	std::mutex bufferMutex;

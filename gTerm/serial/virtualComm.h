@@ -18,6 +18,8 @@ public:
         //TODO: add other params like: 8,N,1
     } serialParameters;
 
+    static inline const std::string baudlist[] = { "9600","57600","115200","1000000", "2000000" };
+
     //the Primary serial Parameters are maintained by the virtual class
     serialParameters vSerialParams;
 
@@ -29,8 +31,15 @@ public:
     // Pure virtual function for Listing Comm Ports
     virtual bool ListComPorts(std::deque<std::string>* ComPortNames) = 0;
 
-    // Pure virtual function for Listing baud rates
-    virtual bool ListBaudRates(std::deque<std::string>* ComPortNames) = 0;
+    //function for Listing baud rates    
+    bool ListBaudRates(std::deque<std::string>* BaudRateNames) {
+        if (!BaudRateNames) return false;
+
+        for (const auto& baud : baudlist) {
+            BaudRateNames->push_back(baud);
+        }
+        return true;
+    }
 
     virtual bool connect() = 0;
 

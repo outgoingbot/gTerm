@@ -30,7 +30,7 @@ size_t terminal_output::getNumLines() {
 
 
 int terminal_output::update(const std::vector<std::string>& new_lines, bool isConnected) {
-    // Store the lines for TextSelect
+    // Store the lines for TextSelect.
     lines = new_lines; //TODO: I dont like this copy!!!!
 
     // Create a window to contain the text

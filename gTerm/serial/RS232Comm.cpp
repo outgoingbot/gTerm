@@ -66,13 +66,6 @@ bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar)
 	}
 }
 
-
-bool RS232Comm::ListBaudRates(std::deque<std::string>* BaudRateNames) {
-	for (auto i = 0; i < SERIAL_NUM_BAUDS; i++) BaudRateNames->push_back(baudlist[i]);
-	return 0;
-}
-
-
 bool RS232Comm::ListComPorts(std::deque<std::string>* ComPortNames) { //added function to find the present serial 
 	char lpTargetPath[5000]; // buffer to store the path of the COMPORTS
 	bool gotPort = false; // in case the port is not found

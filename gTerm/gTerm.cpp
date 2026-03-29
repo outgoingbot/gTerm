@@ -4,7 +4,7 @@
 #include "stb_image.h"
 #include "gTerm.h"
 
-//TODO: update imgui to 1.92.3 (Beta - this has inputTextMultiLine() as wrapping and selectable)
+//TODO: update imgui to 1.92.6 (im on 1.92.5 this has inputTextMultiLine() as wrapping and selectable)
 
 using namespace std;
 
@@ -108,12 +108,15 @@ int main() {
 
     //Create Custom GUI Object
     mainMenu main_menu;
-    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
     DebugMenu debugMenu;
-    dataParser dataParsObj;
+    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
+    dataParser dataParsObj; //This needs access to SerialManager
+    //TODO: make plotter class
+    //Plotter class will import serialManager and dataParser.
+    //DataParser will control where serial Data goes and how
     
     //Scale the entire glfw window with this function
-   // glfwSetWindowSize(window, WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8);
+    glfwSetWindowSize(window, WINDOW_WIDTH * 1.5, WINDOW_HEIGHT * 1.5);
 
  
 
