@@ -37,7 +37,7 @@ bool serialManager::hasData() {
 
 void serialManager::stopThread() {
 	threadIsRunning = false;
-
+	deubug_kernel_num_chars_copied = 0;
 	if (readThread) {
 		if (std::this_thread::get_id() == readThread->get_id()) {
 			std::cerr << "ERROR: Attempted to join thread from itself!" << std::endl;

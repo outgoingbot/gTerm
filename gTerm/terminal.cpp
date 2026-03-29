@@ -179,39 +179,6 @@ int terminal::update(const char* title) {
 
 
 
-    //Buffer size debug plot ================================= START
-    ImGui::Begin("Kernel Buffer chars copied per thread loop Plot");
-
-    static float history[1000] = { 0 };
-    size_t len = 0;
-
-    if (serialManObj) {
-        serialManObj->debug_getKernelcharCount(&len);
-    }
-
-    // Shift and insert data
-    memmove(&history[0], &history[1], sizeof(float) * 999);
-    history[999] = (float)len;
-
-    // This makes the plot resize dynamically when you drag the window edges
-    ImVec2 fill_size = ImVec2(-1, -1);
-
-    if (ImPlot::BeginPlot("##FullSizePlot", fill_size)) {
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
-
-        ImPlot::SetupAxis(ImAxis_X1, "Samples");
-        // Auto-scale Y based on the 1000 points currently in history
-        ImPlot::SetupAxis(ImAxis_Y1, "Bytes", ImPlotAxisFlags_AutoFit);
-
-        ImPlot::PlotLine("Size", history, 1000);
-        ImPlot::EndPlot();
-    }
-
-    ImGui::End();
-    //Buffer size debug plot ================================= END
-
-
-
     //Text Entry Test
     ImGui::SetWindowFontScale(1.0f); //looks like shit when scaled
         

@@ -141,11 +141,11 @@ int main() {
         
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
 
-        ImVec2 windowSize(400, 150);
+        ImVec2 windowSize(400, 250);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
-        debugMenu.update(); //shows fps and mouse position
+        debugMenu.update(term.serialManObj); //shows fps and mouse position
 
 
         // Rendering
