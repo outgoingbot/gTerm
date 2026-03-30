@@ -1,7 +1,7 @@
 #include "dataParser.h"
 
 dataParser::dataParser() {
-    
+    memset(input_text, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
     _window_params.min_height = 100.0f;
     _window_params.width; // Window width
     _window_params.height = 600.f; // Window height
@@ -32,11 +32,18 @@ int dataParser::update() {
     // Display all lines in the console
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));        // Light Gray
 
-
+    //wtf is this code?
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x); // wrap at the edge
 
     ImGui::Checkbox("Parser Enabled", &dataParse_enable);
+    
+    //check to show the serial plot
+    ImGui::Checkbox("Plots Enabled", &send_to_plot);
+
+    if (ImGui::InputText("##TextEntryTest", input_text, IM_ARRAYSIZE(input_text))) {
+        // Handle text input when the field changes
+    }
 
     std::string tempString = "PLACE HOLDER STRING";
     if (dataParse_enable) {
@@ -59,7 +66,7 @@ int dataParser::update() {
 
     return 0;
 }
-
+//this seriously looks like some ai bullshit. drugs are bad
 std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
 {
     std::deque<float> result;

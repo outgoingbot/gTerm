@@ -1,8 +1,6 @@
 #include "terminal.h"
 #define IMPLOT_IMPLEMENTATION //<is this needed by implot?
-#define SHOW_PLOT 0
-
-
+#define SHOW_PLOT 1
 
 terminal::terminal(int width, int height) {
     _width = width;
@@ -22,7 +20,6 @@ terminal::~terminal(void) {
 }
 
 
-
 int terminal::handle_connect_button() {
     if (serialManObj->isConnected() == true) {
         std::cout << "ERROR: Already Connected to Serial Manager" << std::endl;
@@ -35,6 +32,7 @@ int terminal::handle_connect_button() {
     
     return 0;
 }
+
 
 int terminal::handle_disconnect_button() {
     if (serialManObj->isConnected() == false) {
@@ -76,107 +74,6 @@ int terminal::update(const char* title) {
 
     // 3. Send perfect lines to terminal_output
     term_out.update(display_lines, serialManObj->isConnected());
-
-
-
-    // 3-WAVEFORM LIVE PLOT - FINAL, NO-CRASH, NO-RETURN VERSION ==============================================================
-#if SHOW_PLOT
-#define MAX_BUFFER_SIZE MAX_CHAR_COUNT
-
-    ImGui::Begin("Live Serial Plot");
-
-    static bool autoScale = false; //default autoscale off
-    ImGui::Checkbox("Auto Y Scale", &autoScale);
-
-    static bool follow_x = true;
-    ImGui::Checkbox("Follow X", &follow_x);
-
-    static float y_min = -1.5f;
-    static float y_max = 1.5f;
-    if (!autoScale) {
-        ImGui::SliderFloat("Y Min", &y_min, -5.0f, 0.0f);
-        ImGui::SliderFloat("Y Max", &y_max, 0.0f, 5.0f);
-    }
-
-    static int pointsToDisplay = MAX_BUFFER_SIZE;
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, MAX_BUFFER_SIZE);
-    pointsToDisplay = pointsToDisplay < 1 ? 1 : (pointsToDisplay > MAX_BUFFER_SIZE ? MAX_BUFFER_SIZE : pointsToDisplay);
-
-    // Static ring buffer - no vector, no heap, no exceptions
-    static struct Sample { float sin, sq, saw; } samples[MAX_BUFFER_SIZE];
-    static int sampleCount = 0;
-    sampleCount = 0;
-
-    if (!tempRxDeque.empty()) {
-        std::string temp(tempRxDeque.begin(), tempRxDeque.end());
-        const char* p = temp.c_str();
-
-        while (p && *p && sampleCount < MAX_BUFFER_SIZE) {
-            float a = 0, b = 0, c = 0;
-            if (sscanf(p, "%f,%f,%f", &a, &b, &c) == 3) {
-                samples[sampleCount++] = { a, b, c };
-            }
-            const char* nl = strchr(p, '\n');
-            if (!nl) break;
-            p = nl + 1;
-        }
-    }
-
-    // Nothing to plot?
-    if (sampleCount == 0) {
-        ImGui::Text("No valid data received");
-    }
-    else {
-        int count = sampleCount < pointsToDisplay ? sampleCount : pointsToDisplay;
-        int start = sampleCount - count;
-
-        static float x[MAX_BUFFER_SIZE];
-        static float y1[MAX_BUFFER_SIZE];
-        static float y2[MAX_BUFFER_SIZE];
-        static float y3[MAX_BUFFER_SIZE];
-
-        for (int i = 0; i < count; i++) {
-            int idx = start + i;
-            x[i] = (float)i;
-            y1[i] = samples[idx].sin;
-            y2[i] = samples[idx].sq;
-            y3[i] = samples[idx].saw;
-        }
-
-        ImVec2 sz = ImGui::GetContentRegionAvail();
-        if (sz.x < 100) sz.x = 1000;
-        if (sz.y < 100) sz.y = 500;
-
-        if (ImPlot::BeginPlot("Waveforms", sz, ImPlotFlags_Crosshairs)) {
-            ImPlot::SetupAxes("Samples", "Value");
-            ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1);
-            ImPlot::SetupAxisLimits(ImAxis_Y1, autoScale ? -1.6f : y_min, autoScale ? 1.6f : y_max);
-
-            if (follow_x) {
-                ImPlot::SetupAxisLimits(ImAxis_X1, 0, count - 1, ImGuiCond_Always);
-            }
-
-            ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.0f);
-
-            ImPlot::SetNextLineStyle(ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
-            ImPlot::PlotLine("Sine", x, y1, count);
-
-            ImPlot::SetNextLineStyle(ImVec4(0.3f, 1.0f, 0.3f, 1.0f));
-            ImPlot::PlotLine("Square", x, y2, count);
-
-            ImPlot::SetNextLineStyle(ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
-            ImPlot::PlotLine("Saw", x, y3, count);
-
-            ImPlot::PopStyleVar();
-            ImPlot::EndPlot();
-        }
-    }
-
-    ImGui::End();   // This closes "Live Serial Plot" - never skip this
-    // NO return; HERE - THIS WAS KILLING YOUR TERMINAL WINDOW
-    // END FINAL NO-CRASH PLOTImGui::End();================================================================
-#endif
-
 
 
     //Text Entry Test
@@ -251,9 +148,6 @@ int terminal::update(const char* title) {
     }
     //-----------------------------Disconnect Button--------------------------|
         
-
-
-
 
     //------------------------------COM Status Text-------------------------------|
     //Just getting some basic serial status stuff to the GUI. this will change
@@ -364,8 +258,13 @@ int terminal::update(const char* title) {
     ImGui::End();
 
     dParser.update(); //guess ill keep the parser and plotter in terminal
-    dPlotter.ParseData(tempRxDeque);
-    dPlotter.update(tempRxDeque);
+#if SHOW_PLOT
+    if (dParser.send_to_plot) {
+        dPlotter.ParseData(tempRxDeque); //Get rid of this. ai bullshit method
+        //parsing should be done in parser. then 'fixed' deque is sent to plotter
+        dPlotter.update(tempRxDeque);
+    }
+#endif
 	return 0;
 }
 
@@ -374,6 +273,7 @@ int terminal::render(void) {
 
 	return 0;
 }
+
 
 void terminal::drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments) {
     draw_list->AddCircle(center, radius, color, num_segments);

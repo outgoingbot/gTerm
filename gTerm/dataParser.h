@@ -23,9 +23,12 @@ public:
 	//int update(std::deque<char> charArray);
 	int update();
 
+	//wtf is this too?
 	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
 
 	bool dataParse_enable = false;
+
+	bool send_to_plot = true;
 	
 
 private:
@@ -44,4 +47,6 @@ private:
 	window_params_t _window_params;
 
 	std::deque<std::deque<char>> float_buffer_2d;
+
+	char input_text[64]; // Buffer to store the text input
 };

@@ -55,8 +55,8 @@ void DebugMenu::update(serialManager* sermanobj){
         ImPlot::SetupAxis(ImAxis_X1, "Samples");
         // Auto-scale Y based on the 1000 points currently in history
         ImPlot::SetupAxis(ImAxis_Y1, "Bytes", ImPlotAxisFlags_AutoFit);
-
-        ImPlot::PlotLine("Size", history, 1000);
+        ImPlot::SetNextLineStyle(ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+        ImPlot::PlotLine("Bytes", history, 1000);
         ImPlot::EndPlot();
     }
 

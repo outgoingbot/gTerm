@@ -39,8 +39,8 @@ void dataPlotter::update(std::deque<char>& tempRxDeque) {
     ImGui::Checkbox("Follow X", &follow_x);
 
     if (!autoScale) {
-        ImGui::SliderFloat("Y Min", &y_min, -5.0f, 0.0f);
-        ImGui::SliderFloat("Y Max", &y_max, 0.0f, 5.0f);
+        //ImGui::SliderFloat("Y Min", &y_min, -5.0f, 0.0f);
+        //ImGui::SliderFloat("Y Max", &y_max, 0.0f, 5.0f);
     }
 
     ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, MAX_BUFFER_SIZE);

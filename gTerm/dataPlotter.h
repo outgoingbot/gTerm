@@ -24,8 +24,8 @@ private:
     // UI State (Replaces the 'static' variables from your snippet)
     bool autoScale = false;
     bool follow_x = true;
-    float y_min = -1.5f;
-    float y_max = 1.5f;
+    float y_min = -20.f;
+    float y_max = 20.f;
     int pointsToDisplay = 512;
 
     // Data Storage

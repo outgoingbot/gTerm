@@ -10,7 +10,7 @@ using namespace std;
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
-#define SCALE_FACTOR 1.5
+#define SCALE_FACTOR 1.0
 
 int main() {
     // Initialize GLFW
