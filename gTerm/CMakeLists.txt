@@ -25,11 +25,11 @@ add_executable(gTerm
     terminal_output.cpp terminal_output.h
     DebugMenu.cpp DebugMenu.h
     mainMenu.cpp mainMenu.h
-    dataParser.cpp
+    dataParser.cpp dataParser.h
     serial/serialManager.cpp serial/serialManager.h
     serial/virtualComm.h
-    textselect.cpp
-    textselect.hpp
+    textselect.cpp textselect.hpp
+    dataPlotter.cpp dataPlotter.h
     ${SERIAL_SRC}
     ${SERIAL_INC}
 )

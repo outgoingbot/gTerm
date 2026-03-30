@@ -52,3 +52,9 @@ is there a kernel interrupt (thru Linux and Win OS drivers)?
 
 We are close, but the auto scrolling doesnt work.
 Ive decreased the serialManager char buffer size. this reduced scrolling activitity in ImGui::InputTextMultipleLines() function
+
+
+
+//temp: i need to think about how i want to do this serial data managemnt. minimize copies. right now Terminal ownt he serial monitor class
+//so i can either expose the buffer through terminal class. or move serial monitor above terminal class
+//the idea is that the serial data goes through dataParser before it hits dataPlotter

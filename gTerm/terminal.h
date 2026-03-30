@@ -14,6 +14,7 @@ Terminal is master class for all serial related aspects of this program.
 
 #include "serial/serialManager.h"
 #include "dataParser.h"
+#include "dataPlotter.h"
 
 #include "terminal_output.h" //Scolling Text Window
 
@@ -39,7 +40,8 @@ public:
 	//serial Manager class that has all the buffers, and higher level serial data manipulation.
 	serialManager* serialManObj; //Serial Manager
 
-	dataParser dParser;
+	dataParser dParser; //This isnt being used
+	dataPlotter dPlotter;
 
 
 private:

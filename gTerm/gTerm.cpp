@@ -10,6 +10,7 @@ using namespace std;
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
+#define SCALE_FACTOR 1.5
 
 int main() {
     // Initialize GLFW
@@ -110,7 +111,7 @@ int main() {
     mainMenu main_menu;
     DebugMenu debugMenu;
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
-    dataParser dataParsObj; //This needs access to SerialManager
+    //dataParser dataParsObj; //This needs access to SerialManager
     //TODO: make plotter class
     //Plotter class will import serialManager and dataParser.
     //DataParser will control where serial Data goes and how
@@ -137,10 +138,12 @@ int main() {
 
         //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
         //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
-        dataParsObj.update();
+        
+        //dataParsObj.update(); //<--Moved to Terminal Class
         
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
-
+        
+        //Debug window
         ImVec2 windowSize(400, 250);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
@@ -158,7 +161,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);   
-    }
+    } //End While
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

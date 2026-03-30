@@ -1,6 +1,6 @@
 #include "terminal.h"
 #define IMPLOT_IMPLEMENTATION //<is this needed by implot?
-#define SHOW_PLOT 1
+#define SHOW_PLOT 0
 
 
 
@@ -47,7 +47,7 @@ int terminal::handle_disconnect_button() {
 
 
 int terminal::update(const char* title) {
- 
+    
     // Create ImGui window for terminal
     ImGui::Begin(title);
 
@@ -363,6 +363,9 @@ int terminal::update(const char* title) {
     //drawCircle(draw_list, center, 50.0f, IM_COL32(255, 0, 0, 255));
     ImGui::End();
 
+    dParser.update(); //guess ill keep the parser and plotter in terminal
+    dPlotter.ParseData(tempRxDeque);
+    dPlotter.update(tempRxDeque);
 	return 0;
 }
 
