@@ -13,9 +13,9 @@ public:
     ~dataPlotter() = default;
 
     // The main entry point called every frame
-    void update(std::deque<char>& tempRxDeque);
+    void update(const std::deque<char>& tempRxDeque);
     // Helper to parse the deque into our sample buffer
-    void ParseData(std::deque<char>& deque);
+    void ParseData(const std::deque<char>& deque);
 
 private:
     // Constants

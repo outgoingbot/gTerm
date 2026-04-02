@@ -14,3 +14,4 @@
 #include "serial/serialManager.h"
 
 #include "dataParser.h"
+#include "dataPlotter.h"

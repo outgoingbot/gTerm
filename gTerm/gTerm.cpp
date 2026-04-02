@@ -97,7 +97,6 @@ int main() {
     //========================================= FONT TESTING ==============================================
 
 
-
     ImGui::StyleColorsDark();
 
     // Set up platform/renderer bindings
@@ -106,21 +105,17 @@ int main() {
 
     //glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
 
-
     //Create Custom GUI Object
     mainMenu main_menu;
     DebugMenu debugMenu;
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
-    //dataParser dataParsObj; //This needs access to SerialManager
-    //TODO: make plotter class
-    //Plotter class will import serialManager and dataParser.
-    //DataParser will control where serial Data goes and how
+    dataParser dParser;
+    dataPlotter dPlotter;
     
     //Scale the entire glfw window with this function
     glfwSetWindowSize(window, WINDOW_WIDTH * 1.5, WINDOW_HEIGHT * 1.5);
 
  
-
     // Main loop
     while (!glfwWindowShouldClose(window)) {
 
@@ -139,17 +134,24 @@ int main() {
         //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
         //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
         
-        //dataParsObj.update(); //<--Moved to Terminal Class
-        
         //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
         
+        //Parser Window
+        dParser.update();
+        
+        //Plotter Window
+        if (dParser.send_to_plot) {
+            dPlotter.ParseData(term.getRxBuffer()); //Get rid of this. ai bullshit method
+            //parsing should be done in parser. then 'fixed' deque is sent to plotter
+            dPlotter.update(term.getRxBuffer());
+        }
+
         //Debug window
         ImVec2 windowSize(400, 250);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
         debugMenu.update(term.serialManObj); //shows fps and mouse position
-
 
         // Rendering
         ImGui::Render();
@@ -162,6 +164,7 @@ int main() {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);   
     } //End While
+
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

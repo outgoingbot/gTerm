@@ -64,7 +64,7 @@ bool LinuxSerialComm::IsConnected() {
 
 bool LinuxSerialComm::connect() {
     //vSerialParams.port = "/dev/ttyUSB0";
-    vSerialParams.baud = "57600";
+    vSerialParams.baud = "115200";
 
     char portName[64];
     strncpy(portName, vSerialParams.port.c_str(), sizeof(portName) - 1);
@@ -86,9 +86,10 @@ bool LinuxSerialComm::connect() {
         return false;
     }
 
+    //Todo: Fix this mess
     int baud = std::stoi(vSerialParams.baud);
     speed_t speed;
-    if (baud == 9600)   speed = B9600;
+    if (baud == 9600)   speed = B9600; //This is code is FIRE!!
     else if (baud == 19200)  speed = B19200;
     else if (baud == 38400)  speed = B38400;
     else if (baud == 57600)  speed = B57600;

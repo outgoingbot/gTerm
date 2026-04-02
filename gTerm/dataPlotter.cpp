@@ -7,7 +7,9 @@ dataPlotter::dataPlotter() {
     memset(samples, 0, sizeof(samples));
 }
 
-void dataPlotter::ParseData(std::deque<char>& deque) {
+//TODO: Move this into parser class. Most likely going to have to create a struct to pass to plotter with other control stuff
+//like how many plots, data. a proper data strcture
+void dataPlotter::ParseData(const std::deque<char>& deque) {
     if (deque.empty()) return;
 
     // Convert deque to string for sscanf processing
@@ -30,7 +32,7 @@ void dataPlotter::ParseData(std::deque<char>& deque) {
     }
 }
 
-void dataPlotter::update(std::deque<char>& tempRxDeque) {
+void dataPlotter::update(const std::deque<char>& tempRxDeque) {
     ImGui::Begin("Live Serial Plot");
 
     // 1. UI Controls

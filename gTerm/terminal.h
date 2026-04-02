@@ -1,6 +1,7 @@
 
 /*
-Terminal is master class for all serial related aspects of this program.
+Terminal is master class for all serial terminal related aspects of this program.
+parsing and plotting will be done in other classes
 */
 
 #pragma once
@@ -13,9 +14,6 @@ Terminal is master class for all serial related aspects of this program.
 #include <deque>
 
 #include "serial/serialManager.h"
-#include "dataParser.h"
-#include "dataPlotter.h"
-
 #include "terminal_output.h" //Scolling Text Window
 
 //testing imguitextselect library
@@ -40,27 +38,24 @@ public:
 	//serial Manager class that has all the buffers, and higher level serial data manipulation.
 	serialManager* serialManObj; //Serial Manager
 
-	dataParser dParser; //This isnt being used
-	dataPlotter dPlotter;
-
+	//public method to share thread safe rx deque buffer
+	const std::deque<char>& getRxBuffer() const;
 
 private:
+	void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100);
+
 	//GLFWwindow* _window; // Pointer to the GLFW window
 	int _width;          // Window width
 	int _height;         // Window height
-	void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100);
+		
+	char usr_text_buffer[128]; // Buffer to store the text input
 
-
-	
-	char buffer[128]; // Buffer to store the text input
-
-	char input_buffer_Port[64]; // Buffer to store the text input
-	char input_buffer_Baud[64]; // Buffer to store the text input
+	char input_buffer_Port[64]; // Buffer to store the port list
+	char input_buffer_Baud[64]; // Buffer to store the baud
 	
 	int handle_connect_button();
 	int handle_disconnect_button();
 
 	//this will hold a copy of the serial Manager deque. this copy does not need to be mutex locked when accessed.
-	//It will not grow above 10000 chars (a value set in the serial manager pushData()
 	std::deque<char> _Term_rxBufferQueue;
 };

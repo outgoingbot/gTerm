@@ -6,7 +6,7 @@ terminal::terminal(int width, int height) {
     _width = width;
     _height = height;
     //_window = window;
-    memset(buffer, '\0', sizeof(char));
+    memset(usr_text_buffer, '\0', sizeof(char));
     memset(input_buffer_Port, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
     memset(input_buffer_Baud, '\0', sizeof(char));
 
@@ -43,6 +43,12 @@ int terminal::handle_disconnect_button() {
     return 0;
 }
 
+//Method to expose thread safe access to rx buffer
+const std::deque<char>& terminal::getRxBuffer() const
+{
+    return _Term_rxBufferQueue;
+}
+
 
 int terminal::update(const char* title) {
     
@@ -50,16 +56,16 @@ int terminal::update(const char* title) {
     ImGui::Begin(title);
 
     // 1. Get raw serial data <- uh oh, this looks like shitty AI code
-    std::deque<char> tempRxDeque; //This is seeminly one of the xtra buffers that is unnessesary
+    //std::deque<char> tempRxDeque; //This is seeminly one of the xtra buffers that is unnessesary
     //We must copy the entire buffer like this.
-    serialManObj->copyData(&tempRxDeque); //copying
+    serialManObj->copyData(&_Term_rxBufferQueue); //copying
 
     // 2. Convert deque<char> -> vector<string> (split on \n, ignore \r)
     std::vector<std::string> display_lines;
     std::string current_line;
 
     //Rules for handeling certain characters in the serial data
-    for (char c : tempRxDeque) {
+    for (char c : _Term_rxBufferQueue) {
         if (c == '\n') {
             display_lines.push_back(std::move(current_line));
             current_line.clear();
@@ -257,14 +263,6 @@ int terminal::update(const char* title) {
     //drawCircle(draw_list, center, 50.0f, IM_COL32(255, 0, 0, 255));
     ImGui::End();
 
-    dParser.update(); //guess ill keep the parser and plotter in terminal
-#if SHOW_PLOT
-    if (dParser.send_to_plot) {
-        dPlotter.ParseData(tempRxDeque); //Get rid of this. ai bullshit method
-        //parsing should be done in parser. then 'fixed' deque is sent to plotter
-        dPlotter.update(tempRxDeque);
-    }
-#endif
 	return 0;
 }
 
