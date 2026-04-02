@@ -53,7 +53,7 @@ public:
 	//wtf is this too?
 	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
 
-	bool dataParse_enable = false;
+	bool dataParse_enable = true;
 
 	bool send_to_plot = true;
 	

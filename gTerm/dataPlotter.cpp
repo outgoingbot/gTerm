@@ -11,41 +11,19 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 {
     ImGui::Begin("Live Serial Plot");
 
-    // ====================== Format Configuration ======================
-    static char formatBuf[256];
-
-    // Sync buffer with current parser.format when it changes externally (or first time)
-    if (strcmp(formatBuf, parser.format.c_str()) != 0) {
-        strncpy(formatBuf, parser.format.c_str(), sizeof(formatBuf) - 1);
-        formatBuf[sizeof(formatBuf) - 1] = '\0';
-    }
-
-    ImGui::InputText("Format string (e.g. %f,%i,%f,%d)", formatBuf, sizeof(formatBuf));
-
-    // Use this more reliable pattern
-    if (ImGui::IsItemDeactivatedAfterEdit() || ImGui::IsItemActivated() == false && ImGui::IsItemFocused() == false) {
-        std::string newFormat(formatBuf);
-
-        if (newFormat != parser.format) {
-            parser.format = std::move(newFormat);
-            parser.compile();
-            printf("Format updated to: '%s' (%zu channels)\n", parser.format.c_str(), parser.getChannelCount());
-        }
-    }
-
-    ImGui::SameLine();
-    ImGui::Text(" | Channels: %zu", parser.getChannelCount());
-
+    // ====================== Plot Controls ======================
     ImGui::Checkbox("Auto Y Scale", &autoScale);
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
     ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, 4096);
 
+    ImGui::Separator();
+
     // ====================== Parse Data ======================
     parser.parse(rxDeque, currentSamples);
 
     if (currentSamples.empty()) {
-        ImGui::Text("Waiting for valid data... Check format string and serial input.");
+        ImGui::Text("Waiting for valid data... (Check format in Data_Manipulation_Region)");
         ImGui::End();
         return;
     }
@@ -57,10 +35,14 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
     size_t numChannels = parser.getChannelCount();
     if (numChannels == 0) numChannels = 1;
 
+    // Resize buffers
     x_data.resize(displayCount);
     y_data.resize(numChannels);
-    for (auto& ch : y_data) ch.resize(displayCount);
+    for (auto& ch : y_data) {
+        ch.resize(displayCount);
+    }
 
+    // Fill data for plotting (most recent samples)
     for (size_t i = 0; i < displayCount; ++i) {
         size_t idx = startIdx + i;
         const auto& sample = currentSamples[idx];
@@ -100,7 +82,9 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
             ImVec4 color = ImPlot::GetColormapColor(static_cast<int>(ch) % 10);
             ImPlot::SetNextLineStyle(color);
 
-            ImPlot::PlotLine(label.c_str(), x_data.data(), y_data[ch].data(),
+            ImPlot::PlotLine(label.c_str(),
+                x_data.data(),
+                y_data[ch].data(),
                 static_cast<int>(displayCount));
         }
 

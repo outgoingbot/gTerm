@@ -140,8 +140,9 @@ int main() {
         dParser.update();
         
         //Plotter Window
-        dPlotter.update(dParser, term.getRxBuffer());
-
+        if (dParser.dataParse_enable && dParser.send_to_plot) {
+            dPlotter.update(dParser, term.getRxBuffer());
+        }
         //Debug window
         ImVec2 windowSize(400, 250);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right

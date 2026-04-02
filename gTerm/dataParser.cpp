@@ -152,43 +152,63 @@ std::optional<double> dataParser::parse_token(const std::string& token, const Fo
     return std::nullopt;
 }
 
-//int dataParser::update(std::deque<char> rxDequeObj) {
-int dataParser::update() {
-
+int dataParser::update()
+{
     ImGui::Begin("Data_Manipulation_Region");
 
-    // Display all lines in the console
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));        // Light Gray
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
 
-    //wtf is this code?
     ImVec2 region = ImGui::GetContentRegionAvail();
-    ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x); // wrap at the edge
+    ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x);
 
+    // ==================== Parser Controls ====================
     ImGui::Checkbox("Parser Enabled", &dataParse_enable);
-    
-    //check to show the serial plot
     ImGui::Checkbox("Plots Enabled", &send_to_plot);
 
-    if (ImGui::InputText("##TextEntryTest", input_text, IM_ARRAYSIZE(input_text))) {
-        // Handle text input when the field changes
+    // ====================== Format String Input ======================
+    static char formatBuf[256] = { 0 };
+
+    // Sync buffer with current format (only when they differ)
+    if (strcmp(formatBuf, format.c_str()) != 0) {
+        strncpy(formatBuf, format.c_str(), sizeof(formatBuf) - 1);
+        formatBuf[sizeof(formatBuf) - 1] = '\0';
     }
 
-    std::string tempString = "PLACE HOLDER STRING";
     if (dataParse_enable) {
-        tempString = "True";
-    }
-    else {
-        tempString = "False";
-    }
+        ImGui::TextUnformatted("Format string (e.g. %f,%i,%f,%d)");
+        ImGui::PushItemWidth(200.0f);
+        ImGui::InputText("Input String", formatBuf, sizeof(formatBuf));
+        
+        if (ImGui::IsItemDeactivatedAfterEdit()) {
+            std::string newFormat = formatBuf;
+            if (newFormat != format) {
+                format = std::move(newFormat);
+                compile();
+                printf("Format updated to: '%s'  (%zu channels)\n",
+                    format.c_str(), getChannelCount());
+            }
+        }
 
-    ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());  // safer for large logs
-    ImGui::PopTextWrapPos();  // Always pair it
-    ImGui::PopStyleColor(1); // Restore previous colors
+        //ImGui::SameLine();
+        //ImGui::NewLine();
+        ImGui::Text("Channels: %zu", getChannelCount());
+
+        // Optional: Show current active format below
+        ImGui::Text("Active format: %s", format.c_str());
+    }
+    // ==================== Your existing placeholder / debug text ====================
+    //std::string tempString = dataParse_enable ? "True" : "False";
+    //ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());
+
+    ImGui::PopTextWrapPos();
+    ImGui::PopStyleColor(1);
 
     ImGui::End();
 
     return 0;
 }
+
+
 //this seriously looks like some ai bullshit. drugs are bad
 std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
 {
