@@ -11,6 +11,8 @@
 //Set to zero to remove default Comm port and baud settings
 #define DEBUG_COMM_DEFAULTS 1
 
+#define DEBUG_TO_TERMINAL 0
+
 
 //Choose what Serial Driver Header to #include. ifdef Variables defined in CMakeLists
 #ifdef IS_WINDOWS

@@ -9,10 +9,17 @@ Data parsing class.
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
+#include <vector>
 #include <deque>
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <optional>
+
+struct ParsedSample {
+	std::vector<double> values;   // one value per field in the format string
+};
+
 
 class dataParser {
 
@@ -22,6 +29,26 @@ public:
 
 	//int update(std::deque<char> charArray);
 	int update();
+
+	std::string format = "%f,%f,%f";   // User can change this at runtime
+	char delimiter = ',';
+	char eol = '\n';
+
+	// Call this whenever the user changes format, delimiter, or eol
+	void compile();
+
+	// Main parsing function - replaces your old ParseData()
+	// Returns all successfully parsed samples from the deque
+	void parse(const std::deque<char>& deque, std::vector<ParsedSample>& outSamples) const;
+
+	// Convenience: get current number of expected channels (after compile())
+	size_t getChannelCount() const;
+
+	// Add to DataParser class in DataParser.h
+	const std::vector<ParsedSample>& getSamples() const {
+		return lastSamples;
+	}
+
 
 	//wtf is this too?
 	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
@@ -45,6 +72,20 @@ private:
 	} window_params_t;
 
 	window_params_t _window_params;
+
+	struct FormatSpecifier {
+		enum class Type { Float, SignedInt, UnsignedInt, Hex, Invalid };
+		Type type = Type::Invalid;
+	};
+
+	std::vector<FormatSpecifier> specifiers;
+
+	std::vector<FormatSpecifier> parse_specifiers(const std::string& fmt) const;
+	std::vector<std::string> split_line(const std::string& line) const;
+	std::optional<double> parse_token(const std::string& token, const FormatSpecifier& spec) const;
+	std::vector<ParsedSample> lastSamples;   // add this
+
+
 
 	std::deque<std::deque<char>> float_buffer_2d;
 

@@ -6,16 +6,28 @@
 #include <vector>
 #include "imgui.h"
 #include "implot.h"
+#include "dataParser.h"
 
 class dataPlotter {
 public:
     dataPlotter();
     ~dataPlotter() = default;
 
+
+    dataParser parser;
+    std::vector<ParsedSample> currentSamples;   // or process on the fly
+    // Plotting buffers - these will be resized dynamically
+    std::vector<float> x_data;
+    std::vector<std::vector<float>> y_data;     // one vector per channel
+
+    // UI / settings
+    int pointsToDisplay = 512;                  // you can increase this
+    int maxChannels = 128;                      // safety limit
+
     // The main entry point called every frame
-    void update(const std::deque<char>& tempRxDeque);
+    void update(dataParser& parser, const std::deque<char>& rxDeque);
     // Helper to parse the deque into our sample buffer
-    void ParseData(const std::deque<char>& deque);
+    //void ParseData(const std::deque<char>& deque);
 
 private:
     // Constants
@@ -26,18 +38,17 @@ private:
     bool follow_x = true;
     float y_min = -20.f;
     float y_max = 20.f;
-    int pointsToDisplay = 512;
+    //int pointsToDisplay = 512;
 
     // Data Storage
     struct Sample { float sin, sq, saw; };
     Sample samples[MAX_BUFFER_SIZE];
     int sampleCount = 0;
 
-    // Internal Plotting Buffers
-    float x_data[MAX_BUFFER_SIZE];
-    float y1_data[MAX_BUFFER_SIZE];
-    float y2_data[MAX_BUFFER_SIZE];
-    float y3_data[MAX_BUFFER_SIZE];
+    //std::vector<ParsedSample> currentSamples;
+
+    //std::vector<float> x_data;
+    //std::vector<std::vector<float>> y_data;
 
 };
 

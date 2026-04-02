@@ -1,6 +1,5 @@
 #include "terminal.h"
 #define IMPLOT_IMPLEMENTATION //<is this needed by implot?
-#define SHOW_PLOT 1
 
 terminal::terminal(int width, int height) {
     _width = width;

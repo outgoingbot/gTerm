@@ -140,11 +140,7 @@ int main() {
         dParser.update();
         
         //Plotter Window
-        if (dParser.send_to_plot) {
-            dPlotter.ParseData(term.getRxBuffer()); //Get rid of this. ai bullshit method
-            //parsing should be done in parser. then 'fixed' deque is sent to plotter
-            dPlotter.update(term.getRxBuffer());
-        }
+        dPlotter.update(dParser, term.getRxBuffer());
 
         //Debug window
         ImVec2 windowSize(400, 250);

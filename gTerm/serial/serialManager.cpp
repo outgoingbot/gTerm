@@ -58,7 +58,6 @@ void serialManager::stopThread() {
 // Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
 void serialManager::readLoop() {
 #define SLEEP_THREAD_MS 5
-#define DEBUG_TO_TERMINAL 1
 	while (threadIsRunning) {
 		//we should receive 1000 bytes in 5ms at 2,000,000 bps baud. keep this in mid when selecting a sleep time for the thread
 		char buffer[8196]; //copy the kernel comm buffer into this buffer
