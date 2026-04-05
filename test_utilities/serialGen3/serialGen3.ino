@@ -31,5 +31,6 @@ void loop() {
 
         // One single serial write
         Serial.print(outBuf);
+        //delay(5);
     }
 }

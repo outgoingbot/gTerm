@@ -11,6 +11,7 @@ using namespace std;
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 #define SCALE_FACTOR 1.0
+#define IGNORE_SAVED_IMU_INI 0 //0 = use cached object postions, good for debug, bad for release
 
 int main() {
     // Initialize GLFW
@@ -20,8 +21,8 @@ int main() {
     }
 
     // Configure OpenGL version and profile
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
 
@@ -58,7 +59,6 @@ int main() {
     ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     
- #define IGNORE_SAVED_IMU_INI 0
     #if IGNORE_SAVED_IMU_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
@@ -101,9 +101,9 @@ int main() {
 
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplOpenGL3_Init("#version 460");
 
-    //glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
+    glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
 
     //Create Custom GUI Object
     mainMenu main_menu;

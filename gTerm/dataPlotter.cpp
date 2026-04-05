@@ -80,7 +80,7 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
             ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit);
         }
 
-        ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.0f);
+        ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 4.0f);
 
         for (size_t ch = 0; ch < numChannels; ++ch) {
             std::string label = "Channel " + std::to_string(ch + 1);
