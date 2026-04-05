@@ -8,7 +8,7 @@ using namespace std;
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
-#define SCALE_FACTOR 1.5
+#define SCALE_FACTOR 1.7
 
 int main() {
     // Initialize GLFW
@@ -126,7 +126,7 @@ int main() {
         }
         
         //Debug window
-        ImVec2 windowSize(400, 450);
+        ImVec2 windowSize(400, 500);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);

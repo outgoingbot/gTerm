@@ -69,9 +69,9 @@ void DebugMenu::update(serialManager* sermanobj){
     history[999] = (float)len;
 
     // This makes the plot resize dynamically when you drag the window edges
-    ImVec2 fill_size_buf = ImVec2(-1, -1);
+    //ImVec2 fill_size_buf = ImVec2(-1, -1);
 
-    if (ImPlot::BeginPlot("Kernel Buffer chars copied per thread loop", fill_size_buf)) {
+    if (ImPlot::BeginPlot("Kernel Buffer chars copied per thread loop", ImVec2(-1, 200))) {
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
 
         ImPlot::SetupAxis(ImAxis_X1, "Samples");
@@ -82,13 +82,13 @@ void DebugMenu::update(serialManager* sermanobj){
         ImPlot::EndPlot();
     }
 
+    //text with the fps
+    char fpsBuf[32];
+    snprintf(fpsBuf, sizeof(fpsBuf), "%.1f", (float)len);
+    ImGui::Text("Kernel Buffer copy size: %s", fpsBuf);
+
     ImGui::EndChild();
     //Buffer size debug plot ================================= END
-
-
-
-
-
 
     ImGui::End();
 }

@@ -56,14 +56,12 @@ void serialManager::stopThread() {
 
 
 // Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
-void serialManager::readLoop(unsigned int baud) {
-#define SLEEP_THREAD_MS 5
+void serialManager::readLoop() {
 	while (threadIsRunning) {
-		//we should receive 1000 bytes in 5ms at 2,000,000 bps baud. keep this in mid when selecting a sleep time for the thread
 		//copy the kernel comm buffer into this buffer
 		char buffer[8196]; //ideally this would be small if our thread is fast, but that uses lotsa cpu :(
 		int bytesRead = 0;
-		//Scrape everything off the top of the kernel serial file. this is our usable rx buff in SLEEP_THREAD_MS ms intervals
+		//Scrape everything off the top of the kernel serial file. this is our usable rx buff
 		//think of this as collecting serial data from a data register
 		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 
@@ -73,15 +71,6 @@ void serialManager::readLoop(unsigned int baud) {
 			deubug_kernel_num_chars_copied = bytesRead;
 			//push the kernel char buffer into the serialManager Dequeue<std::char>
 			pushData(buffer, bytesRead); //Serial manager method to copy the local buffer into the deque
-			
-			//slow down the thread to reduce cpu usage. may be a better way to do this, base sleep time on baud rate.
-			// Time = Total Bits / Baud Rate
-			// Total Bits = (Start Bit + Stop Bit + 8 Bits in a byte) * number of bytes //for 8N1
-			//for example if baud is 115200 then we can expect a byte at 1/(115200/10) (1 start + 8 + 1 stop bit [8N1]) = 86.8 uS / byte
-			//double byteTime_S = (10.0 / baud);          // 10 bits * 1000 ms / baud
-			//long long sleepUS = static_cast<long long>(byteTime_S * 1000000.0 + 0.0); //convert to unit of microseconds
-			//std::this_thread::sleep_for(std::chrono::microseconds(sleepUS));
-
 #if DEBUG_TO_TERMINAL
 			//std::cout is slowwwww
 			for (int i = 0; i < bytesRead; ++i)	std::cout << buffer[i]; //also print serial data to open debug cmd console
@@ -91,11 +80,6 @@ void serialManager::readLoop(unsigned int baud) {
 			perror("Serial read failed");
 			//TODO: Do something here to handle error?
 		}
-		//else {
-		//	double byteTime_S = (10.0 / baud);          // 10 bits * 1000 ms / baud
-		//	long long sleepUS = static_cast<long long>(byteTime_S * 1000000.0 + 0.0); //convert to unit of microseconds
-		//	std::this_thread::sleep_for(std::chrono::microseconds(sleepUS));
-		//}
 	}
 
 	std::cout << "Serial thread exiting cleanly.\n";
@@ -165,7 +149,7 @@ bool serialManager::connect() {
 	//Start the RS232 or Linux Serial port (hosted by vComPort virtual class)
 	if (_vComPort->connect()) {
 		//create the nonstop thread to keep reading the seria port if connect retruns true
-		readThread = new std::thread(&serialManager::readLoop, this, static_cast<unsigned int>(std::stoul(_vComPort->vSerialParams.baud))); ///retrieve buffer
+		readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
 		threadIsRunning = true;
 		return true;
 	}

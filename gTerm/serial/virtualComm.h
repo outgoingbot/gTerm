@@ -48,17 +48,6 @@ public:
 
     //Check if we are actually connected
     virtual bool IsConnected() = 0;
-
-    
-    // Event-driven support - returns true if new data is available
-        // timeoutMs = -1 means wait forever
-    //virtual bool WaitForData(int timeoutMs = -1) = 0;
-    //Event driver rs232com
-    //virtual void SetupEventDrivenRead() = 0;
-
-    //virtual bool setPort(serialParams* serialParams);
-
-    //virtual bool setBaud(serialParams* serialParams);
 };
 
 #endif // VIRTUALCOMM_H
