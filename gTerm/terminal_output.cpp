@@ -37,6 +37,8 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_NoMove);
     //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(mTextColorR, mTextColorG, mTextColorB, mTextColorA));
+    
+    ImGui::PushFont(nullptr, ImGui::GetFontSize() + localFontSize);
     ImVec2 region = ImGui::GetContentRegionAvail();
     ImVec2 childMin = ImGui::GetWindowPos();
 
@@ -54,7 +56,7 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
         ImGui::TextWrapped("%s", line.c_str());
     }
 
-    //ImGui::PopFont();
+    ImGui::PopFont();
 
     // Register a context menu (optional)
     if (ImGui::BeginPopupContextWindow()) {
@@ -78,6 +80,7 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
         static float g = 0.8f;
         static float b = 0.3f;
         static float a = 1.0f;
+        static float sz = 0.0f;
 
         // Wrap in a collapsible header or your own UI block
         ImGui::Separator();
@@ -88,8 +91,10 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
         ImGui::SliderFloat("Green", &g, 0.0f, 1.0f, "%.3f");
         ImGui::SliderFloat("Blue", &b, 0.0f, 1.0f, "%.3f");
         ImGui::SliderFloat("Alpha", &a, 0.0f, 1.0f, "%.3f");
+        ImGui::SliderFloat("Size", &sz, -20.f, 20.0f, "%.0f");
         ImGui::PopItemWidth();
         SetTextColor(r, g, b, a);
+        SetTextSize(sz);
         //END ------------------------------set the text color-------------------------------|
 
 
@@ -160,4 +165,9 @@ void terminal_output::SetTextColor(float r, float g, float b, float a)
     mTextColorG = g;
     mTextColorB = b;
     mTextColorA = a;
+}
+
+void terminal_output::SetTextSize(float sz)
+{
+    localFontSize = sz;
 }

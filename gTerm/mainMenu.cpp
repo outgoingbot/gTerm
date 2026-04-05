@@ -45,6 +45,27 @@ void mainMenu::update() {
         ImGui::EndMenu(); // End the "Edit" menu
     }
 
+
+    if (ImGui::BeginMenu("Settings"))
+    {
+        if (ImGui::MenuItem("cap frame rate = true")) {
+            frame_rate_capped = true;
+        }
+        if (ImGui::MenuItem("cap frame rate = false")) {
+            frame_rate_capped = false;
+        }
+
+        ImGui::Separator();
+
+        ImGui::SliderFloat("Font Size", &currentFontSize, 8.0f, 60.0f, "%.0f px");
+        if (ImGui::IsItemDeactivatedAfterEdit())        // alternative (more precise)
+        {
+            fontNeedsRebuild = true;
+        }
+
+        ImGui::EndMenu();
+    }
+
     ImGui::EndMainMenuBar(); // End the top menu bar
 
 

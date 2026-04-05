@@ -32,6 +32,28 @@ void DebugMenu::update(serialManager* sermanobj){
     //copy the used serial manager address
     debugserialManObj = sermanobj;
     ImGui::Separator();
+    // Frame Rate debug plot ================================= START
+    ImGui::BeginChild("Debug Frame Rate", ImVec2(0, 150));
+    static float fpsHistory[1000] = { 0 };
+
+    // Insert new value at the end and shift everything left (same as kernel buffer)
+    float currentFPS = ImGui::GetIO().Framerate;
+    memmove(&fpsHistory[0], &fpsHistory[1], sizeof(float) * 999);
+    fpsHistory[999] = currentFPS;
+
+    ImVec2 fill_size_fps = ImVec2(-1, -1);
+    if (ImPlot::BeginPlot("Frame Rate History", fill_size_fps)) {
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
+        ImPlot::SetupAxis(ImAxis_X1, "Samples");
+        ImPlot::SetupAxis(ImAxis_Y1, "FPS", ImPlotAxisFlags_AutoFit);
+        ImPlot::SetNextLineStyle(ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+        ImPlot::PlotLine("FPS", fpsHistory, 1000);
+        ImPlot::EndPlot();
+    }
+    ImGui::EndChild();
+    // Frame Rate debug plot ================================= END
+    ImGui::Separator();
     //Buffer size debug plot ================================= START
     ImGui::BeginChild("Debug Kernel Buffer");
 
@@ -47,9 +69,9 @@ void DebugMenu::update(serialManager* sermanobj){
     history[999] = (float)len;
 
     // This makes the plot resize dynamically when you drag the window edges
-    ImVec2 fill_size = ImVec2(-1, -1);
+    ImVec2 fill_size_buf = ImVec2(-1, -1);
 
-    if (ImPlot::BeginPlot("Kernel Buffer chars copied per thread loop", fill_size)) {
+    if (ImPlot::BeginPlot("Kernel Buffer chars copied per thread loop", fill_size_buf)) {
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
 
         ImPlot::SetupAxis(ImAxis_X1, "Samples");

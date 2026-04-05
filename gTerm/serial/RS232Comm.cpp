@@ -38,17 +38,15 @@ void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
 
 	*returnVal = 0;
 	DWORD bytesRead = 0;
-	ClearCommError(hSerial, &errors, &status);
-
-	if (status.cbInQue > 0) {
-		DWORD toRead = (status.cbInQue > nbChar) ? nbChar : status.cbInQue;
-		if (ReadFile(hSerial, buffer, toRead, &bytesRead, NULL)) {
+		//Let the Timeouts be blocking here.
+		// TODO: Changed this to be blocking mode, serial Manager Thread is realying on this being blocking
+		// so that it is 'shelved' and not use too much cpu		
+		if (ReadFile(hSerial, buffer, nbChar, &bytesRead, NULL)) {
 			*returnVal = static_cast<int>(bytesRead);
 		}
 		else {
 			*returnVal = -1; // Indicate failure
 		}
-	}
 }
 
 
@@ -154,8 +152,8 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	// Set timeouts
 	COMMTIMEOUTS timeouts;
 	timeouts.ReadIntervalTimeout = MAXDWORD;
-	timeouts.ReadTotalTimeoutMultiplier = 0;
-	timeouts.ReadTotalTimeoutConstant = 0;
+	timeouts.ReadTotalTimeoutMultiplier = MAXDWORD;
+	timeouts.ReadTotalTimeoutConstant = 1000;
 	timeouts.WriteTotalTimeoutMultiplier = 0;
 	timeouts.WriteTotalTimeoutConstant = 0;
 
@@ -190,3 +188,51 @@ bool RS232Comm::IsConnected() {
 	//Simply return the connection status
 	return this->connected;
 }
+
+
+//Junk from trying event driven, may revist
+// Call this right after you successfully open the serial port (hSerial is valid)
+//void RS232Comm::SetupEventDrivenRead()
+//{
+//	if (m_hEvent != NULL) return;   // already setup
+//
+//	m_hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);  // manual reset
+//	if (m_hEvent == NULL) {
+//		std::cerr << "Failed to create event for serial read\n";
+//		return;
+//	}
+//
+//	m_overlapped.hEvent = m_hEvent;
+//	SetCommMask(hSerial, EV_RXCHAR);
+//}
+//
+//bool RS232Comm::WaitForData(int timeoutMs)
+//{
+//	if (!IsConnected() || m_hEvent == NULL) {
+//		return false;
+//	}
+//
+//	DWORD dwEvtMask = 0;
+//	BOOL result = WaitCommEvent(hSerial, &dwEvtMask, &m_overlapped);
+//
+//	if (result) {
+//		// Event was already signaled
+//		ResetEvent(m_hEvent);
+//		return true;
+//	}
+//
+//	if (GetLastError() != ERROR_IO_PENDING) {
+//		return false;
+//	}
+//
+//	// Wait for the event with timeout
+//	DWORD waitResult = WaitForSingleObject(m_hEvent,
+//		(timeoutMs < 0) ? INFINITE : static_cast<DWORD>(timeoutMs));
+//
+//	if (waitResult == WAIT_OBJECT_0) {
+//		ResetEvent(m_hEvent);
+//		return true;
+//	}
+//
+//	return false;   // timeout or error
+//}

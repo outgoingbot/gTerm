@@ -87,5 +87,5 @@ private:
 	virtualComm* _vComPort; //the virtualComport class is local to serialManager class.
 
 	// Internal function for the background reading thread
-	void readLoop();
+	void readLoop(unsigned int baud);
 };

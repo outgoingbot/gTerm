@@ -19,6 +19,7 @@ public:
 
     int update(const std::vector<std::string>& new_lines, bool isConnected);
     void SetTextColor(float r, float g, float b, float a = 1.0f);
+    void terminal_output::SetTextSize(float sz);
 
 private:
     bool _autoScroll;
@@ -46,6 +47,7 @@ private:
     float mTextColorG = 0.8f;
     float mTextColorB = 0.3f;
     float mTextColorA = 1.0f;
+    float localFontSize = 0.0f;
 
     //Text slect methods
     std::string_view getLineAtIdx(size_t idx);

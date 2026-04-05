@@ -39,10 +39,8 @@ private:
 	//Connection Parameters
 	DCB dcbSerialParams;
 	
-	//bool _killThreadFlag = false;
-
-	//char* _rx_char_buffer = nullptr;
-	//char* _tx_char_buffer = nullptr;
+	//OVERLAPPED m_overlapped = { 0 };
+	//HANDLE     m_hEvent = NULL;      // event used by WaitCommEvent
 
 public:
 	//these are the ram locations that low level tx/rx commands access
@@ -78,7 +76,9 @@ public:
 
 	bool disconnect();
 
-	
+	//event driven comm port
+	//void SetupEventDrivenRead();
+	//bool WaitForData(int timeoutMs = -1) override;   // -1 means infinite
 };
 
 #endif // RS232COMM_H_INCLUDED

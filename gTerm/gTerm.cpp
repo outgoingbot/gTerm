@@ -4,14 +4,11 @@
 #include "stb_image.h"
 #include "gTerm.h"
 
-//TODO: update imgui to 1.92.6 (im on 1.92.5 this has inputTextMultiLine() as wrapping and selectable)
-
 using namespace std;
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
-#define SCALE_FACTOR 1.0
-#define IGNORE_SAVED_IMU_INI 0 //0 = use cached object postions, good for debug, bad for release
+#define SCALE_FACTOR 1.5
 
 int main() {
     // Initialize GLFW
@@ -45,7 +42,7 @@ int main() {
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable VSync
+    glfwSwapInterval(1); // Enable VSync and caps framerate to moitor refresh rate
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -59,51 +56,29 @@ int main() {
     ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     
+ #define IGNORE_SAVED_IMU_INI 0
     #if IGNORE_SAVED_IMU_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
     
-    (void)io;
-
-    //========================================= FONT TESTING ==============================================
-    //resize the default font
-    //ImFontConfig config;
-    //config.SizePixels = 24.0f; // make ProggyClean bigger
-    //io.Fonts->AddFontDefault(&config);
-
-
-    //Set the Glass_TTY_VT220 Font
-    /*
-    io.Fonts->Clear(); // Clear existing fonts
-    const char* fontPath = FONT_FILE_PATH; // Defined by CMake
-    io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
-    */
-
-    //ImGui_ImplOpenGL3_CreateFontsTexture(); // Docs say this should be called but it crashes the app
-
-    // Keep ImGui default font (automatically added by AddFontDefault)
-    ImFont* fontDefault = io.Fonts->AddFontDefault();
-
-    // Add your custom font
-    const char* fontPath = FONT_FILE_PATH;  // e.g. "assets/Glass_TTY_VT220.ttf"
-    ImFont* fontVT220 = io.Fonts->AddFontFromFileTTF(fontPath, 24.0f);
-
-    // (Optional) Add more sizes or variants
-    ImFont* fontVT220_Large = io.Fonts->AddFontFromFileTTF(fontPath, 32.0f);
-    ImFont* fontVT220_Small = io.Fonts->AddFontFromFileTTF(fontPath, 16.0f);
-
-    // Build the font atlas
-    //io.Fonts->Build(); <-- causing crash on start
-    //========================================= FONT TESTING ==============================================
-
-
     ImGui::StyleColorsDark();
 
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
-
     glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
+    //Scale the entire glfw window with this function
+    glfwSetWindowSize(window, WINDOW_WIDTH * SCALE_FACTOR, WINDOW_HEIGHT * SCALE_FACTOR);
+    //glfwSetWindowSize(window, 1200, 800);
+    
+
+    //========================================= FONT TESTING ==============================================
+    ImFontConfig config;
+    config.SizePixels = 18.0f; // Your starting size
+    io.Fonts->AddFontDefaultVector(&config); // Explicitly load modern font
+    io.Fonts->Build();
+    //========================================= FONT TESTING ==============================================
+
 
     //Create Custom GUI Object
     mainMenu main_menu;
@@ -111,40 +86,47 @@ int main() {
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
     dataParser dParser;
     dataPlotter dPlotter;
-    
-    //Scale the entire glfw window with this function
-    glfwSetWindowSize(window, WINDOW_WIDTH * 1.5, WINDOW_HEIGHT * 1.5);
-
- 
+     
     // Main loop
     while (!glfwWindowShouldClose(window)) {
+        if(main_menu.frame_rate_capped){
+            glfwWaitEventsTimeout(0.008);        // ~8ms timeout → ~120 FPS max when idle
+        }
+        else {
+            glfwPollEvents();                    // Stay fully responsive
+        }
 
-        glfwPollEvents(); //I think this handles the user inputs
+        // rebuild fonts  -  put this BEFORE ImGui::NewFrame()
+        if (main_menu.fontNeedsRebuild) {
+            ImGui::PushFont(nullptr, main_menu.currentFontSize);
+            main_menu.fontNeedsRebuild = false;
+        }
 
         // Start a new frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
+        ImGui::GetStyle().FontSizeBase = main_menu.currentFontSize;
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
+        
         //ImGui::SetNextWindowPos(ImVec2(10, 50), ImGuiCond_FirstUseEver); // initial position only once
         //ImGui::SetNextWindowSize(ImVec2(1200, 800), ImGuiCond_FirstUseEver); // optional size
-        term.update("Terminal"); //going to be the "main" terminal (realTerm like)
+        term.update("Terminal"); //"main" terminal (realTerm like)
 
         //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
-        //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
-        
-        //Going to need smaller 'term' objects that have graphs, logging, settings, DSP options, etc (bulk of code)
-        
+        //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size    
         //Parser Window
         dParser.update();
         
         //Plotter Window
         if (dParser.dataParse_enable && dParser.send_to_plot) {
+            //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
+            //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
             dPlotter.update(dParser, term.getRxBuffer());
         }
+        
         //Debug window
-        ImVec2 windowSize(400, 250);
+        ImVec2 windowSize(400, 450);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
