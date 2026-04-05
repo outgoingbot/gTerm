@@ -1,3 +1,5 @@
+<img src="https://github.com/outgoingbot/gTerm/blob/master/ScreenShot.png" height="512" width="815" >
+
 Building on Linux
 =================
 
