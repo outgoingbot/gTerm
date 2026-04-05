@@ -3,7 +3,7 @@ Building on Linux
 
 1. Install Required Tools:
     
-    ubuntu
+    Debian
     ```bash
     sudo apt update
     sudo apt install build-essential cmake ninja-build pkg-config \
@@ -15,7 +15,7 @@ Building on Linux
     ```bash
     sudo pacman -Syu --needed base-devel cmake ninja pkgconf \
         libx11 libxrandr libxinerama libxcursor libxi \
-        mesa libgl glu
+        mesa libgl glu curl zip unzip tar git
     ```
 
 2. Install vcpkg:
@@ -36,6 +36,7 @@ Building on Linux
     ```bash
     cd ~/dev
     git clone https://github.com/outgoingbot/gTerm.git
+    cd ~/dev/gTerm
     ```
 
 
@@ -57,5 +58,5 @@ Building on Linux
 
 7. Run the Executable:
     ```bash
-    ./build/gTerm
+    ./build/gTerm/gTerm
     ```

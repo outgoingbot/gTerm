@@ -4,6 +4,7 @@
 
 #include <string>
 #include <deque>
+#include <cstdint>
 
 
 class virtualComm {
