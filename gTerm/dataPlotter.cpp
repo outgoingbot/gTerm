@@ -11,15 +11,14 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 {
     ImGui::Begin("Live Serial Plot");
 
-    // ====================== Plot Controls ======================
     ImGui::Checkbox("Auto Y Scale", &autoScale);
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, 4096);
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, static_cast<int>(MAX_SAMPLES));
 
     ImGui::Separator();
 
-    // ====================== Parse Data ======================
+    // ====================== Parse (still uses your parser) ======================
     parser.parse(rxDeque, currentSamples);
 
     if (currentSamples.empty()) {
@@ -28,21 +27,27 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
         return;
     }
 
-    // ====================== Prepare Plot Data ======================
+    // ====================== Limit to last N samples (HUGE performance win) ======================
     size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
-    size_t startIdx = currentSamples.size() - displayCount;
+    size_t startIdx = currentSamples.size() > displayCount ? currentSamples.size() - displayCount : 0;
 
-    size_t numChannels = parser.getChannelCount();
-    if (numChannels == 0) numChannels = 1;
+    size_t numChannels = std::min(parser.getChannelCount(), MAX_CHANNELS);
 
-    // Resize buffers
-    x_data.resize(displayCount);
-    y_data.resize(numChannels);
-    for (auto& ch : y_data) {
-        ch.resize(displayCount);
+    // Only resize when number of channels or points changes (avoids allocation every frame)
+    if (numChannels != lastNumChannels || displayCount != lastPointsToDisplay) {
+        x_data.resize(displayCount);
+        y_data.resize(numChannels);
+        for (auto& ch : y_data) ch.resize(displayCount);
+        lastNumChannels = numChannels;
+        lastPointsToDisplay = displayCount;
+    }
+    else {
+        // just update size without reallocating
+        x_data.resize(displayCount);
+        for (auto& ch : y_data) ch.resize(displayCount);
     }
 
-    // Fill data for plotting (most recent samples)
+    // Fill plotting buffers
     for (size_t i = 0; i < displayCount; ++i) {
         size_t idx = startIdx + i;
         const auto& sample = currentSamples[idx];
@@ -82,10 +87,7 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
             ImVec4 color = ImPlot::GetColormapColor(static_cast<int>(ch) % 10);
             ImPlot::SetNextLineStyle(color);
 
-            ImPlot::PlotLine(label.c_str(),
-                x_data.data(),
-                y_data[ch].data(),
-                static_cast<int>(displayCount));
+            ImPlot::PlotLine(label.c_str(), x_data.data(), y_data[ch].data(), static_cast<int>(displayCount));
         }
 
         ImPlot::PopStyleVar();

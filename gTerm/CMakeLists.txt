@@ -1,7 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.15)
 project(gTerm)
 
-# Use modern C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -37,49 +36,17 @@ add_executable(gTerm
 # ─── Vcpkg Packages ──────────────────────────────────────────────────────────────
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(implot CONFIG REQUIRED)        # ← Now using vcpkg version
 
 target_link_libraries(gTerm PRIVATE
     glfw
     glad::glad
+    imgui::imgui
+    implot::implot                          # ← Much cleaner!
 )
 
-# ─── ImGui (manual integration) ──────────────────────────────────────────────────
-add_library(imgui STATIC
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/imgui_demo.cpp
-
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/backends/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/backends/imgui_impl_opengl3.cpp
-)
-
-target_include_directories(imgui PUBLIC
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5/backends
-)
-
-target_link_libraries(imgui PUBLIC glfw glad::glad)
-
-# ─── ImPlot (manual build) ───────────────────────────────────────────────────────
-add_library(implot STATIC
-    ${CMAKE_SOURCE_DIR}/external/implot/implot.cpp
-    ${CMAKE_SOURCE_DIR}/external/implot/implot_items.cpp
-    # ${CMAKE_SOURCE_DIR}/external/implot/implot_demo.cpp
-)
-
-target_include_directories(implot PUBLIC
-    ${CMAKE_SOURCE_DIR}/external/implot
-    ${CMAKE_SOURCE_DIR}/external/imgui-1.92.5
-)
-
-target_link_libraries(implot PUBLIC imgui)
-
-# Link ImGui + ImPlot into the executable
-target_link_libraries(gTerm PRIVATE imgui implot)
-
-# ─── Resource Paths as Defines ───────────────────────────────────────────────────
+# ─── Resource Paths ──────────────────────────────────────────────────────────────
 set(FONT_FILE_PATH "${CMAKE_SOURCE_DIR}/res/Glass_TTY_VT220.ttf")
 add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")
 

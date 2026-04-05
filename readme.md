@@ -2,60 +2,60 @@ Building on Linux
 =================
 
 1. Install Required Tools:
-   ```bash
-   sudo apt install build-essential gcc g++ clang cmake libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
-   ```
+    
+    ubuntu
+    ```bash
+    sudo apt update
+    sudo apt install build-essential cmake ninja-build pkg-config \
+        libx11-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev \
+        libglu1-mesa-dev libxrandr-dev
+    ```
+    
+    Arch
+    ```bash
+    sudo pacman -Syu --needed base-devel cmake ninja pkgconf \
+        libx11 libxrandr libxinerama libxcursor libxi \
+        mesa libgl glu
+    ```
+
 2. Install vcpkg:
 
-   Clone vcpkg from GitHub into a workspace (like `/home/user/dev`):
-   ```bash
-   git clone https://github.com/microsoft/vcpkg.git
-   ```
-   ```bash
-   cd vcpkg
-   ```
-   ```bash
-   ./bootstrap-vcpkg.sh -disableMetrics
-   ```
+    Clone `vcpkg` from GitHub into a workspace (e.g. `~/dev` or `/opt`):
+    
+    ```bash
+    mkdir ~/dev
+    cd ~/dev
+    git clone https://github.com/microsoft/vcpkg.git ~/dev/vcpkg
+    cd ~/dev/vcpkg
+    ./bootstrap-vcpkg.sh -disableMetrics
+    ```
 
-3. Integrate vcpkg:
-   ```bash
-   ./vcpkg integrate install
-   ```
-4. Install Dependencies:
-   ```bash
-   ./vcpkg install glad glfw3
-   ```
 
-5. Clone gTerm and submodules
-   
-   ```bash
-   cd /home/user/dev
-   ```
+5. Clone gTerm
 
-   ```bash
-   git --recurse-submodules clone https://github.com/outgoingbot/gTerm.git
-   ```
+    ```bash
+    cd ~/dev
+    git clone https://github.com/outgoingbot/gTerm.git
+    ```
 
 
 5. Configure with CMake:
 
-   ```bash
-   cd /home/user/dev/gTerm
-   ```
-   
-   Run this command in the project root: `cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg.cmake`
-   ```bash
-   cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/home/mac/dev/vcpkg/scripts/buildsystems/vcpkg.cmake
-   ```
-6. Build the Project:
-   ```bash
-   make -C build
-   ```
+    ```bash
+    cmake -B build -S . \
+        -DCMAKE_TOOLCHAIN_FILE=~/dev/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_BUILD_TYPE=Release
+    ```
+
+
+6. Build the project
+    
+    ```bash    
+    cmake --build build --config Release -j$(nproc)
+    ```
+
+
 7. Run the Executable:
-   ```bash
-   cd gTerm/build/gTerm
-   ```
-   ```bash
-   ./gterm
-   ```
+    ```bash
+    ./build/gTerm
+    ```
