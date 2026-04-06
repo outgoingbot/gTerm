@@ -1,5 +1,39 @@
+# gTerm - Real-Time Serial Terminal & Plotting
+
+**gTerm** is a modern, high-performance serial terminal and real-time graphing tool designed for embedded developers, and hardware engineers who need fast, responsive visualization of serial data.
+
+`gTerm` combines a classic terminal interface with powerful real-time plotting capabilities.
+<br>
+Think **Serial Terminal** + **Serial Oscilloscope** for streaming data. Great for monitoring sensor data / telemetry. `gTerm` gives you immediate visual feedback without the lag or poor performance of other tools. Inspired from the limitations of other serial terminals being very antiquated and other plotting software having excessive buffer, lag, and lack of plot customization.
+Written in C++ to achieve high performance.
+
+### Key Features
+- **Cross Platform** builds / runs on Windows and Linux
+- **Modern, responsive UI** built with Dear ImGui using GPU hardware Acceleration
+- **High-speed serial communication** with minimal data Buffering (gets live data as fast as possible to screen)
+- **Classic terminal view** with font settings
+- **Live data parsing** with flexible channel support
+- **Real-time plotting** using ImPlot for smooth waveform visualization and dynamic layout
+
+
+
+
+### Built With
+
+- **Dear ImGui** + **ImPlot** for the immediate-mode GUI and graphing
+- **GLFW** + **OpenGL 3/4** for the rendering backend
+- Custom serial communication layer (Windows + Linux support)
+
+`gTerm` aims to be lightweight `(doing my best here)`, highly responsive, and focused on delivering the best possible real-time experience when working with serial devices.
+
+---
+
+
 <img src="https://github.com/outgoingbot/gTerm/blob/master/Screenshot.png" height="512" width="815" >
 
+Building on Windows
+=================
+WIP. using visual studio CMAKE project. just install vcpk and clone the project. make sure to `vcpkg install` in the project dir to install the dependencies listed in the vcpkg.json file
 
 Building on Linux
 =================
