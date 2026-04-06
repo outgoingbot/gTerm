@@ -66,10 +66,9 @@ int main() {
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
-    glEnable(GL_MULTISAMPLE); //this doing anything? supposed to enable the 4x MSAA anti-aliasing set above
+    glEnable(GL_MULTISAMPLE); //enable the 4x MSAA anti-aliasing set above
     //Scale the entire glfw window with this function
     glfwSetWindowSize(window, WINDOW_WIDTH * SCALE_FACTOR, WINDOW_HEIGHT * SCALE_FACTOR);
-    //glfwSetWindowSize(window, 1200, 800);
     
 
     //========================================= FONT TESTING ==============================================
@@ -150,7 +149,6 @@ int main() {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     ImPlot::DestroyContext();
-
     glfwDestroyWindow(window);
     glfwTerminate();
 

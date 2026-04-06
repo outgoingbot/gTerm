@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=gTerm
+Exec=gTerm
+Icon=gTerm
+Type=Application
+Categories=Utility;TerminalEmulator;
+StartupWMClass=gTerm
