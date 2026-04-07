@@ -83,7 +83,7 @@ The executable will be generated in `build/Release/` (or `build/Debug/`).
 
     cmake --build build --config Release
 ```
-<br>
+
 Building on Linux
 =================
 
