@@ -89,8 +89,8 @@ int terminal::update(const char* title) {
     //Input Text Box
     ImGui::SameLine(); // Place the next widget on the same line
         
-    ImGui::SetNextItemWidth(200);  // Set width of the input field
-    if (ImGui::InputText("##TextEntry", input_buffer_Port, IM_ARRAYSIZE(input_buffer_Port))) {
+    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    if (ImGui::InputText("##Comm_Port_Entry", input_buffer_Port, IM_ARRAYSIZE(input_buffer_Port))) {
         // Handle text input when the field changes
     }
     //Text Box
@@ -99,8 +99,8 @@ int terminal::update(const char* title) {
 
     //Input Text Box
     ImGui::SameLine(); // Place the next widget on the same line
-    ImGui::SetNextItemWidth(200);  // Set width of the input field
-    if (ImGui::InputText("##TextEntry2", input_buffer_Baud, IM_ARRAYSIZE(input_buffer_Baud))) {
+    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    if (ImGui::InputText("##Comm_Baud_Entry", input_buffer_Baud, IM_ARRAYSIZE(input_buffer_Baud))) {
         // Handle text input when the field changes
     }
 
@@ -154,13 +154,14 @@ int terminal::update(const char* title) {
     //-----------------------------Disconnect Button--------------------------|
         
 
-    //------------------------------COM Status Text-------------------------------|
+    //------------------------------DEBUG COM Status Text-------------------------------|
     //Just getting some basic serial status stuff to the GUI. this will change
     //Text Box
-    ImGui::SameLine(); // Place the next widget on the same line
-    ImGui::Text("isConnected %i", serialManObj->isConnected());
-    //------------------------------COM Status Text-------------------------------|
+    //ImGui::SameLine(); // Place the next widget on the same line
+    //ImGui::Text("isConnected %i", serialManObj->isConnected());
+    //------------------------------DEBUG COM Status Text-------------------------------|
 
+ 
     if (serialManObj->isConnected() == true) {
         std::string portString = serialManObj->getCommPort();
         strncpy(input_buffer_Port, portString.c_str(), sizeof(input_buffer_Port) - 1);

@@ -58,3 +58,22 @@ Ive decreased the serialManager char buffer size. this reduced scrolling activit
 //temp: i need to think about how i want to do this serial data managemnt. minimize copies. right now Terminal ownt he serial monitor class
 //so i can either expose the buffer through terminal class. or move serial monitor above terminal class
 //the idea is that the serial data goes through dataParser before it hits dataPlotter
+
+
+some issues and things to do next.
+buffer issues:
+copying the deque in terminal is needed. its a thread safe way to get the data and is fine.
+whats not great ins build the std::string lines for the terminal output display.
+also, the buffers in dataPlotter need to be looked at (size, name, reason)
+
+text in terminal output:
+im using a selectText library. it works great but i think imgui 1.92.7 has fixed the multiline wrapping and selecting
+
+linux:
+I changed how the threading is handled in seriam manager. we need to make sure the LinuxSerialComm is configured correctly
+to be blocking (set timeouts and other params) and work like the windows rs232
+
+bugs:
+the dataplotter slider number of smaples to view, need to set it max value based on the data to be plotted, not the deque
+buffer size. the reason is that ascii to float conversion can be like 10 chars per 1 float sample (atof() type conversion)
+if you slide to the right too far the plot bugs out at x=0
