@@ -5,8 +5,8 @@ I need to fix how we connect to the Serial port. Much of it is done automaticall
 
 I need to fuzz the serial port hard and make sure im getting good performance <--Fixed/Done
 -some issues that could cause performance drop is:
---Poor buffer handeling
---excessive sleeps in the thread (using sleep to limit CPU usage.)
+--Poor buffer handeling <-mostly fixed
+--excessive sleeps in the thread (using sleep to limit CPU usage.) <-fixed
 
 Have an issue where when I CreateFile for the hSerial it throws error code 5
 -ERROR_ACCESS_DENIED (5)	<-- Fixed. Solved was opening two terminal windows but only drawing one. Only 1 Terminal per Comm Port
@@ -60,10 +60,11 @@ Ive decreased the serialManager char buffer size. this reduced scrolling activit
 //the idea is that the serial data goes through dataParser before it hits dataPlotter
 
 
+//------------------------------------------Solve all these before moving forward----------------------------------
 some issues and things to do next.
 buffer issues:
-copying the deque in terminal is needed. its a thread safe way to get the data and is fine.
-whats not great ins build the std::string lines for the terminal output display. <-fiex
+copying the deque in terminal is needed. its a thread safe way to get the data and is fine. <--only copy new data per frame
+whats not great ins build the std::string lines for the terminal output display. <-fixed
 also, the buffers in dataPlotter need to be looked at (size, name, reason)
 
 text in terminal output:
@@ -77,3 +78,6 @@ bugs:
 the dataplotter slider number of smaples to view, need to set it max value based on the data to be plotted, not the deque
 buffer size. the reason is that ascii to float conversion can be like 10 chars per 1 float sample (atof() type conversion)
 if you slide to the right too far the plot bugs out at x=0
+
+
+maybe add a trigger to the plots?

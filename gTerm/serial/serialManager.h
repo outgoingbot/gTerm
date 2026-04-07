@@ -26,7 +26,6 @@
 #define SERIAL_ERROR -1
 #define SERIAL_WARNING -2
 
-//TODO: Setting this too high kills FPS
 #define MAX_CHAR_COUNT 20000 //Max number if chars in the deque object
 
 class serialManager {

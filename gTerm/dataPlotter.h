@@ -37,7 +37,7 @@ private:
     // Constants
     static constexpr int MAX_BUFFER_SIZE = 2048; // Adjust as needed
 
-    // UI State (Replaces the 'static' variables from your snippet)
+    // UI State
     bool autoScale = true;
     bool follow_x = true;
     float y_min = -20.f;

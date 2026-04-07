@@ -32,7 +32,7 @@ int main() {
         return -1;
     }
 
-    //Load stupid gTerm Icon that I wasted 3 hours getting to work.
+    // Load stupid gTerm Icon that I wasted 3 hours getting to work.
     const char* iconPath = ICON_FILE_PATH; // Defined by CMake
     GLFWimage images[1];
     images[0].pixels = stbi_load(iconPath, &images[0].width, &images[0].height, 0, 4); //rgba channels 
@@ -79,7 +79,7 @@ int main() {
     //========================================= FONT TESTING ==============================================
 
 
-    //Create Custom GUI Object
+    // Create Custom GUI Object
     mainMenu main_menu;
     DebugMenu debugMenu;
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
@@ -102,7 +102,7 @@ int main() {
             glfwSwapInterval(0);   // VSync OFF (uncapped)
         }
 
-        // rebuild fonts  -  put this BEFORE ImGui::NewFrame()
+        // rebuild fonts
         if (main_menu.fontNeedsRebuild) {
             ImGui::PushFont(nullptr, main_menu.currentFontSize);
             main_menu.fontNeedsRebuild = false;

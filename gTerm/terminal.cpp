@@ -70,9 +70,6 @@ int terminal::update(const char* title) {
         }
     }
 
-    // 3. Limit display lines only
-    //const size_t MAX_LINES = 500;
-
     if (_displayLines.size() > term_out.scroll_back_length)
     {
         _displayLines.erase(_displayLines.begin(),

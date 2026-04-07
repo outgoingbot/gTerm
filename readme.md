@@ -33,8 +33,55 @@ Written in C++ to achieve high performance.
 
 Building on Windows
 =================
-WIP. using visual studio CMAKE project. just install vcpk and clone the project. make sure to `vcpkg install` in the project dir to install the dependencies listed in the vcpkg.json file
 
+1. Install Required Tools:
+
+    - Visual Studio 202x with **Desktop development with C++** (recommended)
+    - CMake 3.15 or higher (if not installed with visuals studio)
+    - Git
+
+2. clone vcpk into a well chosen director (like: `C:\dev`)
+    
+    ```cmd
+    cd C:\dev
+    git clone https://github.com/microsoft/vcpkg.git
+    cd C:\dev\vcpkg
+    .\bootstrap-vcpkg.bat -disableMetrics
+    ```
+5. Clone gTerm
+
+    ```cmd
+    cd C:\dev
+    git clone https://github.com/outgoingbot/gTerm.git
+    cd C:\dev\gTerm
+    ```
+
+3. download/install dependencies using vcpkg.json
+    ```cmd
+    cd C:\dev\gTerm
+    vcpkg install
+    ```
+3. Build the project
+
+#### Option A: Using Visual Studio (recommended)
+
+1. Open the `gTerm` folder in Visual Studio 2022 (`File` -> `Open` -> `CMake...`)
+2. Visual Studio will automatically detect `CMakeLists.txt` and `vcpkg.json`
+3. It will configure CMake using the vcpkg toolchain
+4. Select **x64** as the active configuration
+5. Build the project (`Build` -> `Build All`)
+
+The executable will be generated in `build/Release/` (or `build/Debug/`).
+
+#### Option B: Using Command Line
+    ```cmd
+        cmake -B build -S . ^
+        -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+        -DCMAKE_BUILD_TYPE=Release
+
+        cmake --build build --config Release
+    ```
+<br>
 Building on Linux
 =================
 
