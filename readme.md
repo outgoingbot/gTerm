@@ -48,7 +48,7 @@ Building on Windows
     cd C:\dev\vcpkg
     .\bootstrap-vcpkg.bat -disableMetrics
     ```
-5. Clone gTerm
+3. Clone gTerm
 
     ```cmd
     cd C:\dev
@@ -56,12 +56,13 @@ Building on Windows
     cd C:\dev\gTerm
     ```
 
-3. download/install dependencies using vcpkg.json
+4. download/install dependencies using vcpkg.json
     ```cmd
     cd C:\dev\gTerm
     vcpkg install
     ```
-3. Build the project
+    <br>
+5. Build the project
 
 #### Option A: Using Visual Studio (recommended)
 
@@ -74,13 +75,14 @@ Building on Windows
 The executable will be generated in `build/Release/` (or `build/Debug/`).
 
 #### Option B: Using Command Line
-    ```cmd
-        cmake -B build -S . ^
-        -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake ^
-        -DCMAKE_BUILD_TYPE=Release
+    
+```cmd
+    cmake -B build -S . ^
+    -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+    -DCMAKE_BUILD_TYPE=Release
 
-        cmake --build build --config Release
-    ```
+    cmake --build build --config Release
+```
 <br>
 Building on Linux
 =================
