@@ -21,6 +21,9 @@ public:
     void SetTextColor(float r, float g, float b, float a = 1.0f);
     void terminal_output::SetTextSize(float sz);
 
+    //make private if needed
+    size_t scroll_back_length = 500;
+
 private:
     bool _autoScroll;
     bool _showControlChars;
@@ -48,6 +51,8 @@ private:
     float mTextColorB = 0.3f;
     float mTextColorA = 1.0f;
     float localFontSize = 0.0f;
+
+
 
     //Text slect methods
     std::string_view getLineAtIdx(size_t idx);

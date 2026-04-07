@@ -30,8 +30,6 @@ size_t terminal_output::getNumLines() {
 
 
 int terminal_output::update(const std::vector<std::string>& new_lines, bool isConnected) {
-    // Store the lines for TextSelect.
-    lines = new_lines; //TODO: I dont like this copy!!!!
 
     // Create a window to contain the text
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_NoMove);
@@ -45,14 +43,12 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     // Draw bouncing ball
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
-
-    //ImGui::PushFont(fontVT220); //<--- need to pass this thru terminal -> terminal_output constructors. terminal(ImFont* font);
     
     // Update TextSelect instance (all text selection is handled in this method)
     textSelect->update(); //Moved this above the for loop below
 
     //send the lines into
-    for (const auto& line : lines) {
+    for (const auto& line : new_lines) {
         ImGui::TextWrapped("%s", line.c_str());
     }
 

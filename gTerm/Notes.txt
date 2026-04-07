@@ -63,7 +63,7 @@ Ive decreased the serialManager char buffer size. this reduced scrolling activit
 some issues and things to do next.
 buffer issues:
 copying the deque in terminal is needed. its a thread safe way to get the data and is fine.
-whats not great ins build the std::string lines for the terminal output display.
+whats not great ins build the std::string lines for the terminal output display. <-fiex
 also, the buffers in dataPlotter need to be looked at (size, name, reason)
 
 text in terminal output:

@@ -50,31 +50,37 @@ int terminal::update(const char* title) {
     // Create ImGui window for terminal
     ImGui::Begin(title);
 
-    // 1. Get raw serial data
-    //We must copy the entire buffer like this.
-    serialManObj->copyData(&_Term_rxBufferQueue); //copying
+    // 1. Get new data + number of characters actually added
+    size_t newCharCount = serialManObj->getNewData(_Term_rxBufferQueue);
 
-    // 2. Convert deque<char> -> vector<string> (split on \n, ignore \r)
-    std::vector<std::string> display_lines;
-    std::string current_line;
+    // 2. Process ONLY the new characters
+    for (size_t i = 0; i < newCharCount; ++i)
+    {
+        // We know the new characters are at the end of the deque
+        char c = _Term_rxBufferQueue[_Term_rxBufferQueue.size() - newCharCount + i];
 
-    //Rules for handeling certain characters in the serial data
-    for (char c : _Term_rxBufferQueue) {
-        if (c == '\n') {
-            display_lines.push_back(std::move(current_line));
-            current_line.clear();
+        if (c == '\n')
+        {
+            _displayLines.push_back(std::move(_currentPartialLine));
+            _currentPartialLine.clear();
         }
-        else if (c != '\r') {
-            current_line += c;
+        else if (c != '\r')
+        {
+            _currentPartialLine += c;
         }
     }
-    if (!current_line.empty()) {
-        display_lines.push_back(std::move(current_line));
+
+    // 3. Limit display lines only
+    //const size_t MAX_LINES = 500;
+
+    if (_displayLines.size() > term_out.scroll_back_length)
+    {
+        _displayLines.erase(_displayLines.begin(),
+            _displayLines.begin() + (_displayLines.size() - term_out.scroll_back_length));
     }
 
-    // 3. Send modified lines to terminal_output
-    term_out.update(display_lines, serialManObj->isConnected());
-
+    // 4. Send to output
+    term_out.update(_displayLines, serialManObj->isConnected());
     
        
     //-----------------------------Comm Port Entry Text-----------------------------|
@@ -205,6 +211,24 @@ int terminal::update(const char* title) {
         }
     }
     //------------------------------BAUD Port Drop Down-------------------------------|
+
+    ImGui::NewLine();
+
+    //------------------------------Scroll Back Entry-------------------------------|
+    snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len),"%zu", term_out.scroll_back_length);
+    ImGui::Text("Scroll Back Lines:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
+        if (new_value > 0)
+        {
+            term_out.scroll_back_length = new_value;
+        }
+    }
+    //------------------------------Scroll Back Entry-------------------------------|
 
     ImGui::End();
 

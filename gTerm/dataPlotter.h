@@ -42,17 +42,13 @@ private:
     bool follow_x = true;
     float y_min = -20.f;
     float y_max = 20.f;
-    //int pointsToDisplay = 512;
+
 
     // Data Storage
     struct Sample { float sin, sq, saw; };
     Sample samples[MAX_BUFFER_SIZE];
     int sampleCount = 0;
 
-    //std::vector<ParsedSample> currentSamples;
-
-    //std::vector<float> x_data;
-    //std::vector<std::vector<float>> y_data;
 
 };
 

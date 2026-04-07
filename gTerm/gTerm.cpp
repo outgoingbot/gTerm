@@ -89,7 +89,7 @@ int main() {
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         if(main_menu.frame_rate_capped){
-            glfwWaitEventsTimeout(0.008);        // ~8ms timeout → ~120 FPS max when idle
+            glfwWaitEventsTimeout(0.004);        // ~240 FPS max
         }
         else {
             glfwPollEvents();                    // Stay fully responsive

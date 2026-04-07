@@ -61,10 +61,9 @@ public:
 	bool connect();
 	bool disconnect();
 	
-	bool hasData();
 	void pushData(const char* data, size_t length);
 
-	void copyData(std::deque<char> *rxBufferQueue_public);
+	size_t getNewData(std::deque<char>& destination);
 
 	void debug_getKernelcharCount(size_t* len);
 

@@ -50,6 +50,7 @@ private:
 	{
 		char input_buffer_Port[64] = { 0 };   // Buffer for COM port
 		char input_buffer_Baud[64] = { 0 };  // Buffer for baud rate
+		char input_buffer_scrollback_len[64] = { 0 };  // Buffer for scroll back
 		bool ConnectisClicked = false; //used to lock Connect button on click
 		bool open_popup_port = false; //use for comm port popup
 		bool open_popup_baud = false; //use for baudrate popup
@@ -60,4 +61,8 @@ private:
 
 	//this will hold a copy of the serial Manager deque. this copy does not need to be mutex locked when accessed.
 	std::deque<char> _Term_rxBufferQueue;
+
+	//lines vector control for term output
+	std::vector<std::string> _displayLines; 
+	std::string _currentPartialLine;
 };

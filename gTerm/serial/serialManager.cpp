@@ -81,22 +81,19 @@ std::string serialManager::getBaudRate() const {
 
 
 
-// Thread function that continuously reads data from the serial port. the serial manager dequeu<char> is ready
+// Thread function that continuously reads data from the serial port.
 void serialManager::readLoop() {
 	while (threadIsRunning) {
 		//copy the kernel comm buffer into this buffer
 		char buffer[8196]; //ideally this would be small if our thread is fast, but that uses lotsa cpu :(
 		int bytesRead = 0;
-		//Scrape everything off the top of the kernel serial file. this is our usable rx buff
-		//think of this as collecting serial data from a data register
+		//Scrape everything off the top of the kernel serial file.
 		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
-
-		//Push the char buffer elements onto a rxDeque Object acting as a char queue
 		if (bytesRead > 0) {
-			//DEBUG Keep track of the char copied from the kernel driver
-			deubug_kernel_num_chars_copied = bytesRead;
 			//push the kernel char buffer into the serialManager Dequeue<std::char>
 			pushData(buffer, bytesRead); //Serial manager method to copy the local buffer into the deque
+			//DEBUG Keep track of the char copied from the kernel driver
+			deubug_kernel_num_chars_copied = bytesRead;
 #if DEBUG_TO_TERMINAL
 			//std::cout is slowwwww
 			for (int i = 0; i < bytesRead; ++i)	std::cout << buffer[i]; //also print serial data to open debug cmd console
@@ -115,7 +112,6 @@ void serialManager::readLoop() {
 
 // Push new char data into the deque<char> array. we grabbed it from the kernal buffer and shove it into our deque<char> vector
 void serialManager::pushData(const char* data, size_t length) {
-	
 	//here is where we pump the char array into the deque<char> at the end()
 	std::lock_guard<std::mutex> lock(bufferMutex);
 	this->rxBufferQueue.insert(this->rxBufferQueue.end(), data, data + length);
@@ -130,12 +126,29 @@ void serialManager::pushData(const char* data, size_t length) {
 
 
 
-//Copies the deque<char> to another. I want to keep the mutex only in serialManager
-//This is required to keep the rxBufferQueue thread safe!
-void serialManager::copyData(std::deque<char>* rxBufferQueue_public) {
-    std::lock_guard<std::mutex> lock(bufferMutex);
-    *rxBufferQueue_public = rxBufferQueue;  // Assignment operator does a full copy
+size_t serialManager::getNewData(std::deque<char>& destination){
+	std::lock_guard<std::mutex> lock(bufferMutex);
+
+	size_t charsAdded = 0;
+
+	if (!rxBufferQueue.empty()){
+		//get the size of the internal queue
+		charsAdded = rxBufferQueue.size();
+		// Append only the new data
+		destination.insert(destination.end(),rxBufferQueue.begin(),rxBufferQueue.end());
+		// Clear internal queue
+		rxBufferQueue.clear();
+	}
+
+	// Enforce maximum size on the PUBLIC queue
+	const size_t maxSize = MAX_CHAR_COUNT;
+	if (destination.size() > maxSize){
+		size_t toRemove = destination.size() - maxSize;
+		destination.erase(destination.begin(), destination.begin() + toRemove);
+	}
+	return charsAdded;
 }
+
 
 
 void serialManager::stopThread() {
@@ -157,12 +170,6 @@ void serialManager::stopThread() {
 	}
 }
 
-
-// Check if there is data in the buffer
-bool serialManager::hasData() {
-	std::lock_guard<std::mutex> lock(bufferMutex);
-	return !rxBufferQueue.empty();
-}
 
 
 void serialManager::debug_getKernelcharCount(size_t* len) {
