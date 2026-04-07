@@ -8,7 +8,8 @@ public:
     mainMenu();
     void update(); // Render the debug menu
     bool frame_rate_capped = false;
-    float currentFontSize = 24.0f;
+    bool v_sync_enabled = true;
+    float currentFontSize = 18.0f;
     bool fontNeedsRebuild = false;
 };
 

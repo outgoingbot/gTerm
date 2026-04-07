@@ -95,6 +95,13 @@ int main() {
             glfwPollEvents();                    // Stay fully responsive
         }
 
+        if (main_menu.v_sync_enabled) {
+            glfwSwapInterval(1);   // VSync ON  (locked to monitor refresh rate)
+        }
+        else {
+            glfwSwapInterval(0);   // VSync OFF (uncapped)
+        }
+
         // rebuild fonts  -  put this BEFORE ImGui::NewFrame()
         if (main_menu.fontNeedsRebuild) {
             ImGui::PushFont(nullptr, main_menu.currentFontSize);
@@ -133,7 +140,6 @@ int main() {
 
         // Rendering
         ImGui::Render();
-        //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);

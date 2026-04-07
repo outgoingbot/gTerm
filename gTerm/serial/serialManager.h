@@ -45,9 +45,6 @@ public:
 
 	std::deque<std::string> commPortNames;
 	std::deque<std::string> commBaudNames;
-	std::string selectedPort;
-	std::string selectedBaud;
-
 
 	serialManager();
 	~serialManager();
@@ -55,11 +52,11 @@ public:
 	void listBaudRates(std::deque<std::string>* queue);
 	void listPorts(std::deque<std::string>* queue);
 
-	void setComPort(std::string* string);
-	void settBaudRate(std::string* string);
-
-	std::string getCommPort();
-	std::string getBaudRate();
+	std::string getCommPort() const;
+	void setCommPort(const std::string& port);
+	std::string getBaudRate() const;
+	void setBaudRate(const std::string& baud);
+	
 	
 	bool connect();
 	bool disconnect();

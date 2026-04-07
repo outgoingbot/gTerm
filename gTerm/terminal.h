@@ -30,7 +30,6 @@ public:
 	~terminal();
 
 	int update(const char* title);
-	int render(void);
 
 	//Manages the serial data terminal display window.
 	terminal_output term_out;
@@ -40,18 +39,21 @@ public:
 
 	//public method to share thread safe rx deque buffer
 	const std::deque<char>& getRxBuffer() const;
+	//setTxBuffer
 
 private:
-	void drawCircle(ImDrawList* draw_list, ImVec2 center, float radius, ImU32 color, int num_segments = 100);
 
-	//GLFWwindow* _window; // Pointer to the GLFW window
-	int _width;          // Window width
-	int _height;         // Window height
-		
-	char usr_text_buffer[128]; // Buffer to store the text input
-
-	char input_buffer_Port[64]; // Buffer to store the port list
-	char input_buffer_Baud[64]; // Buffer to store the baud
+	int _width;          // Window width //unused?
+	int _height;         // Window height //unused?
+	
+	struct terminal_ui
+	{
+		char input_buffer_Port[64] = { 0 };   // Buffer for COM port
+		char input_buffer_Baud[64] = { 0 };  // Buffer for baud rate
+		bool ConnectisClicked = false; //used to lock Connect button on click
+		bool open_popup_port = false; //use for comm port popup
+		bool open_popup_baud = false; //use for baudrate popup
+	} ui;
 	
 	int handle_connect_button();
 	int handle_disconnect_button();

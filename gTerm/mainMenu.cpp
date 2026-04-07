@@ -25,6 +25,7 @@ void mainMenu::update() {
         ImGui::EndMenu(); // End the "File" menu
     }
 
+
     if (ImGui::BeginMenu("Edit")) { // Add an "Edit" menu
         if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
             // Handle "Undo" action
@@ -48,12 +49,17 @@ void mainMenu::update() {
 
     if (ImGui::BeginMenu("Settings"))
     {
-        if (ImGui::MenuItem("cap frame rate = true")) {
-            frame_rate_capped = true;
+        if (ImGui::Checkbox("Cap Frame Rate", &frame_rate_capped))
+        {
+            //something else of needed
         }
-        if (ImGui::MenuItem("cap frame rate = false")) {
-            frame_rate_capped = false;
+
+
+        if (ImGui::Checkbox("Enable V-Sync", &v_sync_enabled))
+        {
+            //something else of needed
         }
+
 
         ImGui::Separator();
 

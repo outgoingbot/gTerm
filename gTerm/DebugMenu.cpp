@@ -53,7 +53,9 @@ void DebugMenu::update(serialManager* sermanobj){
     }
     ImGui::EndChild();
     // Frame Rate debug plot ================================= END
+
     ImGui::Separator();
+    
     //Buffer size debug plot ================================= START
     ImGui::BeginChild("Debug Kernel Buffer");
 
