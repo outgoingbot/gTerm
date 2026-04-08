@@ -63,6 +63,6 @@ private:
 	std::deque<char> _Term_rxBufferQueue;
 
 	//lines vector control for term output
-	std::vector<std::string> _displayLines; 
+//	std::string _displayLines; 
 	std::string _currentPartialLine;
 };

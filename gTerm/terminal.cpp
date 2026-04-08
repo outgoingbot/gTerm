@@ -49,35 +49,11 @@ int terminal::update(const char* title) {
     
     // Create ImGui window for terminal
     ImGui::Begin(title);
-
-    // 1. Get new data + number of characters actually added
+    
+    //get the new characters pushed from the serial thread
     size_t newCharCount = serialManObj->getNewData(_Term_rxBufferQueue);
-
-    // 2. Process ONLY the new characters
-    for (size_t i = 0; i < newCharCount; ++i)
-    {
-        // We know the new characters are at the end of the deque
-        char c = _Term_rxBufferQueue[_Term_rxBufferQueue.size() - newCharCount + i];
-
-        if (c == '\n')
-        {
-            _displayLines.push_back(std::move(_currentPartialLine));
-            _currentPartialLine.clear();
-        }
-        else if (c != '\r')
-        {
-            _currentPartialLine += c;
-        }
-    }
-
-    if (_displayLines.size() > term_out.scroll_back_length)
-    {
-        _displayLines.erase(_displayLines.begin(),
-            _displayLines.begin() + (_displayLines.size() - term_out.scroll_back_length));
-    }
-
-    // 4. Send to output
-    term_out.update(_displayLines, serialManObj->isConnected());
+    //Send the buffer and number of new chars to be displayed
+    term_out.update(_Term_rxBufferQueue, newCharCount, serialManObj->isConnected());
     
        
     //-----------------------------Comm Port Entry Text-----------------------------|
@@ -212,8 +188,8 @@ int terminal::update(const char* title) {
     ImGui::NewLine();
 
     //------------------------------Scroll Back Entry-------------------------------|
-    snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len),"%zu", term_out.scroll_back_length);
-    ImGui::Text("Scroll Back Lines:");
+    snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len),"%zu", term_out.display_buff_num_chars);
+    ImGui::Text("Char Buffer Size:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(150);  // Set width of the input field
     ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
@@ -222,10 +198,27 @@ int terminal::update(const char* title) {
         size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
         if (new_value > 0)
         {
-            term_out.scroll_back_length = new_value;
+            term_out.display_buff_num_chars = new_value;
         }
     }
     //------------------------------Scroll Back Entry-------------------------------|
+
+    //-----------------------------Clear Serial Buffer--------------------------|
+    if (ImGui::Button("Clear Serial Buffer")) {
+        _Term_rxBufferQueue.clear();
+        _Term_rxBufferQueue.shrink_to_fit();
+    }
+    //-----------------------------Clear Serial Buffer--------------------------|
+    
+    ImGui::SameLine(); // Place the next widget on the same line
+
+    //-----------------------------Clear Terminal Text--------------------------|
+    if (ImGui::Button("Clear Terminal")) {
+        term_out.clearDisplayText();
+    }
+    //-----------------------------Clear Terminal Text--------------------------|
+
+
 
     ImGui::End();
 

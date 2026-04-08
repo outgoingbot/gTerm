@@ -1,6 +1,7 @@
 #pragma once
 
 #include <imgui.h>
+#include "imgui_internal.h"
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -17,12 +18,14 @@ public:
     terminal_output();
     ~terminal_output();
 
-    int update(const std::vector<std::string>& new_lines, bool isConnected);
+    int update(std::deque<char>& fullBufferqueue, size_t newCharCount, bool isConnected);
     void SetTextColor(float r, float g, float b, float a = 1.0f);
     void terminal_output::SetTextSize(float sz);
 
     //make private if needed
-    size_t scroll_back_length = 500;
+    size_t display_buff_num_chars = 100000;
+
+    void clearDisplayText();
 
 private:
     bool _autoScroll;
@@ -52,16 +55,7 @@ private:
     float mTextColorA = 1.0f;
     float localFontSize = 0.0f;
 
-
-
-    //Text slect methods
-    std::string_view getLineAtIdx(size_t idx);
-
-    size_t getNumLines();
-
-    //Decalare Selectable text object
-    TextSelect* textSelect;
-
-    std::vector<std::string> lines; //TODO: we want to remove this if possible
+    //string to be printed in InpuTextMultiLine. one continues block of ram
+    std::string _displayLines;
     
 };

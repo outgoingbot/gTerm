@@ -1,35 +1,17 @@
 #include "terminal_output.h"
 
+
 terminal_output::terminal_output() {
     _autoScroll = true;
     _showControlChars = false;
-
-    //allocate Selactable Text object
-    textSelect = new TextSelect(
-        [this](size_t idx) { return this->getLineAtIdx(idx); },
-        [this]() { return this->getNumLines();     },
-        true
-    );
 
 }
 
 terminal_output::~terminal_output() {}
 
 
-//these fucking dumb and need to be removed or changed. why are we forced to have a hard coded variable type here?
-// It look like they are needed to be pushed into the selectText constructor but we need a better solution
-// Prob need to modify the selectText class
-//Text slect methods
-std::string_view terminal_output::getLineAtIdx(size_t idx) {
-    return lines[idx];
-}
 
-size_t terminal_output::getNumLines() {
-    return lines.size();
-}
-
-
-int terminal_output::update(const std::vector<std::string>& new_lines, bool isConnected) {
+int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCharCount, bool isConnected) {
 
     // Create a window to contain the text
     ImGui::BeginChild("ConsoleRegion", ImVec2(0, _window_params.height), true, ImGuiWindowFlags_NoMove);
@@ -44,63 +26,125 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
     
-    // Update TextSelect instance (all text selection is handled in this method)
-    textSelect->update(); //Moved this above the for loop below
 
-    //send the lines into
-    for (const auto& line : new_lines) {
-        ImGui::TextWrapped("%s", line.c_str());
+
+    //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
+    for (size_t i = 0; i < newCharCount; ++i){
+        char c = _Term_rxBufferQueue[_Term_rxBufferQueue.size() - newCharCount + i];
+        //Parse each character is you want to. InputTextMultiLine will obey control characters ao no need to check for new linea, etc
+        /*
+        // control character checks
+        switch (c){
+        case '\0':
+        case '\r':
+        case '\n':
+            _displayLines += ','; // Append the modified character to string
+            break;
+        case '\t':
+        case '\v':
+        case '\f':
+        case '\b':
+        default:
+            _displayLines += c; // Append the new character directly to string
+            break;    
+        }
+        */
+        _displayLines += c; // Append only new characters directly to string
     }
 
+    // limit total size of the string
+    if (_displayLines.size() > display_buff_num_chars){
+        _displayLines.erase(0, _displayLines.size() - display_buff_num_chars);
+    }
+
+
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));     // fully transparent
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ImGui::InputTextMultiline(
+        "##terminal_output",
+        const_cast<char*>(_displayLines.c_str()),
+        _displayLines.size() + 1,
+        ImVec2(-FLT_MIN, -FLT_MIN),
+        ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_NoHorizontalScroll
+    );
+    ImGui::PopStyleColor(3);
     ImGui::PopFont();
-
-    // Register a context menu (optional)
-    if (ImGui::BeginPopupContextWindow()) {
-        ImGui::BeginDisabled(!textSelect->hasSelection());
-        if (ImGui::MenuItem("Copy", "Ctrl+C")) {
-            textSelect->copy();
-        }
-        ImGui::EndDisabled();
-
-        if (ImGui::MenuItem("Select all", "Ctrl+A")) {
-            textSelect->selectAll();
-        }
-
-        if (ImGui::MenuItem("Clear selection")) {
-            textSelect->clearSelection();
-        }
-
-        //------------------------------set the text color-------------------------------|
-        // Local static values so sliders remember their positions
-        static float r = 0.0f;
-        static float g = 0.8f;
-        static float b = 0.3f;
-        static float a = 1.0f;
-        static float sz = 0.0f;
-
-        // Wrap in a collapsible header or your own UI block
-        ImGui::Separator();
-        ImGui::Text("Text Color Controls");
-        ImGui::PushItemWidth(150.0f);
-        // Four sliders (each 0.0 -> 1.0)
-        ImGui::SliderFloat("Red", &r, 0.0f, 1.0f, "%.3f");
-        ImGui::SliderFloat("Green", &g, 0.0f, 1.0f, "%.3f");
-        ImGui::SliderFloat("Blue", &b, 0.0f, 1.0f, "%.3f");
-        ImGui::SliderFloat("Alpha", &a, 0.0f, 1.0f, "%.3f");
-        ImGui::SliderFloat("Size", &sz, -20.f, 20.0f, "%.0f");
-        ImGui::PopItemWidth();
-        SetTextColor(r, g, b, a);
-        SetTextSize(sz);
-        //END ------------------------------set the text color-------------------------------|
-
-
-
-        ImGui::EndPopup();
-    }
-
     if (_autoScroll) {
-        ImGui::SetScrollY(ImGui::GetScrollMaxY());
+        // 1. Get the current window where the widget lives
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+
+        // 2. Locate the child window by its auto-generated name
+        // Format is: "ParentWindowName/Label_ID" (ID in hex)
+        char child_name[128];
+        ImFormatString(child_name, IM_ARRAYSIZE(child_name), "%s/##terminal_output_%08X", window->Name, ImGui::GetID("##terminal_output"));
+
+        if (ImGuiWindow* child_window = ImGui::FindWindowByName(child_name)) {
+            // 3. Directly set the scroll of that internal child
+            child_window->Scroll.y = child_window->ScrollMax.y;
+        }
     }
+    //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
+    
+    //--------------------------------------- Copy Text PopUp ---------------------------------------|
+    // Save selection before popup (critical)
+    int sel_start = -1;
+    int sel_end = -1;
+    ImGuiID id = ImGui::GetID("##terminal_output");
+    if (ImGuiInputTextState* state = ImGui::GetInputTextState(id))
+    {
+        if (state->HasSelection())
+        {
+            sel_start = ImMin(state->GetSelectionStart(), state->GetSelectionEnd());
+            sel_end = ImMax(state->GetSelectionStart(), state->GetSelectionEnd());
+        }
+    }
+
+    // Right-click Copy menu
+    // Show right-click menu ONLY if text is selected
+    if (sel_start != -1 && sel_end > sel_start){
+        if (ImGui::BeginPopupContextItem("##terminal_output"))
+        {
+            if (ImGui::MenuItem("Copy", "Ctrl+C"))
+            {
+                std::string selected = _displayLines.substr(sel_start, sel_end - sel_start);
+                ImGui::SetClipboardText(selected.c_str());
+            }
+            ImGui::EndPopup();
+        }
+    }else{
+
+        //this is a little buggy. sometimes need to left click once if selection has been made, even if not visible
+        // Register a context menu (optional)
+        if (ImGui::BeginPopupContextItem("##terminal_output2")){
+
+            //------------------------------set the text color-------------------------------|
+            // Local static values so sliders remember their positions
+            static float r = 0.0f;
+            static float g = 0.8f;
+            static float b = 0.3f;
+            static float a = 1.0f;
+            static float sz = 0.0f;
+
+            // Wrap in a collapsible header or your own UI block
+            ImGui::Separator();
+            ImGui::Text("Text Color Controls");
+            ImGui::PushItemWidth(150.0f);
+            // Four sliders (each 0.0 -> 1.0)
+            ImGui::SliderFloat("Red", &r, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Green", &g, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Blue", &b, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Alpha", &a, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Size", &sz, -20.f, 20.0f, "%.0f");
+            ImGui::PopItemWidth();
+            SetTextColor(r, g, b, a);
+            SetTextSize(sz);
+            //END ------------------------------set the text color-------------------------------|
+
+            ImGui::EndPopup();
+        }
+    }
+
     
     ImGui::PopStyleColor(1);
     ImGui::EndChild();
@@ -124,6 +168,11 @@ int terminal_output::update(const std::vector<std::string>& new_lines, bool isCo
     return 0;
 }
 
+
+void terminal_output::clearDisplayText() {
+    _displayLines.clear();
+
+}
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
 #define BALL_SPEED_SCALE 3.0f
 
