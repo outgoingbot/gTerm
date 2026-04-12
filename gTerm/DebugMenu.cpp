@@ -51,9 +51,13 @@ void DebugMenu::update(serialManager* sermanobj){
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
         ImPlot::SetupAxis(ImAxis_X1, "Samples");
         ImPlot::SetupAxis(ImAxis_Y1, "FPS", ImPlotAxisFlags_AutoFit);
-        ImPlot::SetNextLineStyle(ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-
-        ImPlot::PlotLine("FPS", fpsHistory, 1000);
+        //ImPlot::SetNextLineStyle(ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+        // New ImPlot 1.0 way
+        ImPlotSpec spec;
+        spec.LineColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+        spec.LineWeight = 1.0f;
+        //ImPlot::PlotLine("FPS", fpsHistory, 1000);
+        ImPlot::PlotLine("FPS", fpsHistory, 1000, 1.0, 0.0, spec);
         ImPlot::EndPlot();
     }
     ImGui::EndChild();
@@ -84,8 +88,12 @@ void DebugMenu::update(serialManager* sermanobj){
         ImPlot::SetupAxis(ImAxis_X1, "Samples");
         // Auto-scale Y based on the 1000 points currently in history
         ImPlot::SetupAxis(ImAxis_Y1, "Bytes", ImPlotAxisFlags_AutoFit);
-        ImPlot::SetNextLineStyle(ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
-        ImPlot::PlotLine("Bytes", history, 1000);
+        //ImPlot::SetNextLineStyle(ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+        ImPlotSpec spec2;
+        spec2.LineColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+        spec2.LineWeight = 1.0f;
+        //ImPlot::PlotLine("Bytes", history, 1000);
+        ImPlot::PlotLine("Bytes", history, 1000, 1.0, 0.0, spec2);
         ImPlot::EndPlot();
     }
 

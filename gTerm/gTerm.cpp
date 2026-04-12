@@ -1,6 +1,7 @@
 ﻿//gTerm entry point
 #define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION
+#define IMPLOT_ENABLE_SPEC 1
 #include "stb_image.h"
 #include "gTerm.h"
 

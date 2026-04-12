@@ -42,6 +42,9 @@ private:
     float y_min = -20.f;
     float y_max = 20.f;
 
+    // New ImPlot 1.0 way
+    ImPlotSpec spec;
+
 
     // Data Storage
     

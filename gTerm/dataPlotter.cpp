@@ -83,6 +83,8 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 
     bool anyPlotDrawn = false;
 
+    
+
     for (int p = 0; p < numPlots; ++p) {
         const auto& group = activeGroups[p];
         if (group.empty()) continue;        // Skip plots with no channels assigned
@@ -105,8 +107,6 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
                 ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit);
             }
 
-            ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 4.0f);
-
             for (int ch : group) {
                 std::vector<float> y(displayCount);
                 for (size_t i = 0; i < displayCount; ++i) {
@@ -118,11 +118,19 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 
                 std::string label = "Channel " + std::to_string(ch + 1);
                 ImVec4 color = ImPlot::GetColormapColor(ch % 10);
-                ImPlot::SetNextLineStyle(color);
-                ImPlot::PlotLine(label.c_str(), x_data.data(), y.data(), static_cast<int>(displayCount));
+                //ImPlot::PushStyleColor(ImPlotCol_Line, color);
+                //ImPlot::PlotLine(label.c_str(), x_data.data(), y.data(), static_cast<int>(displayCount));
+                spec.LineColor = color;
+                spec.LineWeight = 4.0f;
+
+                ImPlot::PlotLine(label.c_str(),
+                    x_data.data(),
+                    y.data(),
+                    static_cast<int>(displayCount),
+                    spec);     // implot 1.0 takes spec argument
             }
 
-            ImPlot::PopStyleVar();
+            //ImPlot::PopStyleVar();
             ImPlot::EndPlot();
         }
 
