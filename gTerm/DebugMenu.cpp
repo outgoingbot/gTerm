@@ -1,9 +1,11 @@
 #include "DebugMenu.h"
 
-DebugMenu::DebugMenu() {
-    // Constructor (if you need to initialize anything, do it here)
+DebugMenu::DebugMenu(const VersionInfo& versions)
+    : m_versions(versions)
+{
     debugserialManObj = nullptr;
 }
+
 
 void DebugMenu::update(serialManager* sermanobj){
     // Start the debug menu window
@@ -13,8 +15,11 @@ void DebugMenu::update(serialManager* sermanobj){
         ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoCollapse);
 
-    ImGui::Text("ImGui Version: %s", IMGUI_VERSION);
-
+    ImGui::Text("ImGui Version: %s", m_versions.imgui.c_str());
+    ImGui::Text("ImPlot Version: %s", m_versions.implot.c_str());
+    ImGui::Text("GLFW Version: %s", m_versions.glfw.c_str());
+    ImGui::Text("OpenGL Version: %s", m_versions.opengl.c_str());
+    ImGui::Text("GLSL Version: %s", m_versions.glsl.c_str());
     // Display the frame rate
     ImGui::Text("Frame Rate: %.1f FPS", ImGui::GetIO().Framerate);
 

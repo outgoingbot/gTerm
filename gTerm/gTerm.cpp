@@ -70,6 +70,13 @@ int main() {
     //Scale the entire glfw window with this function
     glfwSetWindowSize(window, WINDOW_WIDTH * SCALE_FACTOR, WINDOW_HEIGHT * SCALE_FACTOR);
     
+    VersionInfo versions;
+    versions.imgui = IMGUI_VERSION;
+    versions.implot = IMPLOT_VERSION;
+    versions.glfw = glfwGetVersionString();
+    versions.opengl = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    versions.glsl = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 
     //========================================= FONT TESTING ==============================================
     ImFontConfig config;
@@ -81,7 +88,7 @@ int main() {
 
     // Create Custom GUI Object
     mainMenu main_menu;
-    DebugMenu debugMenu;
+    DebugMenu debugMenu(versions);
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
     dataParser dParser;
     dataPlotter dPlotter;
