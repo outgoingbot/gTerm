@@ -118,8 +118,9 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 
                 std::string label = "Channel " + std::to_string(ch + 1);
                 ImVec4 color = ImPlot::GetColormapColor(ch % 10);
-                //ImPlot::PushStyleColor(ImPlotCol_Line, color);
-                //ImPlot::PlotLine(label.c_str(), x_data.data(), y.data(), static_cast<int>(displayCount));
+
+                // New ImPlot 1.0 way
+                ImPlotSpec spec;
                 spec.LineColor = color;
                 spec.LineWeight = 4.0f;
 
@@ -130,7 +131,6 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
                     spec);     // implot 1.0 takes spec argument
             }
 
-            //ImPlot::PopStyleVar();
             ImPlot::EndPlot();
         }
 
