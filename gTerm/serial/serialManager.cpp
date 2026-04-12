@@ -12,8 +12,8 @@ serialManager::serialManager(){
 
 	//TODO: used for debug during deveopment Hard COded
 #if DEBUG_COMM_DEFAULTS
-	setCommPort(R"(\\.\COM11)"); //R() is raw string
-	setBaudRate("115200");
+	setCommPort(R"(\\.\COM5)"); //R() is raw string
+	setBaudRate("2000000");
 #endif
 }
 

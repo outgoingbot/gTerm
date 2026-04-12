@@ -65,7 +65,7 @@ some issues and things to do next.
 buffer issues:
 copying the deque in terminal is needed. its a thread safe way to get the data and is fine. <--only copy new data per frame
 whats not great ins build the std::string lines for the terminal output display. <-fixed
-also, the buffers in dataPlotter need to be looked at (size, name, reason)
+also, the buffers in dataPlotter need to be looked at (size, name, reason) //<-done
 
 text in terminal output:
 im using a selectText library. it works great but i think imgui 1.92.7 has fixed the multiline wrapping and selecting <- Done
