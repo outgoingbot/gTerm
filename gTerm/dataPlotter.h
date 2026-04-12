@@ -19,7 +19,7 @@ public:
     std::vector<ParsedSample> currentSamples;   // or process on the fly
     // Plotting buffers - these will be resized dynamically
     std::vector<float> x_data;
-    std::vector<std::vector<float>> y_data;     // one vector per channel
+    //std::vector<std::vector<float>> y_data;     // one vector per channel
 
     // UI / settings
     int pointsToDisplay = 512;                  // you can increase this
@@ -44,9 +44,9 @@ private:
 
 
     // Data Storage
-    struct Sample { float sin, sq, saw; };
-    Sample samples[MAX_BUFFER_SIZE];
-    int sampleCount = 0;
+    //struct Sample { float sin, sq, saw; };
+    //Sample samples[MAX_BUFFER_SIZE];
+    //int sampleCount = 0;
 
 
 };

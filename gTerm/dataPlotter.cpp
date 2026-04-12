@@ -4,7 +4,7 @@
 
 dataPlotter::dataPlotter() {
     // Initialize buffers if necessary
-    memset(samples, 0, sizeof(samples));
+    //memset(samples, 0, sizeof(samples));
 }
 
 void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)

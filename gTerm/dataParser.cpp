@@ -331,19 +331,21 @@ void dataParser::setChannelToPlot(int channelIndex, int plotIndex)
 
 int dataParser::getPlotCount() const
 {
-    if (channelToPlotMap.empty()) return 1;
+    if (channelToPlotMap.empty()) {
+        return 1;
+    }
 
-    int maxPlot = 0;
+    int maxPlot = -1;   // start from -1 so we can detect if anything was assigned
 
-    for (size_t i = 0; i < channelToPlotMap.size(); ++i) {
-        for (int p : channelToPlotMap[i]) {
+    for (const auto& plots : channelToPlotMap) {
+        for (int p : plots) {
             if (p > maxPlot) {
                 maxPlot = p;
             }
         }
     }
 
-    return maxPlot + 1;
+    return (maxPlot < 0) ? 1 : maxPlot + 1;
 }
 
 
@@ -370,33 +372,33 @@ void dataParser::removeChannelFromPlot(int channelIndex, int plotIndex)
 
 
 //this seriously looks like some ai bullshit. drugs are bad
-std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
-{
-    std::deque<float> result;
-    std::string token;
-    std::stringstream ss;
-
-    // Build a full string from the deque
-    for (char ch : asciiBuffer)
-        ss << ch;
-
-    // Parse comma-separated values
-    while (std::getline(ss, token, ','))
-    {
-        try {
-            // Convert to float and store
-            result.push_back(std::stof(token));
-        }
-        catch (const std::invalid_argument& e) {
-            // Ignore invalid tokens (non-numeric)
-            continue;
-        }
-        catch (const std::out_of_range& e) {
-            // Ignore values that don't fit in float
-            continue;
-        }
-    }
-
-    return result;
-}
+//std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
+//{
+//    std::deque<float> result;
+//    std::string token;
+//    std::stringstream ss;
+//
+//    // Build a full string from the deque
+//    for (char ch : asciiBuffer)
+//        ss << ch;
+//
+//    // Parse comma-separated values
+//    while (std::getline(ss, token, ','))
+//    {
+//        try {
+//            // Convert to float and store
+//            result.push_back(std::stof(token));
+//        }
+//        catch (const std::invalid_argument& e) {
+//            // Ignore invalid tokens (non-numeric)
+//            continue;
+//        }
+//        catch (const std::out_of_range& e) {
+//            // Ignore values that don't fit in float
+//            continue;
+//        }
+//    }
+//
+//    return result;
+//}
 

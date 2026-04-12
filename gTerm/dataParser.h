@@ -61,7 +61,7 @@ public:
 	std::vector<std::vector<int>> channelToPlotMap;   // channelToPlotMap[channel] = list of plots it appears on
 
 	//wtf is this too?
-	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
+	//std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
 
 	bool dataParse_enable = true;
 	bool send_to_plot = true;
