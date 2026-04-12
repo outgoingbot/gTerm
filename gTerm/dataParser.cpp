@@ -202,50 +202,11 @@ int dataParser::update()
 
     ImGui::PopTextWrapPos();
     ImGui::PopStyleColor(1);
+ 
 
-    
-    
-    //static int selectedChannel = 0;   // this will hold the value from the first dropdown
-
-    //// Populate first dropdown with channels 0 to getChannelCount()-1
-    //// (example using ImGui - adjust for your UI framework)
-    //if (ImGui::BeginCombo("Channel", ("Channel " + std::to_string(selectedChannel)).c_str()))
-    //{
-    //    for (size_t ch = 0; ch < getChannelCount(); ++ch)
-    //    {
-    //        bool isSelected = (selectedChannel == (int)ch);
-    //        if (ImGui::Selectable(("Channel " + std::to_string(ch)).c_str(), isSelected))
-    //            selectedChannel = (int)ch;
-    //        if (isSelected)
-    //            ImGui::SetItemDefaultFocus();
-    //    }
-    //    ImGui::EndCombo();
-    //}
-
-
-
-    
-    static std::vector<char> channelSelected; 
-    std::vector<bool> checked;
-#if 0
-    for (size_t plot_idx = 0; plot_idx < getChannelCount(); ++plot_idx){
-        // Initialize once
-        if (channelSelected.size() != getChannelCount())
-            channelSelected.resize(getChannelCount(), 0);
-
-        // Multi-select Combo with checkboxes
-        if (ImGui::BeginCombo(("Select Channels " + std::to_string(plot_idx)).c_str(), "Select Channels")){
-            for (size_t chn_idx = 0; chn_idx < getChannelCount(); ++chn_idx){
-                bool checked = channelSelected[chn_idx] != 0;
-                if (ImGui::Checkbox(("Channel " + std::to_string(chn_idx)).c_str(), &checked))
-                    channelSelected[chn_idx] = checked ? 1 : 0;
-                    if(channelSelected[chn_idx]) setChannelToPlot(plot_idx, channelSelected[chn_idx]);
-            }
-            ImGui::EndCombo();
-        }
-
-#else
     // ====================== Per-Plot Channel Selection (Add + Remove) ======================
+    static std::vector<char> channelSelected;
+    std::vector<bool> checked;
     size_t numChannels = getChannelCount();
     if (numChannels == 0) return 0;
 
@@ -282,26 +243,6 @@ int dataParser::update()
             ImGui::EndCombo();
         }
     }
-#endif
-
-
-
-
-        // Later, evaluate which ones are checked:
-        //for (size_t i = 0; i < getChannelCount(); ++i)
-        //{
-        //    if (channelSelected[i]) {
-        //        //setChannelToPlot((int)i, yourPlotIndex);
-        //    }
-        //}
-    //}
-
-    // Example usage anywhere in your code
-    //setChannelToPlot(0, 0);   // Channel 1 -> Plot 1
-    //setChannelToPlot(0, 1);   // Channel 2 -> Plot 1
-    //setChannelToPlot(1, 1);   // Channel 2 -> Plot 2
-    //setChannelToPlot(2, 2);   // Channel 3 -> Plot 3
-
 
     ImGui::End();
 
@@ -368,37 +309,4 @@ void dataParser::removeChannelFromPlot(int channelIndex, int plotIndex)
         plots.erase(it);
     }
 }
-
-
-
-//this seriously looks like some ai bullshit. drugs are bad
-//std::deque<float> dataParser::ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer)
-//{
-//    std::deque<float> result;
-//    std::string token;
-//    std::stringstream ss;
-//
-//    // Build a full string from the deque
-//    for (char ch : asciiBuffer)
-//        ss << ch;
-//
-//    // Parse comma-separated values
-//    while (std::getline(ss, token, ','))
-//    {
-//        try {
-//            // Convert to float and store
-//            result.push_back(std::stof(token));
-//        }
-//        catch (const std::invalid_argument& e) {
-//            // Ignore invalid tokens (non-numeric)
-//            continue;
-//        }
-//        catch (const std::out_of_range& e) {
-//            // Ignore values that don't fit in float
-//            continue;
-//        }
-//    }
-//
-//    return result;
-//}
 

@@ -72,10 +72,14 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
 
     // ====================== Plotting - ONLY plots with assigned channels ======================
     ImVec2 plotSize = ImGui::GetContentRegionAvail();
-    if (plotSize.x < 100) plotSize.x = 100;
-    if (plotSize.y < 100) plotSize.y = 100;
+
     plotSize.x = -FLT_MIN;
-    plotSize.y = 300;
+    if (numPlots > 0) {
+        plotSize.y = (plotSize.y / numPlots) - 5; //fill window with plots. -5 for float rounding error (removes scroll bar)
+    }
+    //if (plotSize.x < 100) plotSize.x = 100;
+    if (plotSize.y < 100) plotSize.y = 100;
+
 
     bool anyPlotDrawn = false;
 

@@ -15,11 +15,11 @@ public:
 
     static constexpr size_t MAX_SAMPLES = 4096;   // how many lines we keep for plotting
     static constexpr size_t MAX_CHANNELS = 128;    // safety limit
+
     dataParser parser;
     std::vector<ParsedSample> currentSamples;   // or process on the fly
     // Plotting buffers - these will be resized dynamically
     std::vector<float> x_data;
-    //std::vector<std::vector<float>> y_data;     // one vector per channel
 
     // UI / settings
     int pointsToDisplay = 512;                  // you can increase this
@@ -44,11 +44,7 @@ private:
 
 
     // Data Storage
-    //struct Sample { float sin, sq, saw; };
-    //Sample samples[MAX_BUFFER_SIZE];
-    //int sampleCount = 0;
-
-
+    
 };
 
 #endif // DATAPLOTTER_H
