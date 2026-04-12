@@ -50,11 +50,20 @@ public:
 	}
 
 
+	// Plot assignment - you control this here (channel index -> plot index)
+	//std::vector<int> channelToPlotMap;
+
+	void setChannelToPlot(int channelIndex, int plotIndex);
+	void removeChannelFromPlot(int channelIndex, int plotIndex);
+	int getPlotCount() const;
+	//const std::vector<int>& getChannelToPlotMap() const;
+	const std::vector<std::vector<int>>& dataParser::getChannelToPlotMap() const;
+	std::vector<std::vector<int>> channelToPlotMap;   // channelToPlotMap[channel] = list of plots it appears on
+
 	//wtf is this too?
 	std::deque<float> ParseFloatArrayFromAscii(const std::deque<char>& asciiBuffer);
 
 	bool dataParse_enable = true;
-
 	bool send_to_plot = true;
 	
 

@@ -30,8 +30,7 @@ public:
 
     // The main entry point called every frame
     void update(dataParser& parser, const std::deque<char>& rxDeque);
-    // Helper to parse the deque into our sample buffer
-    //void ParseData(const std::deque<char>& deque);
+    
 
 private:
     // Constants

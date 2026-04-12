@@ -86,6 +86,9 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     }
     //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
     
+
+    //TODO: This is a bit buggy. the selected text can scroll off the screen but the user doesnt know. so the
+    // //right click context will be "copy" and te user wont know why
     //--------------------------------------- Copy Text PopUp ---------------------------------------|
     // Save selection before popup (critical)
     int sel_start = -1;

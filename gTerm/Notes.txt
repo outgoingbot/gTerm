@@ -68,7 +68,7 @@ whats not great ins build the std::string lines for the terminal output display.
 also, the buffers in dataPlotter need to be looked at (size, name, reason)
 
 text in terminal output:
-im using a selectText library. it works great but i think imgui 1.92.7 has fixed the multiline wrapping and selecting
+im using a selectText library. it works great but i think imgui 1.92.7 has fixed the multiline wrapping and selecting <- Done
 
 linux:
 I changed how the threading is handled in seriam manager. we need to make sure the LinuxSerialComm is configured correctly
