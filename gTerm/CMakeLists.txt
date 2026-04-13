@@ -40,6 +40,8 @@ if(WIN32)
         serial/virtualComm.h
         textselect.cpp textselect.hpp
         dataPlotter.cpp dataPlotter.h
+        ConfigManager.cpp ConfigManager.h
+        external/json.hpp
         ${SERIAL_SRC}
         ${SERIAL_INC}
         "${CMAKE_SOURCE_DIR}/gTerm.rc"
@@ -56,6 +58,8 @@ else()
         serial/virtualComm.h
         textselect.cpp textselect.hpp
         dataPlotter.cpp dataPlotter.h
+        ConfigManager_linux.cpp ConfigManager.h
+        external/json.hpp
         ${SERIAL_SRC}
         ${SERIAL_INC}
     )

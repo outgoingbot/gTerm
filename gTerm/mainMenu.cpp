@@ -4,6 +4,10 @@ mainMenu::mainMenu() {
     // Constructor (if you need to initialize anything, do it here)
 }
 
+
+
+// Call this every frame (can be at the end of your ImGui section)
+
 void mainMenu::update() {
 
     ImGui::BeginMainMenuBar(); // Start the top menu bar
@@ -13,9 +17,11 @@ void mainMenu::update() {
             // Handle "New" action
         }
         if (ImGui::MenuItem("Open")) {
+            cfgManager.ShowLoadButton();
             // Handle "Open" action
         }
         if (ImGui::MenuItem("Save")) {
+            cfgManager.ShowSaveButton();
             // Handle "Save" action
         }
         ImGui::Separator(); // Add a separator between menu items
@@ -74,6 +80,6 @@ void mainMenu::update() {
 
     ImGui::EndMainMenuBar(); // End the top menu bar
 
-
-    
+    //handle config manager updates
+    cfgManager.HandleDialogs();
 }
