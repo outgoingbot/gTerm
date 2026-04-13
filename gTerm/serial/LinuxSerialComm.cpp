@@ -13,7 +13,7 @@ LinuxSerialComm::~LinuxSerialComm() {
     }
 }
 
-
+#if 0
 void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
     if (!buffer || !returnVal || serialPort == -1) {
         if (returnVal) *returnVal = -1;
@@ -54,7 +54,29 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
         *returnVal = -1;
     }
 }
+#else
+void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
+    if (!buffer || !returnVal || serialPort == -1) {
+        if (returnVal) *returnVal = -1;
+        return;
+    }
 
+    *returnVal = 0;
+
+    ssize_t bytesRead = read(serialPort, buffer, nbChar);
+
+    if (bytesRead > 0) {
+        *returnVal = static_cast<int>(bytesRead);
+    }
+    else if (bytesRead == 0) {
+        *returnVal = 0;        // timeout or no data
+    }
+    else {
+        perror("read");
+        *returnVal = -1;
+    }
+}
+#endif
 
 //Check if we are actually connected
 bool LinuxSerialComm::IsConnected() {
@@ -113,7 +135,7 @@ bool LinuxSerialComm::connect() {
     tty.c_iflag = 0;
     //Adding a Timout
     tty.c_cc[VMIN] = 0;
-    tty.c_cc[VTIME] = 1; //100ms Timeout
+    tty.c_cc[VTIME] = 10; //1000ms Timeout
 
     std::cout << "VMIN: " << (int)tty.c_cc[VMIN] << ", VTIME: " << (int)tty.c_cc[VTIME] << std::endl;
 
