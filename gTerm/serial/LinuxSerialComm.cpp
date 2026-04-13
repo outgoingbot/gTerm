@@ -54,7 +54,7 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
         *returnVal = -1;
     }
 }
-#else
+#else //This is supposed to be more 'blocking'. seems to work the same as above but is simpler and prob keep this method
 void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
     if (!buffer || !returnVal || serialPort == -1) {
         if (returnVal) *returnVal = -1;
