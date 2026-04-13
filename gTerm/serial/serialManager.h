@@ -26,7 +26,7 @@
 #define SERIAL_ERROR -1
 #define SERIAL_WARNING -2
 
-#define MAX_CHAR_COUNT 20000 //Max number if chars in the deque object
+#define MAX_CHAR_COUNT 40000 //Max number if chars in the deque object
 
 class serialManager {
 

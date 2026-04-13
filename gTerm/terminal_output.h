@@ -23,7 +23,7 @@ public:
     void SetTextSize(float sz);
 
     //make private if needed
-    size_t display_buff_num_chars = 100000;
+    size_t display_buff_num_chars = 10000; //TODO: Some resize bug crashes gTerm when this is too large
 
     void clearDisplayText();
 
