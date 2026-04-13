@@ -20,7 +20,7 @@ public:
 
     int update(std::deque<char>& fullBufferqueue, size_t newCharCount, bool isConnected);
     void SetTextColor(float r, float g, float b, float a = 1.0f);
-    void terminal_output::SetTextSize(float sz);
+    void SetTextSize(float sz);
 
     //make private if needed
     size_t display_buff_num_chars = 100000;

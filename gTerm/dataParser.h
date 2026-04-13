@@ -55,7 +55,7 @@ public:
 	void removeChannelFromPlot(int channelIndex, int plotIndex);
 	int getPlotCount() const;
 
-	const std::vector<std::vector<int>>& dataParser::getChannelToPlotMap() const;
+	const std::vector<std::vector<int>>& getChannelToPlotMap() const;
 	std::vector<std::vector<int>> channelToPlotMap;   // channelToPlotMap[channel] = list of plots it appears on
 
 	//TODO: Put this in a struct
