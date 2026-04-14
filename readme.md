@@ -106,12 +106,12 @@ Building on Linux
 
 2. Install vcpkg:
 
-    Clone `vcpkg` from GitHub into a workspace (e.g. `~/dev` or `/opt`):
+    Clone `vcpkg` from GitHub into a workspace (e.g. `~/dev`):
     
     ```bash
     mkdir ~/dev
     cd ~/dev
-    git clone https://github.com/microsoft/vcpkg.git ~/dev/vcpkg
+    git clone https://github.com/microsoft/vcpkg.git
     cd ~/dev/vcpkg
     ./bootstrap-vcpkg.sh -disableMetrics
     ```
