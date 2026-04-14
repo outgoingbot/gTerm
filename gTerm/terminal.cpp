@@ -55,168 +55,193 @@ int terminal::update(const char* title) {
     //Send the buffer and number of new chars to be displayed
     term_out.update(_Term_rxBufferQueue, newCharCount, serialManObj->isConnected());
     
-    //ImGui::BeginChild("Terminal_Controls",ImVec2(-FLT_MIN, 300));
-    //-----------------------------Comm Port Entry Text-----------------------------|
-    ImGui::Text("Comm Port:");
-    ImGui::SameLine(); // Place the next widget on the same line
-    strncpy(ui.input_buffer_Port, serialManObj->getCommPort().c_str(),IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
-    ui.input_buffer_Port[IM_ARRAYSIZE(ui.input_buffer_Port) - 1] = '\0';
-    ImGui::SetNextItemWidth(100);  // Set width of the input field
-    if (ImGui::InputText("##Comm_Port_Entry", ui.input_buffer_Port, IM_ARRAYSIZE(ui.input_buffer_Port))){
-        serialManObj->setCommPort(ui.input_buffer_Port);
-    }
-    //-----------------------------Comm Port Entry Text-----------------------------|
 
-    ImGui::SameLine(); // Place the next widget on the same line 
 
-    //-----------------------------Comm Baud Entry Text-----------------------------|
-    ImGui::Text("Baud Rate:");
-    strncpy(ui.input_buffer_Baud, serialManObj->getBaudRate().c_str(), IM_ARRAYSIZE(ui.input_buffer_Baud) - 1);
-    ui.input_buffer_Baud[IM_ARRAYSIZE(ui.input_buffer_Baud) - 1] = '\0';
-    ImGui::SameLine(); // Place the next widget on the same line
-    ImGui::SetNextItemWidth(100);  // Set width of the input field
-    if (ImGui::InputText("##Comm_Baud_Entry", ui.input_buffer_Baud, IM_ARRAYSIZE(ui.input_buffer_Baud))) {
-        serialManObj->setBaudRate(ui.input_buffer_Baud);
-    }
-    //-----------------------------Comm Baud Entry Text-----------------------------|
+    if (ImGui::BeginTabBar("TermTabBar")) {
 
-    ImGui::SameLine(); // Place the next widget on the same line
+        if (ImGui::BeginTabItem("Port Config")) {
+            // Put content for Tab 1 here
+            //-----------------------------Comm Port Entry Text-----------------------------|
+            ImGui::Text("Comm Port:");
+            ImGui::SameLine(); // Place the next widget on the same line
+            strncpy(ui.input_buffer_Port, serialManObj->getCommPort().c_str(), IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
+            ui.input_buffer_Port[IM_ARRAYSIZE(ui.input_buffer_Port) - 1] = '\0';
+            ImGui::SetNextItemWidth(100);  // Set width of the input field
+            if (ImGui::InputText("##Comm_Port_Entry", ui.input_buffer_Port, IM_ARRAYSIZE(ui.input_buffer_Port))) {
+                serialManObj->setCommPort(ui.input_buffer_Port);
+            }
+            //-----------------------------Comm Port Entry Text-----------------------------|
 
-    //-----------------------------Connect Button-----------------------------|
-    //static bool ConnectisClicked = false;
-    bool pushingColor = false;    
-    if (ui.ConnectisClicked) {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
-        pushingColor = true;
-    }
+            ImGui::SameLine(); // Place the next widget on the same line 
 
-    if (ImGui::Button("Connect")) {
-        ui.ConnectisClicked = true;
-        if (this->handle_connect_button() == 0) {
-            std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
-            std::cout << "" << serialManObj->getCommPort() << std::endl;
-            std::cout << "" << serialManObj->getBaudRate() << std::endl;
-        }else {
-            std::cout << "ERROR: Terminal Class Not Connected!" << std::endl;
-        }
-    }
-
-    if (pushingColor) ImGui::PopStyleColor(3);
-    //-----------------------------Connect Button-----------------------------|
-       
-    ImGui::SameLine(); // Place the next widget on the same line
-
-    //-----------------------------Disconnect Button--------------------------|
-    if (ImGui::Button("Disconnect")) {
-        if (this->handle_disconnect_button() == 0) {
-            ui.ConnectisClicked = false;
-        }
-    }
-    //-----------------------------Disconnect Button--------------------------|
-        
-
-    //------------------------------COM Port Drop Down-------------------------------|
-    if (serialManObj != nullptr && serialManObj->isConnected() == false){
-        // Button to trigger port scan and open popup
-        if (ImGui::Button("Open COM Ports")){
-            serialManObj->commPortNames.clear();
-            serialManObj->listPorts(&serialManObj->commPortNames);
-            ui.open_popup_port = true;
-            ImGui::OpenPopup("SerialPortPopup");
-        }
-
-        // The popup itself
-        if (ImGui::BeginPopup("SerialPortPopup")){
-            ImGui::Text("Select a COM port:");
-            ImGui::Separator();
-            for (const auto& port : serialManObj->commPortNames){
-                bool isSelected = (serialManObj->getCommPort() == port);
-                if (ImGui::Selectable(port.c_str(), isSelected)){
-                    serialManObj->setCommPort(port);
-                    ui.open_popup_port = false;
-                    ImGui::CloseCurrentPopup();
+            //------------------------------COM Port Drop Down-------------------------------|
+            if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+                // Button to trigger port scan and open popup
+                if (ImGui::Button("Open COM Ports")) {
+                    serialManObj->commPortNames.clear();
+                    serialManObj->listPorts(&serialManObj->commPortNames);
+                    ui.open_popup_port = true;
+                    ImGui::OpenPopup("SerialPortPopup");
                 }
 
-                if (isSelected) {
-                    ImGui::SetItemDefaultFocus();
+                // The popup itself
+                if (ImGui::BeginPopup("SerialPortPopup")) {
+                    ImGui::Text("Select a COM port:");
+                    ImGui::Separator();
+                    for (const auto& port : serialManObj->commPortNames) {
+                        bool isSelected = (serialManObj->getCommPort() == port);
+                        if (ImGui::Selectable(port.c_str(), isSelected)) {
+                            serialManObj->setCommPort(port);
+                            ui.open_popup_port = false;
+                            ImGui::CloseCurrentPopup();
+                        }
+
+                        if (isSelected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+
+                    ImGui::EndPopup();
+                }
+            }
+            //------------------------------COM Port Drop Down-------------------------------|
+
+
+            //-----------------------------Comm Baud Entry Text-----------------------------|
+            ImGui::Text("Baud Rate:");
+            strncpy(ui.input_buffer_Baud, serialManObj->getBaudRate().c_str(), IM_ARRAYSIZE(ui.input_buffer_Baud) - 1);
+            ui.input_buffer_Baud[IM_ARRAYSIZE(ui.input_buffer_Baud) - 1] = '\0';
+            ImGui::SameLine(); // Place the next widget on the same line
+            ImGui::SetNextItemWidth(100);  // Set width of the input field
+            if (ImGui::InputText("##Comm_Baud_Entry", ui.input_buffer_Baud, IM_ARRAYSIZE(ui.input_buffer_Baud))) {
+                serialManObj->setBaudRate(ui.input_buffer_Baud);
+            }
+            //-----------------------------Comm Baud Entry Text-----------------------------|
+
+            ImGui::SameLine(); // Place the next widget on the same line
+
+            //------------------------------BAUD Port Drop Down-------------------------------|
+            if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+                if (ImGui::Button("Open BAUD Rates")) {
+                    serialManObj->commBaudNames.clear();
+                    serialManObj->listBaudRates(&serialManObj->commBaudNames);
+                    ui.open_popup_baud = true;
+                    ImGui::OpenPopup("SerialBaudPopup");
+                }
+
+                if (ImGui::BeginPopup("SerialBaudPopup")) {
+                    ImGui::Text("Select a BAUD rate:");
+                    ImGui::Separator();
+
+                    for (const auto& baud : serialManObj->commBaudNames) {
+                        bool isSelected = (serialManObj->getBaudRate() == baud);
+
+                        if (ImGui::Selectable(baud.c_str(), isSelected)) {
+                            serialManObj->setBaudRate(baud);
+                            ui.open_popup_baud = false;
+                            ImGui::CloseCurrentPopup();
+                        }
+
+                        if (isSelected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+
+                    ImGui::EndPopup();
+                }
+            }
+            //------------------------------BAUD Port Drop Down-------------------------------|
+
+            ImGui::NewLine();
+
+            //-----------------------------Connect Button-----------------------------|
+            bool pushingColor = false;
+            if (ui.ConnectisClicked) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
+                pushingColor = true;
+            }
+
+            if (ImGui::Button("Connect")) {
+                ui.ConnectisClicked = true;
+                if (this->handle_connect_button() == 0) {
+                    std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
+                    std::cout << "" << serialManObj->getCommPort() << std::endl;
+                    std::cout << "" << serialManObj->getBaudRate() << std::endl;
+                }
+                else {
+                    std::cout << "ERROR: Terminal Class Not Connected!" << std::endl;
                 }
             }
 
-            ImGui::EndPopup();
-        }
-    }
-    //------------------------------COM Port Drop Down-------------------------------|
-    
+            if (pushingColor) ImGui::PopStyleColor(3);
+            //-----------------------------Connect Button-----------------------------|
 
-    ImGui::SameLine(); // Place the next widget on the same line
-    
+            ImGui::SameLine(); // Place the next widget on the same line
 
-    //------------------------------BAUD Port Drop Down-------------------------------|
-    if (serialManObj != nullptr && serialManObj->isConnected() == false){
-        if (ImGui::Button("Open BAUD Rates")){
-            serialManObj->commBaudNames.clear();
-            serialManObj->listBaudRates(&serialManObj->commBaudNames);
-            ui.open_popup_baud = true;
-            ImGui::OpenPopup("SerialBaudPopup");
-        }
-
-        if (ImGui::BeginPopup("SerialBaudPopup")){
-            ImGui::Text("Select a BAUD rate:");
-            ImGui::Separator();
-
-            for (const auto& baud : serialManObj->commBaudNames){
-                bool isSelected = (serialManObj->getBaudRate() == baud);
-
-                if (ImGui::Selectable(baud.c_str(), isSelected)){
-                    serialManObj->setBaudRate(baud);
-                    ui.open_popup_baud = false;
-                    ImGui::CloseCurrentPopup();
-                }
-
-                if (isSelected) {
-                    ImGui::SetItemDefaultFocus();
+            //-----------------------------Disconnect Button--------------------------|
+            if (ImGui::Button("Disconnect")) {
+                if (this->handle_disconnect_button() == 0) {
+                    ui.ConnectisClicked = false;
                 }
             }
+            //-----------------------------Disconnect Button--------------------------|
 
-            ImGui::EndPopup();
+            ImGui::EndTabItem();
         }
+
+        if (ImGui::BeginTabItem("Terminal Config")) {
+            // Put content for Tab 2 here
+            //------------------------------Scroll Back Entry-------------------------------|
+            snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len), "%zu", term_out.display_buff_num_chars);
+            ImGui::Text("Char Buffer Size:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(100);  // Set width of the input field
+            ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
+            if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
+                if (new_value > 0)
+                {
+                    term_out.display_buff_num_chars = new_value;
+                }
+            }
+            //------------------------------Scroll Back Entry-------------------------------|
+
+            //-----------------------------Clear Serial Buffer--------------------------|
+            if (ImGui::Button("Clear Serial Buffer")) {
+                _Term_rxBufferQueue.clear();
+                _Term_rxBufferQueue.shrink_to_fit();
+            }
+            //-----------------------------Clear Serial Buffer--------------------------|
+
+            ImGui::SameLine(); // Place the next widget on the same line
+
+            //-----------------------------Clear Terminal Text--------------------------|
+            if (ImGui::Button("Clear Terminal")) {
+                term_out.clearDisplayText();
+            }
+            //-----------------------------Clear Terminal Text--------------------------|
+
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Tab 3")) {
+            // Put content for Tab 3 here
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
     }
-    //------------------------------BAUD Port Drop Down-------------------------------|
+
+
+
 
     ImGui::NewLine();
 
-    //------------------------------Scroll Back Entry-------------------------------|
-    snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len),"%zu", term_out.display_buff_num_chars);
-    ImGui::Text("Char Buffer Size:");
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(100);  // Set width of the input field
-    ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
-    if (ImGui::IsItemDeactivatedAfterEdit())
-    {
-        size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
-        if (new_value > 0)
-        {
-            term_out.display_buff_num_chars = new_value;
-        }
-    }
-    //------------------------------Scroll Back Entry-------------------------------|
-
-    //-----------------------------Clear Serial Buffer--------------------------|
-    if (ImGui::Button("Clear Serial Buffer")) {
-        _Term_rxBufferQueue.clear();
-        _Term_rxBufferQueue.shrink_to_fit();
-    }
-    //-----------------------------Clear Serial Buffer--------------------------|
-    
-    ImGui::SameLine(); // Place the next widget on the same line
-
-    //-----------------------------Clear Terminal Text--------------------------|
-    if (ImGui::Button("Clear Terminal")) {
-        term_out.clearDisplayText();
-    }
-    //-----------------------------Clear Terminal Text--------------------------|
 
 
     //ImGui::EndChild();
