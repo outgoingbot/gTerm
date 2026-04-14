@@ -6,10 +6,10 @@
 #include "gTerm.h"
 
 using namespace std;
-
+#define IGNORE_SAVED_IMU_INI 0
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
-#define SCALE_FACTOR 1.7
+#define SCALE_FACTOR 1.0
 
 int main() {
     // Initialize GLFW
@@ -57,7 +57,7 @@ int main() {
     ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     
- #define IGNORE_SAVED_IMU_INI 0
+
     #if IGNORE_SAVED_IMU_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
@@ -123,25 +123,25 @@ int main() {
         ImGui::GetStyle().FontSizeBase = main_menu.currentFontSize;
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
         
-        //ImGui::SetNextWindowPos(ImVec2(10, 50), ImGuiCond_FirstUseEver); // initial position only once
-        //ImGui::SetNextWindowSize(ImVec2(1200, 800), ImGuiCond_FirstUseEver); // optional size
+        ImGui::SetNextWindowPos(ImVec2(10, 20), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowSize(ImVec2(700, 800), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //"main" terminal (realTerm like)
 
-        //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
-        //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size    
+        ImGui::SetNextWindowPos(ImVec2(700, 20), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowSize(ImVec2(250, 600), ImGuiCond_FirstUseEver); // optional size    
         //Parser Window
         dParser.update();
         
         //Plotter Window
         if (dParser.dataParse_enable && dParser.send_to_plot) {
-            //ImGui::SetNextWindowPos(ImVec2(1100, 100), ImGuiCond_FirstUseEver); // initial position only once
-            //ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver); // optional size
+            ImGui::SetNextWindowPos(ImVec2(1000, 20), ImGuiCond_FirstUseEver); // initial position only once
+            ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
             dPlotter.update(dParser, term.getRxBuffer());
         }
         
         //Debug window
-        ImVec2 windowSize(400, 500);
-        ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 0); // top-right
+        ImVec2 windowSize(400, 600);
+        ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 20); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
         debugMenu.update(term.serialManObj); //shows fps and mouse position

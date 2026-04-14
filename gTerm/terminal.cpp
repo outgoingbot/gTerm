@@ -55,13 +55,13 @@ int terminal::update(const char* title) {
     //Send the buffer and number of new chars to be displayed
     term_out.update(_Term_rxBufferQueue, newCharCount, serialManObj->isConnected());
     
-       
+    //ImGui::BeginChild("Terminal_Controls",ImVec2(-FLT_MIN, 300));
     //-----------------------------Comm Port Entry Text-----------------------------|
     ImGui::Text("Comm Port:");
     ImGui::SameLine(); // Place the next widget on the same line
     strncpy(ui.input_buffer_Port, serialManObj->getCommPort().c_str(),IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
     ui.input_buffer_Port[IM_ARRAYSIZE(ui.input_buffer_Port) - 1] = '\0';
-    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    ImGui::SetNextItemWidth(100);  // Set width of the input field
     if (ImGui::InputText("##Comm_Port_Entry", ui.input_buffer_Port, IM_ARRAYSIZE(ui.input_buffer_Port))){
         serialManObj->setCommPort(ui.input_buffer_Port);
     }
@@ -74,7 +74,7 @@ int terminal::update(const char* title) {
     strncpy(ui.input_buffer_Baud, serialManObj->getBaudRate().c_str(), IM_ARRAYSIZE(ui.input_buffer_Baud) - 1);
     ui.input_buffer_Baud[IM_ARRAYSIZE(ui.input_buffer_Baud) - 1] = '\0';
     ImGui::SameLine(); // Place the next widget on the same line
-    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    ImGui::SetNextItemWidth(100);  // Set width of the input field
     if (ImGui::InputText("##Comm_Baud_Entry", ui.input_buffer_Baud, IM_ARRAYSIZE(ui.input_buffer_Baud))) {
         serialManObj->setBaudRate(ui.input_buffer_Baud);
     }
@@ -191,7 +191,7 @@ int terminal::update(const char* title) {
     snprintf(ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len),"%zu", term_out.display_buff_num_chars);
     ImGui::Text("Char Buffer Size:");
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(150);  // Set width of the input field
+    ImGui::SetNextItemWidth(100);  // Set width of the input field
     ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
@@ -219,7 +219,7 @@ int terminal::update(const char* title) {
     //-----------------------------Clear Terminal Text--------------------------|
 
 
-
+    //ImGui::EndChild();
     ImGui::End();
 
 	return 0;

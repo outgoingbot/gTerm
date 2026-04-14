@@ -5,16 +5,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ─── OS Detection ────────────────────────────────────────────────────────────────
-if (WIN32)
+if(WIN32)
     message(STATUS "Detected Windows OS")
     add_compile_definitions(IS_WINDOWS)
     set(SERIAL_SRC serial/RS232Comm.cpp)
     set(SERIAL_INC serial/RS232Comm.h)
-elseif (UNIX)
+    set(CONFIG_SRC ConfigManager.cpp)
+    set(RC_FILE "${CMAKE_SOURCE_DIR}/gTerm.rc")
+elseif(UNIX)
     message(STATUS "Detected Unix/Linux OS")
     add_compile_definitions(IS_LINUX)
     set(SERIAL_SRC serial/LinuxSerialComm.cpp)
     set(SERIAL_INC serial/LinuxSerialComm.h)
+    set(CONFIG_SRC ConfigManager_linux.cpp)
+    set(RC_FILE "")
+else()
+    message(FATAL_ERROR "Unsupported OS")
 endif()
 
 # ─── Resource Paths (relative) ───────────────────────────────────────────────────
@@ -27,43 +33,25 @@ add_definitions(-DFONT_FILE_PATH=\"${FONT_FILE_PATH}\")
 set(LOGO_FILE_PATH "res/logo.png")
 add_definitions(-DLOGO_FILE_PATH=\"${LOGO_FILE_PATH}\")
 
-# ─── Source Files + Windows .rc for embedded icon ────────────────────────────────
-if(WIN32)
-    add_executable(gTerm
-        gTerm.cpp gTerm.h
-        terminal.cpp terminal.h
-        terminal_output.cpp terminal_output.h
-        DebugMenu.cpp DebugMenu.h
-        mainMenu.cpp mainMenu.h
-        dataParser.cpp dataParser.h
-        serial/serialManager.cpp serial/serialManager.h
-        serial/virtualComm.h
-        textselect.cpp textselect.hpp
-        dataPlotter.cpp dataPlotter.h
-        ConfigManager.cpp ConfigManager.h
-        external/json.hpp
-        ${SERIAL_SRC}
-        ${SERIAL_INC}
-        "${CMAKE_SOURCE_DIR}/gTerm.rc"
-    )
-else()
-    add_executable(gTerm
-        gTerm.cpp gTerm.h
-        terminal.cpp terminal.h
-        terminal_output.cpp terminal_output.h
-        DebugMenu.cpp DebugMenu.h
-        mainMenu.cpp mainMenu.h
-        dataParser.cpp dataParser.h
-        serial/serialManager.cpp serial/serialManager.h
-        serial/virtualComm.h
-        textselect.cpp textselect.hpp
-        dataPlotter.cpp dataPlotter.h
-        ConfigManager_linux.cpp ConfigManager.h
-        external/json.hpp
-        ${SERIAL_SRC}
-        ${SERIAL_INC}
-    )
-endif()
+# ─── Common sources ──────────────────────────────────────────────────────────────
+set(SOURCES
+    gTerm.cpp gTerm.h
+    terminal.cpp terminal.h
+    terminal_output.cpp terminal_output.h
+    DebugMenu.cpp DebugMenu.h
+    mainMenu.cpp mainMenu.h
+    dataParser.cpp dataParser.h
+    serial/serialManager.cpp serial/serialManager.h
+    serial/virtualComm.h
+    dataPlotter.cpp dataPlotter.h
+    ${CONFIG_SRC} ConfigManager.h
+    external/json.hpp
+    ${SERIAL_SRC}
+    ${SERIAL_INC}
+    ${RC_FILE}
+)
+
+add_executable(gTerm ${SOURCES})
 
 # ─── Vcpkg Packages ──────────────────────────────────────────────────────────────
 find_package(glfw3 CONFIG REQUIRED)

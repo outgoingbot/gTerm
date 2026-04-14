@@ -216,7 +216,7 @@ int dataParser::update()
     }
 
     for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
-        std::string comboLabel = "Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
+        std::string comboLabel = "##Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
         std::string preview = "Plot " + std::to_string(plot_idx + 1) + " channels";
 
         if (ImGui::BeginCombo(comboLabel.c_str(), preview.c_str())) {

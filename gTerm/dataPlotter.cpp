@@ -14,23 +14,24 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
     ImGui::Checkbox("Auto Y Scale", &autoScale);
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 64, static_cast<int>(MAX_SAMPLES));
+    ImGui::SameLine();
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
 
     // ====================== Parser controls plot assignment ======================
-    ImGui::Separator();
-    if (ImGui::Button("Reset: One Channel per Plot")) {
-        size_t numCh = parser.getChannelCount();
-        for (size_t i = 0; i < numCh; ++i) {
-            parser.setChannelToPlot(static_cast<int>(i), static_cast<int>(i));
-        }
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("All Channels in One Plot")) {
-        size_t numCh = parser.getChannelCount();
-        for (size_t i = 0; i < numCh; ++i) {
-            parser.setChannelToPlot(static_cast<int>(i), 0);
-        }
-    }
+    //ImGui::Separator();
+    //if (ImGui::Button("Reset: One Channel per Plot")) {
+    //    size_t numCh = parser.getChannelCount();
+    //    for (size_t i = 0; i < numCh; ++i) {
+    //        parser.setChannelToPlot(static_cast<int>(i), static_cast<int>(i));
+    //    }
+    //}
+    //ImGui::SameLine();
+    //if (ImGui::Button("All Channels in One Plot")) {
+    //    size_t numCh = parser.getChannelCount();
+    //    for (size_t i = 0; i < numCh; ++i) {
+    //        parser.setChannelToPlot(static_cast<int>(i), 0);
+    //    }
+    //}
 
     ImGui::Separator();
 
@@ -92,9 +93,11 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
         anyPlotDrawn = true;
 
         std::string title = "Plot " + std::to_string(p + 1);
+        //TODO: DOnt think is actually changing the plot axis padding
+        ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(1, 1));   // left/right, top/bottom
 
         if (ImPlot::BeginPlot(title.c_str(), plotSize, ImPlotFlags_Crosshairs)) {
-            ImPlot::SetupAxes("Sample", "Value");
+            ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_NoLabel);
 
             if (follow_x) {
                 ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, static_cast<double>(displayCount) - 1.0, ImGuiCond_Always);
@@ -104,7 +107,7 @@ void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
             }
 
             if (autoScale) {
-                ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxis(ImAxis_Y1, NULL, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel);
             }
 
             for (int ch : group) {

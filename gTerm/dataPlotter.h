@@ -22,7 +22,7 @@ public:
     std::vector<float> x_data;
 
     // UI / settings
-    int pointsToDisplay = 512;                  // you can increase this
+    int pointsToDisplay = 128;                  // you can increase this
     int maxChannels = 128;                      // safety limit
 
     size_t lastNumChannels = 0;

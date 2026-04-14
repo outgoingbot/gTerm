@@ -12,8 +12,7 @@ void DebugMenu::update(serialManager* sermanobj){
     //ImGui::Begin("Debug Menu");
     ImGui::Begin("Debug Menu", nullptr,
         ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoCollapse);
+        ImGuiWindowFlags_NoMove);
 
     ImGui::Text("ImGui Version: %s", m_versions.imgui.c_str());
     ImGui::Text("ImPlot Version: %s", m_versions.implot.c_str());
