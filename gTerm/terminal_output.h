@@ -11,7 +11,6 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
-#include "textselect.hpp"
 
 class terminal_output {
 public:

@@ -19,8 +19,6 @@ parsing and plotting will be done in other classes
 //testing imguitextselect library
 #include <string_view>
 #include <vector>
-#include "textselect.hpp"
-
 
 
 class terminal{
