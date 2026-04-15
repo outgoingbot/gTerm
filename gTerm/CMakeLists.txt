@@ -80,9 +80,6 @@ add_custom_command(
 
 # ─── Install rules ───────────────────────────────────────────────────────────────
 
-# Enable vcpkg automatic DLL deployment (only copies what is actually needed)
-set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
-
 # 1. Install the executable
 install(TARGETS gTerm
     RUNTIME DESTINATION .
@@ -93,12 +90,12 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/res"
     DESTINATION .
 )
 
-# 3. Install only the DLLs that vcpkg deployed next to the executable
+# 3. Install ONLY glfw3.dll on Windows (cleanest and most reliable)
 if(WIN32)
-    install(DIRECTORY "${CMAKE_BINARY_DIR}/bin/"
-        DESTINATION .
-        FILES_MATCHING PATTERN "*.dll"
-    )
+    # glfw3.dll comes from vcpkg
+    install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/glfw3.dll"
+            DESTINATION .
+            OPTIONAL)
 endif()
 
 # 4. Linux .desktop file
