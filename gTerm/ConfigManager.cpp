@@ -102,8 +102,8 @@ void ConfigManager::CopyConfigToVars(){
         config.comm_baud = j["comm_baud"].get<std::string>();
     }
 
-    if (j.contains("window_title")) {
-        //dataPlotter.window_title = j["window_title"].get<std::string>();
+    if (j.contains("d_parser_format")) {
+        config.d_parser_format = j["d_parser_format"].get<std::string>();
     }
 }
 

@@ -10,13 +10,14 @@
 
 class dataPlotter {
 public:
-    dataPlotter();
+    dataPlotter(const dataParser& p);
     ~dataPlotter() = default;
 
     static constexpr size_t MAX_SAMPLES = 4096;   // how many lines we keep for plotting
     static constexpr size_t MAX_CHANNELS = 128;    // safety limit
 
-    dataParser parser;
+    const dataParser& parser;
+
     std::vector<ParsedSample> currentSamples;   // or process on the fly
     // Plotting buffers - these will be resized dynamically
     std::vector<float> x_data;
@@ -29,7 +30,7 @@ public:
     size_t lastPointsToDisplay = 0;
 
     // The main entry point called every frame
-    void update(dataParser& parser, const std::deque<char>& rxDeque);
+    void update(const std::deque<char>& rxDeque);
     
 
 private:

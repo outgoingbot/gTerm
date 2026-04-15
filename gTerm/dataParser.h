@@ -15,7 +15,9 @@ Data parsing class.
 #include <sstream>
 #include <string>
 #include <optional>
+#include <cctype>
 
+#include "ConfigManager.h"
 struct ParsedSample {
 	std::vector<double> values;   // one value per field in the format string
 };
@@ -24,7 +26,7 @@ struct ParsedSample {
 class dataParser {
 
 public:
-	dataParser();
+	dataParser(AppConfig& cfg);
 	~dataParser();
 
 	//int update(std::deque<char> charArray);
@@ -67,16 +69,22 @@ public:
 	bool send_to_plot = true;
 	
 
+	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
+	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
+
+	//make this private
+	std::vector<char> channelSelected;
 private:
 	
 	//char _buffer[128]; // Buffer to store the text input
 	bool _autoScroll;                // Controls auto-scrolling behavior
 
+	AppConfig& configRef;
+
 	typedef struct window_params_t {
 		float min_height = 100.0f;
 		float width = 600.0f; // Window width
 		float height = 600.f; // Window height
-
 		float drag_bar_height = 20.f;
 	} window_params_t;
 

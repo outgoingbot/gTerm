@@ -2,12 +2,12 @@
 #include <cstdio>
 #include <cstring>
 
-dataPlotter::dataPlotter() {
+dataPlotter::dataPlotter(const dataParser& p) : parser(p) {
     // Initialize buffers if necessary
     //memset(samples, 0, sizeof(samples));
 }
 
-void dataPlotter::update(dataParser& parser, const std::deque<char>& rxDeque)
+void dataPlotter::update(const std::deque<char>& rxDeque)
 {
     ImGui::Begin("Live Serial Plot");
 

@@ -99,8 +99,8 @@ int main() {
     mainMenu main_menu(cfgManager);
     DebugMenu debugMenu(versions);
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT, cfgManager.GetConfig()); //I dont think these size params are doing anything
-    dataParser dParser;
-    dataPlotter dPlotter;
+    dataParser dParser(cfgManager.GetConfig());
+    dataPlotter dPlotter(dParser);
     //------------------------------------ Create the Objects ---------------------------------| 
 
 
@@ -133,7 +133,7 @@ int main() {
         //----------------------- Open JSON and copy to class members -----------------------------|
         if (cfgManager.config_need_update) {
             term.ApplyConfig();
-            //dParser.ApplyConfig();
+            dParser.ApplyConfig();
             //dPlotter.ApplyConfig();
             cfgManager.config_need_update = false;  // reset flag
         }
@@ -143,7 +143,7 @@ int main() {
         //----------------------------- Save class members to JSON --------------------------------|
         if (cfgManager.app_config_need_update) {
             term.StoreConfig();
-            //dParser.StoreConfig();
+            dParser.StoreConfig();
             //dPlotter.StoreConfig();
             cfgManager.ShowSaveDiag();
             cfgManager.app_config_need_update = false;  // reset flag
@@ -171,7 +171,7 @@ int main() {
         if (dParser.dataParse_enable && dParser.send_to_plot) {
             ImGui::SetNextWindowPos(ImVec2(1000, 20), ImGuiCond_FirstUseEver); // initial position only once
             ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
-            dPlotter.update(dParser, term.getRxBuffer());
+            dPlotter.update(term.getRxBuffer());
         }
         
         //Debug window

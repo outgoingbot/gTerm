@@ -8,12 +8,13 @@
 struct AppConfig {
     std::string comm_port = R"(\\.\COM11)";
     std::string comm_baud = "115200";
-    std::string ser_buff_num_chars = "alot";
+    std::string d_parser_format = R"(%f,%f,%f)";
+    std::vector<char> channelSelected;
     // add your variables here
 };
 
 //This list must be kept updated with the AppConfig struct for some dumb reason
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AppConfig, comm_port, comm_baud, ser_buff_num_chars)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AppConfig, comm_port, comm_baud, d_parser_format, channelSelected)
 
 class ConfigManager {
 public:

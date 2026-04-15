@@ -1,9 +1,6 @@
 #include "dataParser.h"
-#include <sstream>
-#include <cctype>
-#include <algorithm>
 
-dataParser::dataParser() {
+dataParser::dataParser(AppConfig& cfg) : configRef(cfg) {
     compile();  // compile default format
 
     memset(input_text, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
@@ -205,8 +202,8 @@ int dataParser::update()
  
 
     // ====================== Per-Plot Channel Selection (Add + Remove) ======================
-    static std::vector<char> channelSelected;
-    std::vector<bool> checked;
+    //static std::vector<char> channelSelected;
+    //std::vector<bool> checked;
     size_t numChannels = getChannelCount();
     if (numChannels == 0) return 0;
 
@@ -310,3 +307,38 @@ void dataParser::removeChannelFromPlot(int channelIndex, int plotIndex)
     }
 }
 
+void dataParser::ApplyConfig()
+{
+    format = configRef.d_parser_format;
+    compile();
+    channelSelected = configRef.channelSelected; //this may copy wrong. might be vect<int> -> vect<char>.
+    
+    //TODO: shitty copy paste from combo box
+    //needs to be a method. prob crash if there are wrong channels saved like this
+    size_t numChannels = getChannelCount();
+    for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
+        for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
+            size_t idx = plot_idx * numChannels + chn_idx;
+
+            bool isChecked = (channelSelected[idx] != 0);
+
+            if (isChecked) {
+                // Add channel to this plot
+                setChannelToPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+            }else {
+                // REMOVE channel from this plot
+                removeChannelFromPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+            }
+        }
+    }//fix this shit
+
+    // add every variable you need copied
+}
+
+
+void dataParser::StoreConfig()
+{
+    configRef.d_parser_format = format;
+    configRef.channelSelected = channelSelected;
+    // add every variable you need copied
+}
