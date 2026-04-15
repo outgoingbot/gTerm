@@ -1,7 +1,7 @@
 {
     "name": "gterm",
     "version": "1.0",
-    "builtin-baseline": "c3867e714dd3a51c272826eea77267876517ed99",
+    "builtin-baseline": "d13fa75214c258099923cf25a5e6311e58c07f3b",
     "dependencies": [
         "glfw3",
         "glad",
