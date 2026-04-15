@@ -81,9 +81,11 @@ void ConfigManager::ShowOpenDiag() {
     if (!path.empty()) {
         bool success = LoadFromFile(path);
         if (success) {
-            PrintConfigDebug();
             CopyConfigToVars();
+            PrintConfigDebug();
+            config_need_update = true;
         }
+
     }
 }
 
@@ -92,12 +94,23 @@ void ConfigManager::HandleDialogs() {
 }
 
 void ConfigManager::CopyConfigToVars() {
-    nlohmann::json j = GetConfig();
-    // Add your mappings here when needed
-    // Example:
-    // if (j.contains("_autoscroll")) {
-    //     dataPlotter.controls.autoscroll = j["_autoscroll"].get<bool>();
-    // }
+    nlohmann::json j = GetConfig();   // convert struct back to json
+
+    // Example for your "_autoscroll" key
+    if (j.contains("comm_port")) {
+        //dataPlotter.controls.autoscroll = j["_autoscroll"].get<bool>();
+        config.comm_port = j["comm_port"].get<std::string>();
+    }
+
+    // Other examples:
+    if (j.contains("comm_baud")) {
+        //dataPlotter.some_int = j["some_int"].get<int>();
+        config.comm_baud = j["comm_baud"].get<std::string>();
+    }
+
+    if (j.contains("d_parser_format")) {
+        config.d_parser_format = j["d_parser_format"].get<std::string>();
+    }
 }
 
 void ConfigManager::PrintConfigDebug() const {

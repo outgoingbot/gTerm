@@ -72,7 +72,7 @@ im using a selectText library. it works great but i think imgui 1.92.7 has fixed
 
 linux:
 I changed how the threading is handled in seriam manager. we need to make sure the LinuxSerialComm is configured correctly
-to be blocking (set timeouts and other params) and work like the windows rs232
+to be blocking (set timeouts and other params) and work like the windows rs232 //<-done
 
 bugs:
 the dataplotter slider number of smaples to view, need to set it max value based on the data to be plotted, not the deque
@@ -84,12 +84,6 @@ maybe add a trigger to the plots?
 add binary mode
 add serial control signals (dtr, rts ,etc)
 
-mayne need to update readme for linux build with this:
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_TOOLCHAIN_FILE=~/dev/vcpkg/scripts/buildsystems/vcpkg.cmake \
-    -DVCPKG_TARGET_TRIPLET=x64-linux
-
-	still dont like the path i have to pass in '/dev/vcpkg/etcetc'
 
 	need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows
 	-better option would be to use an abstract class?
@@ -97,5 +91,5 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
 
 	fix these things. test a bunch, then merge into master
 	-linuc build has no desktop icon working
-	- can prob remove some files in the project root / with old cmake stuf
-	-remove git submodule
+	- can prob remove some files in the project root / with old cmake stuf //<-- done
+	-remove git submodule <--done
