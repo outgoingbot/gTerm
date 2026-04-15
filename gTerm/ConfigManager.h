@@ -18,8 +18,8 @@ class ConfigManager {
 public:
     ConfigManager();
 
-    void ShowSaveButton();
-    void ShowLoadButton();
+    void ShowSaveDiag();
+    void ShowOpenDiag();
     void HandleDialogs();
 
     AppConfig& GetConfig() { return config; }
@@ -29,6 +29,10 @@ public:
 
     //Debugging function to print json key/values to terminal
     void PrintConfigDebug() const;
+
+    bool config_need_update = false;
+
+    bool app_config_need_update = false;
 
 private:
     AppConfig config;

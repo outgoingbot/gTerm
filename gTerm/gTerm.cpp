@@ -4,6 +4,7 @@
 #define IMPLOT_ENABLE_SPEC 1
 #include "stb_image.h"
 #include "gTerm.h"
+#include "ConfigManager.h"
 
 using namespace std;
 #define IGNORE_SAVED_IMU_INI 0
@@ -86,16 +87,17 @@ int main() {
     io.Fonts->Build();
     //========================================= FONT TESTING ==============================================
 
+    ConfigManager cfgManager;
 
     // Create Custom GUI Object
-    mainMenu main_menu;
+    mainMenu main_menu(cfgManager);
     DebugMenu debugMenu(versions);
-    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT); //I dont think these size params are doing anything
+    terminal term(WINDOW_WIDTH, WINDOW_HEIGHT, cfgManager.GetConfig()); //I dont think these size params are doing anything
     dataParser dParser;
     dataPlotter dPlotter;
      
     // Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
         if(main_menu.frame_rate_capped){
             glfwWaitEventsTimeout(0.004);        // ~240 FPS max
         }
@@ -115,6 +117,22 @@ int main() {
             ImGui::PushFont(nullptr, main_menu.currentFontSize);
             main_menu.fontNeedsRebuild = false;
         }
+
+        if (cfgManager.config_need_update) {
+            term.ApplyConfig();
+            //dParser.ApplyConfig();
+            //dPlotter.ApplyConfig();
+            cfgManager.config_need_update = false;  // reset flag
+        }
+
+        if (cfgManager.app_config_need_update) {
+            term.StoreConfig();
+            //dParser.ApplyConfig();
+            //dPlotter.ApplyConfig();
+            cfgManager.ShowSaveDiag();
+            cfgManager.app_config_need_update = false;  // reset flag
+        }
+        
 
         // Start a new frame
         ImGui_ImplOpenGL3_NewFrame();

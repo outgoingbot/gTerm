@@ -1,6 +1,7 @@
 #include "mainMenu.h"
 
-mainMenu::mainMenu() {
+//Main Menu with initialization list for cfgManager
+mainMenu::mainMenu(ConfigManager& cfgManager) : cfgManagerP(cfgManager) {
     // Constructor (if you need to initialize anything, do it here)
 }
 
@@ -13,20 +14,22 @@ void mainMenu::update() {
     ImGui::BeginMainMenuBar(); // Start the top menu bar
 
     if (ImGui::BeginMenu("File")) { // Add a "File" menu
+
         if (ImGui::MenuItem("New")) {
-            // Handle "New" action
+            // Handle "New" action        
         }
         if (ImGui::MenuItem("Open")) {
-            cfgManager.ShowLoadButton();
             // Handle "Open" action
+            cfgManagerP.ShowOpenDiag();
         }
         if (ImGui::MenuItem("Save")) {
-            cfgManager.ShowSaveButton();
             // Handle "Save" action
+            cfgManagerP.app_config_need_update = true;
         }
         ImGui::Separator(); // Add a separator between menu items
         if (ImGui::MenuItem("Exit")) {
             // Handle "Exit" action
+            exit_app = true;
         }
         ImGui::EndMenu(); // End the "File" menu
     }
@@ -81,5 +84,5 @@ void mainMenu::update() {
     ImGui::EndMainMenuBar(); // End the top menu bar
 
     //handle config manager updates
-    cfgManager.HandleDialogs();
+    cfgManagerP.HandleDialogs();
 }

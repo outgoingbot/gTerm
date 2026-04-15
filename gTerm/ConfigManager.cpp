@@ -60,7 +60,7 @@ std::string ConfigManager::OpenNativeLoadDialog() {
     return result;
 }
 
-void ConfigManager::ShowSaveButton() {
+void ConfigManager::ShowSaveDiag() {
     //if (ImGui::Button("Save Config")) {
         std::string path = OpenNativeSaveDialog("gTerm_config.json");
         if (!path.empty()) {
@@ -69,13 +69,14 @@ void ConfigManager::ShowSaveButton() {
     //}
 }
 
-void ConfigManager::ShowLoadButton() {
+void ConfigManager::ShowOpenDiag() {
         std::string path = OpenNativeLoadDialog();
         if (!path.empty()) {
             bool success = LoadFromFile(path);
             if (success){
-                PrintConfigDebug();
                 CopyConfigToVars();
+                PrintConfigDebug();
+                config_need_update = true;
             }
 
         }
@@ -90,13 +91,15 @@ void ConfigManager::CopyConfigToVars(){
     nlohmann::json j = GetConfig();   // convert struct back to json
 
     // Example for your "_autoscroll" key
-    if (j.contains("_autoscroll")) {
+    if (j.contains("comm_port")) {
         //dataPlotter.controls.autoscroll = j["_autoscroll"].get<bool>();
+        config.comm_port = j["comm_port"].get<std::string>();
     }
 
     // Other examples:
-    if (j.contains("some_int")) {
+    if (j.contains("comm_baud")) {
         //dataPlotter.some_int = j["some_int"].get<int>();
+        config.comm_baud = j["comm_baud"].get<std::string>();
     }
 
     if (j.contains("window_title")) {

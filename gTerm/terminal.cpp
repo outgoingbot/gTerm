@@ -1,7 +1,7 @@
 #include "terminal.h"
 //#define IMPLOT_IMPLEMENTATION //<is this needed by implot?
 
-terminal::terminal(int width, int height) {
+terminal::terminal(int width, int height, AppConfig& cfg) : configRef(cfg) {
     _width = width;
     _height = height;
     //_window = window;
@@ -12,6 +12,24 @@ terminal::terminal(int width, int height) {
 
 terminal::~terminal(void) {
     delete serialManObj; // Cleanup
+}
+
+
+void terminal::ApplyConfig()
+{
+    serialManObj->setCommPort(configRef.comm_port);
+    serialManObj->setBaudRate(configRef.comm_baud);
+    //ser_buff_num_chars = configRef.ser_buff_num_chars;
+    // add every variable you need copied
+}
+
+
+void terminal::StoreConfig()
+{
+    configRef.comm_port = serialManObj->getCommPort();
+    configRef.comm_baud = serialManObj->getBaudRate();
+    //ser_buff_num_chars = configRef.ser_buff_num_chars;
+    // add every variable you need copied
 }
 
 

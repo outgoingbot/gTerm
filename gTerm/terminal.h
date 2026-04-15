@@ -13,6 +13,7 @@ parsing and plotting will be done in other classes
 #include <iostream>
 #include <deque>
 
+#include "ConfigManager.h"
 #include "serial/serialManager.h"
 #include "terminal_output.h" //Scolling Text Window
 
@@ -24,7 +25,7 @@ parsing and plotting will be done in other classes
 class terminal{
 
 public:
-	terminal(int width, int height);
+	terminal(int width, int height, AppConfig& cfg);
 	~terminal();
 
 	int update(const char* title);
@@ -39,10 +40,17 @@ public:
 	const std::deque<char>& getRxBuffer() const;
 	//setTxBuffer
 
+	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
+	
+	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
+
 private:
 
 	int _width;          // Window width //unused?
 	int _height;         // Window height //unused?
+	
+	AppConfig& configRef;
+
 	
 	struct terminal_ui
 	{
