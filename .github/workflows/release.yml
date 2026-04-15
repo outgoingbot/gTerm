@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            triplet: x64-linux
+            name: linux-x64
+            ext: tar.gz
+          - os: windows-2022
+            triplet: x64-windows
+            name: windows-x64
+            ext: zip
+          - os: macos-13
+            triplet: x64-osx
+            name: macos-x64
+            ext: tar.gz
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgJson: '${{ github.workspace }}/vcpkg.json'
+
+      - name: Configure
+        run: >
+          cmake -B build -S .
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+          -DCMAKE_INSTALL_PREFIX=install
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Install
+        run: cmake --install build --config Release
+
+      - name: Package
+        if: runner.os != 'Windows'
+        working-directory: install
+        run: tar -czf ../${{ github.ref_name }}-${{ matrix.name }}.${{ matrix.ext }} .
+
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path install/* -DestinationPath ${{ github.ref_name }}-${{ matrix.name }}.${{ matrix.ext }}
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}-${{ matrix.name }}
+          path: ${{ github.ref_name }}-${{ matrix.name }}.${{ matrix.ext }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          draft: false

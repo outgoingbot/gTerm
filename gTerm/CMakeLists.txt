@@ -1,8 +1,9 @@
 ﻿cmake_minimum_required(VERSION 3.15)
-project(gTerm)
+project(gTerm LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ─── OS Detection ────────────────────────────────────────────────────────────────
 if(WIN32)
@@ -73,6 +74,12 @@ add_custom_command(
             "${CMAKE_SOURCE_DIR}/res"
             "$<TARGET_FILE_DIR:gTerm>/res"
     COMMENT "Copying resources (icon.png, font, logo) to output directory"
+)
+
+# ─── Install rules (critical for packaging in CI) ────────────────────────────────
+install(TARGETS gTerm
+    RUNTIME DESTINATION .
+    BUNDLE DESTINATION .
 )
 
 # ─── Linux .desktop (optional) ───────────────────────────────────────────────────
