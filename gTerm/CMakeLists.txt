@@ -80,35 +80,29 @@ add_custom_command(
 
 # ─── Install rules ───────────────────────────────────────────────────────────────
 
-# 1. Install the Executable
+# Enable vcpkg automatic DLL deployment (only copies what is actually needed)
+set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
+
+# 1. Install the executable
 install(TARGETS gTerm
     RUNTIME DESTINATION .
 )
 
-# 2. Install the Resources (Crucial! Your app needs these to run)
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/res" 
-    DESTINATION . 
+# 2. Install the resources folder
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/res"
+    DESTINATION .
 )
 
-# 3. Bundle Windows DLLs
+# 3. Install only the DLLs that vcpkg deployed next to the executable
 if(WIN32)
-    install(CODE "
-        file(GET_RUNTIME_DEPENDENCIES
-            RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
-            UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
-            EXECUTABLES $<TARGET_FILE:gTerm>
-            # Dynamically use vcpkg paths
-            DIRECTORIES \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin\"
-            PRE_EXCLUDE_REGEXES \"api-ms-.*\" \"ext-ms-.*\" \"runtime.*\" \"kernel32.dll\" \"user32.dll\" \"shell32.dll\"
-        )
-        foreach(dep IN LISTS RESOLVED_DEPS)
-            file(INSTALL \"\${dep}\" DESTINATION \"\${CMAKE_INSTALL_PREFIX}\")
-        endforeach()
-    " COMPONENT Runtime)
+    install(DIRECTORY "${CMAKE_BINARY_DIR}/bin/"
+        DESTINATION .
+        FILES_MATCHING PATTERN "*.dll"
+    )
 endif()
 
-# 4. Linux .desktop
+# 4. Linux .desktop file
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install(FILES "${CMAKE_SOURCE_DIR}/res/gTerm.desktop" 
+    install(FILES "${CMAKE_SOURCE_DIR}/res/gTerm.desktop"
             DESTINATION share/applications)
 endif()
