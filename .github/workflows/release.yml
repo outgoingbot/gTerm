@@ -35,7 +35,7 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-          vcpkgGitCommitId: '2025.04.11'   # ← This fixes the baseline error (recent stable commit)
+          vcpkgGitCommitId: 'c3867e714dd3a51c272826eea77267876517ed99'   # 2026.03.18 stable release
 
       - name: Configure
         run: >
