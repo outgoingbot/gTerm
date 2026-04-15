@@ -26,8 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
-          fetch-depth: 0   # important for vcpkg baseline
+          fetch-depth: 0
 
       - name: Setup CMake
         uses: lukka/get-cmake@latest
@@ -36,7 +35,7 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-          vcpkgJson: '${{ github.workspace }}/vcpkg.json'
+          vcpkgGitCommitId: '2025.04.11'   # ← This fixes the baseline error (recent stable commit)
 
       - name: Configure
         run: >
