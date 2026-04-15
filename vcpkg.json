@@ -1,13 +1,27 @@
 {
     "name": "gterm",
     "version": "1.0",
+    "builtin-baseline": "c3867e714dd3a51c272826eea77267876517ed99",
     "dependencies": [
         "glfw3",
         "glad",
         {
             "name": "imgui",
-            "features": [ "glfw-binding", "opengl3-binding" ]
+            "features": [
+                "glfw-binding",
+                "opengl3-binding"
+            ]
         },
         "implot"
+    ],
+    "overrides": [
+        {
+            "name": "imgui",
+            "version": "1.92.7"
+        },
+        {
+            "name": "implot",
+            "version": "1.0"
+        }
     ]
 }
