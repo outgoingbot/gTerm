@@ -87,6 +87,9 @@ int main() {
     io.Fonts->Build();
     //========================================= FONT TESTING ==============================================
 
+
+    //------------------------------------ Create the Objects ---------------------------------|
+    // Create config manager to handle json load/save
     ConfigManager cfgManager;
 
     // Create Custom GUI Object
@@ -95,44 +98,55 @@ int main() {
     terminal term(WINDOW_WIDTH, WINDOW_HEIGHT, cfgManager.GetConfig()); //I dont think these size params are doing anything
     dataParser dParser;
     dataPlotter dPlotter;
-     
+    //------------------------------------ Create the Objects ---------------------------------| 
+
+
     // Main loop
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
+        
+        //----------------------------- Update glfw from main menu settings -----------------------|
         if(main_menu.frame_rate_capped){
             glfwWaitEventsTimeout(0.004);        // ~240 FPS max
-        }
-        else {
+        }else {
             glfwPollEvents();                    // Stay fully responsive
         }
 
         if (main_menu.v_sync_enabled) {
             glfwSwapInterval(1);   // VSync ON  (locked to monitor refresh rate)
-        }
-        else {
+        }else {
             glfwSwapInterval(0);   // VSync OFF (uncapped)
         }
+        //----------------------------- Update glfw from main menu settings -----------------------|
 
-        // rebuild fonts
+
+        //----------------------------- rebuild fonts from main menu settings ---------------------|
         if (main_menu.fontNeedsRebuild) {
             ImGui::PushFont(nullptr, main_menu.currentFontSize);
-            main_menu.fontNeedsRebuild = false;
+            main_menu.fontNeedsRebuild = false; // rest flag
         }
+        //----------------------------- rebuild fonts from main menu settings ---------------------|
+        
 
+        //----------------------- Open JSON and copy to class members -----------------------------|
         if (cfgManager.config_need_update) {
             term.ApplyConfig();
             //dParser.ApplyConfig();
             //dPlotter.ApplyConfig();
             cfgManager.config_need_update = false;  // reset flag
         }
+        //----------------------- Open JSON and copy to class members -----------------------------|
 
+
+        //----------------------------- Save class members to JSON --------------------------------|
         if (cfgManager.app_config_need_update) {
             term.StoreConfig();
-            //dParser.ApplyConfig();
-            //dPlotter.ApplyConfig();
+            //dParser.StoreConfig();
+            //dPlotter.StoreConfig();
             cfgManager.ShowSaveDiag();
             cfgManager.app_config_need_update = false;  // reset flag
         }
-        
+        //----------------------------- Save class members to JSON --------------------------------|
+
 
         // Start a new frame
         ImGui_ImplOpenGL3_NewFrame();
