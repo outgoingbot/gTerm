@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.15)
 project(gTerm LANGUAGES CXX)
 
+include(GNUInstallDirs) 
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -76,13 +78,37 @@ add_custom_command(
     COMMENT "Copying resources (icon.png, font, logo) to output directory"
 )
 
-# ─── Install rules (critical for packaging in CI) ────────────────────────────────
+# ─── Install rules ───────────────────────────────────────────────────────────────
+
+# 1. Install the Executable
 install(TARGETS gTerm
     RUNTIME DESTINATION .
-    BUNDLE DESTINATION .
 )
 
-# ─── Linux .desktop (optional) ───────────────────────────────────────────────────
-if(UNIX)
-    install(FILES "${CMAKE_SOURCE_DIR}/res/gTerm.desktop" DESTINATION share/applications)
+# 2. Install the Resources (Crucial! Your app needs these to run)
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/res" 
+    DESTINATION . 
+)
+
+# 3. Bundle Windows DLLs
+if(WIN32)
+    install(CODE "
+        file(GET_RUNTIME_DEPENDENCIES
+            RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
+            UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
+            EXECUTABLES $<TARGET_FILE:gTerm>
+            # Dynamically use vcpkg paths
+            DIRECTORIES \"${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin\"
+            PRE_EXCLUDE_REGEXES \"api-ms-.*\" \"ext-ms-.*\" \"runtime.*\" \"kernel32.dll\" \"user32.dll\" \"shell32.dll\"
+        )
+        foreach(dep IN LISTS RESOLVED_DEPS)
+            file(INSTALL \"\${dep}\" DESTINATION \"\${CMAKE_INSTALL_PREFIX}\")
+        endforeach()
+    " COMPONENT Runtime)
+endif()
+
+# 4. Linux .desktop
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(FILES "${CMAKE_SOURCE_DIR}/res/gTerm.desktop" 
+            DESTINATION share/applications)
 endif()
