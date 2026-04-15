@@ -37,6 +37,7 @@ public:
 	std::string format = "%f,%f,%f";   // User can change this at runtime
 #endif
 	
+	//TODO: allow user to customize these
 	char delimiter = ',';
 	char eol = '\n';
 
@@ -73,13 +74,15 @@ public:
 	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
 
 	//make this private
-	std::vector<char> channelSelected;
+	
 private:
 	
 	//char _buffer[128]; // Buffer to store the text input
 	bool _autoScroll;                // Controls auto-scrolling behavior
 
 	AppConfig& configRef;
+	
+	std::vector<char> channelSelected;
 
 	typedef struct window_params_t {
 		float min_height = 100.0f;

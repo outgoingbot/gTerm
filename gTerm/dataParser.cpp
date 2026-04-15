@@ -311,7 +311,7 @@ void dataParser::ApplyConfig()
 {
     format = configRef.d_parser_format;
     compile();
-    channelSelected = configRef.channelSelected; //this may copy wrong. might be vect<int> -> vect<char>.
+    channelSelected = configRef.p_channelSelected; //this may copy wrong. might be vect<int> -> vect<char>.
     
     //TODO: shitty copy paste from combo box
     //needs to be a method. prob crash if there are wrong channels saved like this
@@ -339,6 +339,6 @@ void dataParser::ApplyConfig()
 void dataParser::StoreConfig()
 {
     configRef.d_parser_format = format;
-    configRef.channelSelected = channelSelected;
+    configRef.p_channelSelected = channelSelected;
     // add every variable you need copied
 }
