@@ -1,8 +1,6 @@
 #include "DebugMenu.h"
 
-DebugMenu::DebugMenu(const VersionInfo& versions)
-    : m_versions(versions)
-{
+DebugMenu::DebugMenu(const VersionInfo& versions) : m_versions(versions) {
     debugserialManObj = nullptr;
 }
 

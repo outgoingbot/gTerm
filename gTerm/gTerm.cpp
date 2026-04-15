@@ -7,7 +7,7 @@
 #include "ConfigManager.h"
 
 using namespace std;
-#define IGNORE_SAVED_IMU_INI 0
+#define IGNORE_SAVED_IMGUI_INI 0
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 #define SCALE_FACTOR 1.0
@@ -59,7 +59,7 @@ int main() {
     ImGuiIO &io = ImGui::GetIO();
     
 
-    #if IGNORE_SAVED_IMU_INI
+    #if IGNORE_SAVED_IMGUI_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
     
@@ -72,20 +72,23 @@ int main() {
     //Scale the entire glfw window with this function
     glfwSetWindowSize(window, WINDOW_WIDTH * SCALE_FACTOR, WINDOW_HEIGHT * SCALE_FACTOR);
     
+    
+    //----------------------------- Collect Various Version Info ------------------------------|
     VersionInfo versions;
     versions.imgui = IMGUI_VERSION;
     versions.implot = IMPLOT_VERSION;
     versions.glfw = glfwGetVersionString();
     versions.opengl = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     versions.glsl = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+    //----------------------------- Collect Various Version Info ------------------------------|
 
 
-    //========================================= FONT TESTING ==============================================
+    //------------------------------------- Font Setup ----------------------------------------|
     ImFontConfig config;
-    config.SizePixels = 18.0f; // Your starting size
+    config.SizePixels = 18.0f; // Font starting size
     io.Fonts->AddFontDefaultVector(&config); // Explicitly load modern font
     io.Fonts->Build();
-    //========================================= FONT TESTING ==============================================
+    //------------------------------------- Font Setup ----------------------------------------|
 
 
     //------------------------------------ Create the Objects ---------------------------------|

@@ -12,6 +12,7 @@ struct AppConfig {
     // add your variables here
 };
 
+//This list must be kept updated with the AppConfig struct for some dumb reason
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AppConfig, comm_port, comm_baud, ser_buff_num_chars)
 
 class ConfigManager {
@@ -30,8 +31,8 @@ public:
     //Debugging function to print json key/values to terminal
     void PrintConfigDebug() const;
 
+    //used to trigger json save/load after copy operations
     bool config_need_update = false;
-
     bool app_config_need_update = false;
 
 private:
