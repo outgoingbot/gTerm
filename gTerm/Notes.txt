@@ -81,3 +81,19 @@ if you slide to the right too far the plot bugs out at x=0
 
 
 maybe add a trigger to the plots?
+
+mayne need to update readme for linux build with this:
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE=~/dev/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DVCPKG_TARGET_TRIPLET=x64-linux
+
+	still dont like the path i have to pass in '/dev/vcpkg/etcetc'
+
+	need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows
+	-better option would be to use an abstract class?
+	-also the file loading is slow and shit. its using like powershell calls and on linux some shit called 'zenity'
+
+	fix these things. test a bunch, then merge into master
+	-linuc build has no desktop icon working
+	- can prob remove some files in the project root / with old cmake stuf
+	-remove git submodule
