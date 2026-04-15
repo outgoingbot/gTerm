@@ -81,6 +81,8 @@ if you slide to the right too far the plot bugs out at x=0
 
 
 maybe add a trigger to the plots?
+add binary mode
+add serial control signals (dtr, rts ,etc)
 
 mayne need to update readme for linux build with this:
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
