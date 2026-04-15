@@ -85,11 +85,11 @@ add binary mode
 add serial control signals (dtr, rts ,etc)
 
 
-	need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows
-	-better option would be to use an abstract class?
-	-also the file loading is slow and shit. its using like powershell calls and on linux some shit called 'zenity'
+need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows <--Done
+-better option would be to use an abstract class?
+-also the file loading is slow and shit. its using like powershell calls and on linux some shit called 'zenity'
 
-	fix these things. test a bunch, then merge into master
-	-linuc build has no desktop icon working
-	- can prob remove some files in the project root / with old cmake stuf //<-- done
-	-remove git submodule <--done
+fix these things. test a bunch, then merge into master
+-linuc build has no desktop icon working
+- can prob remove some files in the project root / with old cmake stuf //<-- done
+-remove git submodule <--done
