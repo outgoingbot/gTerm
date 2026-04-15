@@ -69,14 +69,14 @@ std::string ConfigManager::OpenNativeLoadDialog() {
     return result;
 }
 
-void ConfigManager::ShowSaveButton() {
+void ConfigManager::ShowSaveDiag() {
     std::string path = OpenNativeSaveDialog("gTerm_config.json");
     if (!path.empty()) {
         SaveToFile(path);
     }
 }
 
-void ConfigManager::ShowLoadButton() {
+void ConfigManager::ShowOpenDiag() {
     std::string path = OpenNativeLoadDialog();
     if (!path.empty()) {
         bool success = LoadFromFile(path);
