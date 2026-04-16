@@ -56,6 +56,31 @@ int terminal::handle_disconnect_button() {
     return 0;
 }
 
+int terminal::handle_send_button() {
+    if (serialManObj->isConnected() == false) {
+        std::cout << "ERROR: Not Connected" << std::endl;
+        return -1;
+    }
+
+    std::string toSend = ui.inputBuffer;   // copy the current text
+
+    // Append EOL only once, on this send
+    if (controls.tx_eol_cr) {
+        toSend += '\r';
+    }
+    if (controls.tx_eol_lf) {
+        toSend += '\n';
+    }
+
+    if (!toSend.empty()) {
+        serialManObj->queueForTransmit(toSend);
+    }
+
+    return 0;
+}
+
+
+
 //Method to expose thread safe access to rx buffer
 const std::deque<char>& terminal::getRxBuffer() const
 {
@@ -246,8 +271,34 @@ int terminal::update(const char* title) {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Tab 3")) {
+        if (ImGui::BeginTabItem("Send")) {
             // Put content for Tab 3 here
+            ImGui::InputTextMultiline("##terminal_input", ui.inputBuffer, IM_ARRAYSIZE(ui.inputBuffer),
+                ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 5),
+                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CtrlEnterForNewLine);
+            //-----------------------------Send Button--------------------------|
+            if (ImGui::Button("Send") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter, false))) {
+                if (this->handle_send_button() == 0) {
+                    //so something agfter clicking send
+                }
+            }
+            //-----------------------------Send Button--------------------------|
+
+            //-----------------------------Clear Button--------------------------|
+            if (ImGui::Button("Clear") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter, false))) {
+                ui.inputBuffer[0] = '\0'; //used to make the char buff 'empty'
+            }
+            //-----------------------------Clear Button--------------------------|
+
+            if (ImGui::Checkbox("EOL_+CR", &controls.tx_eol_cr))
+            {
+                //something else of needed
+            }
+            if (ImGui::Checkbox("EOL_+LF", &controls.tx_eol_lf))
+            {
+                //something else of needed
+            }
+
 
             ImGui::EndTabItem();
         }

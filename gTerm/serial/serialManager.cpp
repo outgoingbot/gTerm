@@ -12,8 +12,8 @@ serialManager::serialManager(){
 
 	//TODO: used for debug during deveopment Hard COded
 #if DEBUG_COMM_DEFAULTS
-	setCommPort(R"(\\.\COM5)"); //R() is raw string
-	setBaudRate("2000000");
+	setCommPort(R"(\\.\COM12)"); //R() is raw string
+	setBaudRate("115200");
 #endif
 }
 
@@ -80,7 +80,13 @@ std::string serialManager::getBaudRate() const {
 }
 
 
+void serialManager::queueForTransmit(const std::string& data) {
+	if (data.empty()) return;
+	std::lock_guard<std::mutex> lock(txMutex);
+	txQueue.push(data);
+}
 
+#if 0
 // Thread function that continuously reads data from the serial port.
 void serialManager::readLoop() {
 	while (threadIsRunning) {
@@ -107,7 +113,44 @@ void serialManager::readLoop() {
 
 	std::cout << "Serial thread exiting cleanly.\n";
 }
+#else
+void serialManager::readLoop() { //Todo: rename this now that this threaded function handles both reads and writes
+	while (threadIsRunning) {
+		// drain and send queued data
+		std::string toSend;
+		{ //why is there a curly brace here?
+			std::lock_guard<std::mutex> lock(txMutex);
+			if (!txQueue.empty()) {
+				toSend = std::move(txQueue.front());
+				txQueue.pop();
+			}
+		}
+		if (!toSend.empty()) {
+			_vComPort->WriteData(toSend.c_str(), static_cast<unsigned int>(toSend.size()));
+		}
 
+		// existing read code
+		char buffer[8196] = {};
+		int bytesRead = 0;
+		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
+		if (bytesRead > 0) {
+			pushData(buffer, bytesRead);
+			deubug_kernel_num_chars_copied = bytesRead;
+#if DEBUG_TO_TERMINAL
+			for (int i = 0; i < bytesRead; ++i) std::cout << buffer[i];
+#endif
+		}
+		else if (bytesRead == -1) {
+			perror("Serial read failed");
+		}
+
+		// prevent 100% CPU (add this)
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+	std::cout << "Serial thread exiting cleanly.\n";
+}
+
+#endif
 
 
 // Push new char data into the deque<char> array. we grabbed it from the kernal buffer and shove it into our deque<char> vector

@@ -6,6 +6,7 @@
 #include <atomic>
 #include "virtualComm.h"
 #include <algorithm>
+#include <queue>
 
 //DEBUG to prevent me having to select the port and baud during development
 //Set to zero to remove default Comm port and baud settings
@@ -42,8 +43,12 @@ public:
 	//	std::deque<std::string> com_baud_rate_que;
 	//};
 
+
 	std::deque<std::string> commPortNames;
 	std::deque<std::string> commBaudNames;
+
+	//setTxBuffer queue
+	void queueForTransmit(const std::string& data);
 
 	serialManager();
 	~serialManager();
@@ -78,6 +83,9 @@ private:
 	std::mutex bufferMutex;
 	std::thread* readThread = nullptr;
 	std::atomic<bool> threadIsRunning;
+
+	std::queue<std::string> txQueue;// tx serial data queue
+	std::mutex txMutex;
 
 	virtualComm* _vComPort; //the virtualComport class is local to serialManager class.
 
