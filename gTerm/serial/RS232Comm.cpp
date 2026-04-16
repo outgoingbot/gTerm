@@ -50,10 +50,8 @@ void RS232Comm::ReadData(char* buffer, unsigned int nbChar, int* returnVal) {
 }
 
 
-bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar)
-{
+bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar){
 	DWORD bytesSend;
-
 	//Try to write the buffer on the Serial port
 	if (!WriteFile(this->hSerial, (void *)buffer, nbChar, &bytesSend, 0)) {
 		//In case it don't work get comm error and return false
@@ -63,6 +61,7 @@ bool RS232Comm::WriteData(const char *buffer, unsigned int nbChar)
 		return true;
 	}
 }
+
 
 bool RS232Comm::ListComPorts(std::deque<std::string>* ComPortNames) { //added function to find the present serial 
 	char lpTargetPath[5000]; // buffer to store the path of the COMPORTS
@@ -83,7 +82,7 @@ bool RS232Comm::ListComPorts(std::deque<std::string>* ComPortNames) { //added fu
 		if (::GetLastError() == ERROR_INSUFFICIENT_BUFFER){
 		}
 	}
-	std::cout << "Leaving RS232COMM\r\n" << std::endl;
+	std::cout << "[INFO]: Leaving RS232Comm List Ports\r\n" << std::endl;
 	return gotPort;
 }
 
@@ -119,10 +118,10 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	if (this->hSerial == INVALID_HANDLE_VALUE) {
 		DWORD error = GetLastError();
 		if (error == ERROR_FILE_NOT_FOUND) {
-			printf("ERROR: Handle was not attached. Reason: %s not available.\n", portName);
+			printf("[ERROR]: RS232comm Handle was not attached. Reason: %s not available.\n", portName);
 		}
 		else {
-			printf("ERROR: CreateFileA failed with error code: %lu\n", error);
+			printf("[ERROR]: RS232comm CreateFileA failed with error code: %lu\n", error);
 		}
 		return false;
 	}
@@ -130,13 +129,13 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	// Get current serial port settings
 	DCB currentParams = { 0 };
 	if (!GetCommState(this->hSerial, &currentParams)) {
-		printf("ERROR: Failed to get current serial parameters!\n");
+		printf("[ERROR]: RS232comm Failed to get current serial parameters!\n");
 		return false;
 	}
 
 	// Apply the new settings from the caller
 	if (!SetCommState(this->hSerial, &dcbSerialParams)) {
-		printf("ERROR: Could not set Serial Port parameters!\n");
+		printf("[ERROR]: RS232comm Could not set Serial Port parameters!\n");
 		return false;
 	}
 
@@ -153,12 +152,12 @@ bool RS232Comm::Connect(const char* portName, DCB dcbSerialParams) {
 	COMMTIMEOUTS timeouts;
 	timeouts.ReadIntervalTimeout = MAXDWORD;
 	timeouts.ReadTotalTimeoutMultiplier = MAXDWORD;
-	timeouts.ReadTotalTimeoutConstant = 1000;
+	timeouts.ReadTotalTimeoutConstant = 100;
 	timeouts.WriteTotalTimeoutMultiplier = 0;
 	timeouts.WriteTotalTimeoutConstant = 0;
 
 	if (!SetCommTimeouts(this->hSerial, &timeouts)) {
-		printf("ERROR: Could not set Serial Port timeouts!\n");
+		printf("[ERROR]: RS232comm Could not set Serial Port timeouts!\n");
 		return false;
 	}
 

@@ -28,11 +28,15 @@ bool serialManager::connect() {
 	//Start the RS232 or Linux Serial port (hosted by vComPort virtual class)
 	if (_vComPort->connect()) {
 		//create the nonstop thread to keep reading the seria port if connect retruns true
+		std::cout << "[INFO]: gTerm serialManager Comm: " << getCommPort() << std::endl;
+		std::cout << "[INFO]: gTerm serialManager Baud: " << getBaudRate() << std::endl;
+		std::cout << "[SUCCESS]: gTerm seriManager Thread Started" << std::endl;
 		readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
 		threadIsRunning = true;
 		return true;
 	}
 	else {
+		std::cout << "[ERROR]: gTerm seriManager Thread Failed To Start" << std::endl;
 		return false;
 	}
 }
@@ -86,10 +90,24 @@ void serialManager::queueForTransmit(const std::string& data) {
 	txQueue.push(data);
 }
 
-#if 0
+#if 1
 // Thread function that continuously reads data from the serial port.
 void serialManager::readLoop() {
 	while (threadIsRunning) {
+		// drain and send queued data
+		std::string toSend;
+		{ //why is there a curly brace here?
+			std::lock_guard<std::mutex> lock(txMutex);
+			if (!txQueue.empty()) {
+				toSend = std::move(txQueue.front());
+				txQueue.pop();
+			}
+		}
+		//Consider using "chunking here to prevent very large transmits from blocking the ReadData() for too long"
+		if (!toSend.empty()) {
+			_vComPort->WriteData(toSend.c_str(), static_cast<unsigned int>(toSend.size()));
+		}
+
 		//copy the kernel comm buffer into this buffer
 		char buffer[8196]; //ideally this would be small if our thread is fast, but that uses lotsa cpu :(
 		int bytesRead = 0;
@@ -110,45 +128,11 @@ void serialManager::readLoop() {
 			//TODO: Do something here to handle error?
 		}
 	}
-
-	std::cout << "Serial thread exiting cleanly.\n";
+	std::cout << "[INFO]: gTerm serilManager readLoop Thread Exiting Cleanly" << std::endl;
 }
 #else
-void serialManager::readLoop() { //Todo: rename this now that this threaded function handles both reads and writes
-	while (threadIsRunning) {
-		// drain and send queued data
-		std::string toSend;
-		{ //why is there a curly brace here?
-			std::lock_guard<std::mutex> lock(txMutex);
-			if (!txQueue.empty()) {
-				toSend = std::move(txQueue.front());
-				txQueue.pop();
-			}
-		}
-		if (!toSend.empty()) {
-			_vComPort->WriteData(toSend.c_str(), static_cast<unsigned int>(toSend.size()));
-		}
+//Place tests here
 
-		// existing read code
-		char buffer[8196] = {};
-		int bytesRead = 0;
-		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
-		if (bytesRead > 0) {
-			pushData(buffer, bytesRead);
-			deubug_kernel_num_chars_copied = bytesRead;
-#if DEBUG_TO_TERMINAL
-			for (int i = 0; i < bytesRead; ++i) std::cout << buffer[i];
-#endif
-		}
-		else if (bytesRead == -1) {
-			perror("Serial read failed");
-		}
-
-		// prevent 100% CPU (add this)
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	}
-	std::cout << "Serial thread exiting cleanly.\n";
-}
 
 #endif
 
@@ -199,15 +183,14 @@ void serialManager::stopThread() {
 	deubug_kernel_num_chars_copied = 0;
 	if (readThread) {
 		if (std::this_thread::get_id() == readThread->get_id()) {
-			std::cerr << "ERROR: Attempted to join thread from itself!" << std::endl;
+			std::cerr << "[ERROR]: gTerm serialManager Attempted to join thread from itself!" << std::endl;
 			return;
 		}
 
 		if (readThread->joinable()) {
 			readThread->join();
 		}
-
-		std::cout << "readThread Joined" << std::endl;
+		std::cout << "[SUCCESS]: gTerm seriManager Thread Joined" << std::endl;
 		delete readThread;
 		readThread = nullptr;
 	}

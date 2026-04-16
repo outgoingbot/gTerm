@@ -35,12 +35,15 @@ void terminal::StoreConfig()
 
 int terminal::handle_connect_button() {
     if (serialManObj->isConnected() == true) {
-        std::cout << "ERROR: Already Connected to Serial Manager" << std::endl;
+        std::cout << "[WARNING]: gTerm serialManager Port Already Connected" << std::endl;
         return -1;
     }
     
     if (serialManObj->connect()) {
-        std::cout << "SUCCESS: Serial Manager Connected!" << std::endl;
+        std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
+    } else {
+        std::cout << "[ERROR]: gTerm serialManager Port Failed To Connect!" << std::endl;
+        return -1;
     }
     
     return 0;
@@ -49,7 +52,7 @@ int terminal::handle_connect_button() {
 
 int terminal::handle_disconnect_button() {
     if (serialManObj->isConnected() == false) {
-        std::cout << "ERROR: Already Disconnected from Serial Manager" << std::endl;
+        std::cout << "[WARNING]: gTerm serialManager Port Already Disconnected" << std::endl;
         return -1;
     }
     serialManObj->disconnect();
@@ -58,7 +61,7 @@ int terminal::handle_disconnect_button() {
 
 int terminal::handle_send_button() {
     if (serialManObj->isConnected() == false) {
-        std::cout << "ERROR: Not Connected" << std::endl;
+        std::cout << "[ERROR]: gTerm serialManager Port Not Connected" << std::endl;
         return -1;
     }
 
@@ -198,27 +201,25 @@ int terminal::update(const char* title) {
             ImGui::NewLine();
 
             //-----------------------------Connect Button-----------------------------|
-            bool pushingColor = false;
-            if (ui.ConnectisClicked) {
+            bool connect_btn_style_pushed = false;
+            if (serialManObj->isConnected()) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
-                pushingColor = true;
+                connect_btn_style_pushed = true;
             }
 
             if (ImGui::Button("Connect")) {
-                ui.ConnectisClicked = true;
+                //ui.ConnectisClicked = true;
                 if (this->handle_connect_button() == 0) {
-                    std::cout << "SUCCESS: Terminal Class Connected!" << std::endl;
-                    std::cout << "" << serialManObj->getCommPort() << std::endl;
-                    std::cout << "" << serialManObj->getBaudRate() << std::endl;
+                    std::cout << "[SUCCESS]: gTerm Terminal Class Connected!" << std::endl;
                 }
                 else {
-                    std::cout << "ERROR: Terminal Class Not Connected!" << std::endl;
+                    std::cout << "[ERROR]: gTerm Terminal Class Not Connected!" << std::endl;
                 }
             }
 
-            if (pushingColor) ImGui::PopStyleColor(3);
+            if (connect_btn_style_pushed) ImGui::PopStyleColor(3);
             //-----------------------------Connect Button-----------------------------|
 
             ImGui::SameLine(); // Place the next widget on the same line
@@ -226,7 +227,7 @@ int terminal::update(const char* title) {
             //-----------------------------Disconnect Button--------------------------|
             if (ImGui::Button("Disconnect")) {
                 if (this->handle_disconnect_button() == 0) {
-                    ui.ConnectisClicked = false;
+                    //ui.ConnectisClicked = false;
                 }
             }
             //-----------------------------Disconnect Button--------------------------|
@@ -272,10 +273,13 @@ int terminal::update(const char* title) {
         }
 
         if (ImGui::BeginTabItem("Send")) {
+            //----------------------------- TX Data Entry Text-----------------------------|
             // Put content for Tab 3 here
             ImGui::InputTextMultiline("##terminal_input", ui.inputBuffer, IM_ARRAYSIZE(ui.inputBuffer),
                 ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 5),
-                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CtrlEnterForNewLine);
+                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CtrlEnterForNewLine | ImGuiInputTextFlags_WordWrap);
+            //----------------------------- TX Data Entry Text-----------------------------|
+
             //-----------------------------Send Button--------------------------|
             if (ImGui::Button("Send") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter, false))) {
                 if (this->handle_send_button() == 0) {
@@ -283,34 +287,28 @@ int terminal::update(const char* title) {
                 }
             }
             //-----------------------------Send Button--------------------------|
-
+            ImGui::SameLine();
             //-----------------------------Clear Button--------------------------|
             if (ImGui::Button("Clear") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter, false))) {
                 ui.inputBuffer[0] = '\0'; //used to make the char buff 'empty'
             }
             //-----------------------------Clear Button--------------------------|
 
+            ImGui::NewLine();
             if (ImGui::Checkbox("EOL_+CR", &controls.tx_eol_cr))
             {
-                //something else of needed
+                //something else if needed
             }
+            ImGui::SameLine();
             if (ImGui::Checkbox("EOL_+LF", &controls.tx_eol_lf))
             {
-                //something else of needed
+                //something else if needed
             }
-
-
             ImGui::EndTabItem();
         }
 
         ImGui::EndTabBar();
     }
-
-
-
-
-    ImGui::NewLine();
-
 
 
     //ImGui::EndChild();
