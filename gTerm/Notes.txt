@@ -79,12 +79,6 @@ the dataplotter slider number of smaples to view, need to set it max value based
 buffer size. the reason is that ascii to float conversion can be like 10 chars per 1 float sample (atof() type conversion)
 if you slide to the right too far the plot bugs out at x=0
 
-
-maybe add a trigger to the plots?
-add binary mode
-add serial control signals (dtr, rts ,etc)
-
-
 need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows <--Done
 -better option would be to use an abstract class?
 -also the file loading is slow and shit. its using like powershell calls and on linux some shit called 'zenity'
@@ -93,3 +87,27 @@ fix these things. test a bunch, then merge into master
 -linuc build has no desktop icon working
 - can prob remove some files in the project root / with old cmake stuf //<-- done
 -remove git submodule <--done
+
+
+TODO:
+Terminal -> SerialManager -> virtualComm -> RS232/LinuxSerial
+	- Need to add Serial Transmitting!
+	- Need a 'Pause button' (pause term_out prints and dataPlotter scrolling)
+	- Need to add port modes (Databits, Parity, StopBits) [8N1]
+
+Terminal <-> SerialManager <-> virtualComm <-> RS232/LinuxSerial
+	- Need to add flow control signals (DTR, RTS, DCD, DSR, RI, CTS)
+
+dataParser <-> ConfigManager
+	- Need to add user changes to 'data format' for delimiter and EOL (',' and '\n')
+
+ConfigManager
+	- Change File I/O to improve latency
+	- auto-disconnect on file load/save
+
+UI
+	- Need to improve window control (layout and positioning)
+
+Extras ideas:
+maybe add a trigger to the plots?
+add binary mode
