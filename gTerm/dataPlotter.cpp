@@ -14,7 +14,6 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
     ImGui::SameLine();
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
 
     // ====================== Parser controls plot assignment ======================
     //ImGui::Separator();
@@ -41,9 +40,16 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         ImGui::End();
         return;
     }
+    
+    //Testing fix for X axis scaling
+    size_t numAvailable = currentSamples.size();
+    size_t maxDisplayable = std::min(MAX_SAMPLES, numAvailable);
+    //Testing fix for X axis scaling
+
 
     size_t numChannels = parser.getChannelCount();
-    size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
+    //size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
+    size_t displayCount = std::min(numAvailable, static_cast<size_t>(pointsToDisplay)); //testing fix for x axis
     size_t startIdx = currentSamples.size() > displayCount ? currentSamples.size() - displayCount : 0;
 
     if (displayCount != lastPointsToDisplay) {
@@ -53,6 +59,10 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     for (size_t i = 0; i < displayCount; ++i) {
         x_data[i] = static_cast<float>(i);
     }
+
+    //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
+    //pointsToDisplay = std::clamp(pointsToDisplay, 8, static_cast<int>(maxDisplayable));
 
     // Build groups - one channel can now be on multiple plots
     const auto& map = parser.getChannelToPlotMap();
