@@ -22,7 +22,7 @@ public:
     LinuxSerialComm();
     ~LinuxSerialComm();
     void ReadData(char* buffer, unsigned int nbChar, int* returnVal) override;
-    bool LinuxSerialComm::WriteData(const char* buffer, unsigned int nbChar) override;
+    bool WriteData(const char* buffer, unsigned int nbChar) override;
 
     bool ListComPorts(std::deque<std::string>* ComPortNames);
 
