@@ -24,9 +24,9 @@ public:
 
     // UI / settings
     int pointsToDisplay = 128;                  // you can increase this
-    int maxChannels = 128;                      // safety limit
+    //int maxChannels = 128;                      // safety limit
 
-    size_t lastNumChannels = 0;
+    //size_t lastNumChannels = 0;
     size_t lastPointsToDisplay = 0;
 
     // The main entry point called every frame
@@ -35,13 +35,13 @@ public:
 
 private:
     // Constants
-    static constexpr int MAX_BUFFER_SIZE = 2048; // Adjust as needed
+    //static constexpr int MAX_BUFFER_SIZE = 2048; // Adjust as needed
 
     // UI State
     bool autoScale = true;
     bool follow_x = true;
-    float y_min = -20.f;
-    float y_max = 20.f;
+    //float y_min = -20.f;
+    //float y_max = 20.f;
 
 
     // Data Storage

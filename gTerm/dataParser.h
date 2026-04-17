@@ -100,10 +100,6 @@ private:
 	std::vector<FormatSpecifier> parse_specifiers(const std::string& fmt) const;
 	std::vector<std::string> split_line(const std::string& line) const;
 	std::optional<double> parse_token(const std::string& token, const FormatSpecifier& spec) const;
-	std::vector<ParsedSample> lastSamples;   // add this
+	std::vector<ParsedSample> lastSamples;
 
-	//char _buffer[128]; // Buffer to store the text input
-	//bool _autoScroll;                // Controls auto-scrolling behavior
-	//std::deque<std::deque<char>> float_buffer_2d;
-	//char input_text[64]; // Buffer to store the text input
 };

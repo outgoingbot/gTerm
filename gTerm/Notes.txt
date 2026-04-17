@@ -107,6 +107,8 @@ ConfigManager
 
 UI
 	- Need to improve window control (layout and positioning)
+	- maybe cap frame rate when serial disconnected to save on cpu usage
+	- Dont let user uncheck vync anymore?
 
 Extras ideas:
 maybe add a trigger to the plots?
