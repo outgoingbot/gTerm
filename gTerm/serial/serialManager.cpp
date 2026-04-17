@@ -1,8 +1,6 @@
 #include "serialManager.h"
 
-// Constructor: Initializes and starts the background thread
 serialManager::serialManager(){
-	deubug_kernel_num_chars_copied = 0;
 	//create the virtual Com Port Class that serialManager will interact with
 #ifdef IS_WINDOWS
 	_vComPort = new RS232Comm(); // Windows serial port
@@ -15,6 +13,8 @@ serialManager::serialManager(){
 	setCommPort(R"(\\.\COM12)"); //R() is raw string
 	setBaudRate("115200");
 #endif
+
+	deubug_kernel_num_chars_copied = 0;
 }
 
 
@@ -31,7 +31,7 @@ bool serialManager::connect() {
 		std::cout << "[INFO]: gTerm serialManager Comm: " << getCommPort() << std::endl;
 		std::cout << "[INFO]: gTerm serialManager Baud: " << getBaudRate() << std::endl;
 		std::cout << "[SUCCESS]: gTerm seriManager Thread Started" << std::endl;
-		readThread = new std::thread(&serialManager::readLoop, this); ///retrieve buffer
+		serial_IO_Thread = new std::thread(&serialManager::serial_IO_Loop, this); ///retrieve buffer
 		threadIsRunning = true;
 		return true;
 	}
@@ -52,13 +52,14 @@ bool serialManager::isConnected() {
 	return _vComPort->IsConnected();
 }
 
-void serialManager::listBaudRates(std::deque<std::string>* queue) {
-	_vComPort->ListBaudRates(queue);
-}
-
 
 void serialManager::listPorts(std::deque<std::string>* queue) {
 	_vComPort->ListComPorts(queue);
+}
+
+
+void serialManager::listBaudRates(std::deque<std::string>* queue) {
+	_vComPort->ListBaudRates(queue);
 }
 
 
@@ -68,14 +69,16 @@ void serialManager::setCommPort(const std::string& port) {
 	}
 }
 
+
+std::string serialManager::getCommPort() const {
+	return _vComPort ? _vComPort->vSerialParams.port : "";
+}
+
+
 void serialManager::setBaudRate(const std::string& baud) {
 	if (_vComPort) {
 		_vComPort->vSerialParams.baud = baud;
 	}
-}
-
-std::string serialManager::getCommPort() const {
-	return _vComPort ? _vComPort->vSerialParams.port : "";
 }
 
 
@@ -84,15 +87,55 @@ std::string serialManager::getBaudRate() const {
 }
 
 
-void serialManager::queueForTransmit(const std::string& data) {
+// Push new char data into the deque<char> array. we grabbed it from the kernal buffer and shove it into our deque<char> vector
+void serialManager::pushToRxQueue(const char* data, size_t length) {
+	//here is where we pump the char array into the deque<char> at the end()
+	std::lock_guard<std::mutex> lock(rxMutex);
+	this->rxQueue.insert(this->rxQueue.end(), data, data + length);
+
+	const size_t maxSize = MAX_CHAR_COUNT;
+	if (rxQueue.size() > maxSize) {
+		//std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
+		size_t toRemove = rxQueue.size() - maxSize;
+		rxQueue.erase(rxQueue.begin(), rxQueue.begin() + toRemove);
+	}
+}
+
+
+size_t serialManager::getNewDataFromRxQueue(std::deque<char>& destination) {
+	std::lock_guard<std::mutex> lock(rxMutex);
+
+	size_t charsAdded = 0;
+
+	if (!rxQueue.empty()) {
+		//get the size of the internal queue
+		charsAdded = rxQueue.size();
+		// Append only the new data
+		destination.insert(destination.end(), rxQueue.begin(), rxQueue.end());
+		// Clear internal queue
+		rxQueue.clear();
+	}
+
+	// Enforce maximum size on the PUBLIC queue
+	const size_t maxSize = MAX_CHAR_COUNT;
+	if (destination.size() > maxSize) {
+		size_t toRemove = destination.size() - maxSize;
+		destination.erase(destination.begin(), destination.begin() + toRemove);
+	}
+	return charsAdded;
+}
+
+
+void serialManager::pushToTxQueue(const std::string& data) {
 	if (data.empty()) return;
 	std::lock_guard<std::mutex> lock(txMutex);
 	txQueue.push(data);
 }
 
+
 #if 1
 // Thread function that continuously reads data from the serial port.
-void serialManager::readLoop() {
+void serialManager::serial_IO_Loop() {
 	while (threadIsRunning) {
 		// drain and send queued data
 		std::string toSend;
@@ -115,7 +158,7 @@ void serialManager::readLoop() {
 		_vComPort->ReadData(buffer, sizeof(buffer), &bytesRead);
 		if (bytesRead > 0) {
 			//push the kernel char buffer into the serialManager Dequeue<std::char>
-			pushData(buffer, bytesRead); //Serial manager method to copy the local buffer into the deque
+			pushToRxQueue(buffer, bytesRead); //Serial manager method to copy the local buffer into the deque
 			//DEBUG Keep track of the char copied from the kernel driver
 			deubug_kernel_num_chars_copied = bytesRead;
 #if DEBUG_TO_TERMINAL
@@ -131,75 +174,35 @@ void serialManager::readLoop() {
 	std::cout << "[INFO]: gTerm serilManager readLoop Thread Exiting Cleanly" << std::endl;
 }
 #else
-//Place tests here
-
+//may test txQueue "Chunking here"
 
 #endif
 
-
-// Push new char data into the deque<char> array. we grabbed it from the kernal buffer and shove it into our deque<char> vector
-void serialManager::pushData(const char* data, size_t length) {
-	//here is where we pump the char array into the deque<char> at the end()
-	std::lock_guard<std::mutex> lock(bufferMutex);
-	this->rxBufferQueue.insert(this->rxBufferQueue.end(), data, data + length);
-
-	const size_t maxSize = MAX_CHAR_COUNT;
-	if (rxBufferQueue.size() > maxSize) {
-		//std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
-		size_t toRemove = rxBufferQueue.size() - maxSize;
-		rxBufferQueue.erase(rxBufferQueue.begin(), rxBufferQueue.begin() + toRemove);
-	}
-}
-
-
-
-size_t serialManager::getNewData(std::deque<char>& destination){
-	std::lock_guard<std::mutex> lock(bufferMutex);
-
-	size_t charsAdded = 0;
-
-	if (!rxBufferQueue.empty()){
-		//get the size of the internal queue
-		charsAdded = rxBufferQueue.size();
-		// Append only the new data
-		destination.insert(destination.end(),rxBufferQueue.begin(),rxBufferQueue.end());
-		// Clear internal queue
-		rxBufferQueue.clear();
-	}
-
-	// Enforce maximum size on the PUBLIC queue
-	const size_t maxSize = MAX_CHAR_COUNT;
-	if (destination.size() > maxSize){
-		size_t toRemove = destination.size() - maxSize;
-		destination.erase(destination.begin(), destination.begin() + toRemove);
-	}
-	return charsAdded;
-}
 
 
 
 void serialManager::stopThread() {
 	threadIsRunning = false;
 	deubug_kernel_num_chars_copied = 0;
-	if (readThread) {
-		if (std::this_thread::get_id() == readThread->get_id()) {
+	if (serial_IO_Thread) {
+		if (std::this_thread::get_id() == serial_IO_Thread->get_id()) {
 			std::cerr << "[ERROR]: gTerm serialManager Attempted to join thread from itself!" << std::endl;
 			return;
 		}
 
-		if (readThread->joinable()) {
-			readThread->join();
+		if (serial_IO_Thread->joinable()) {
+			serial_IO_Thread->join();
 		}
-		std::cout << "[SUCCESS]: gTerm seriManager Thread Joined" << std::endl;
-		delete readThread;
-		readThread = nullptr;
+		std::cout << "[SUCCESS]: gTerm seriManager serial_IO_Thread Joined" << std::endl;
+		delete serial_IO_Thread;
+		serial_IO_Thread = nullptr;
 	}
 }
 
 
 
 void serialManager::debug_getKernelcharCount(size_t* len) {
-	std::lock_guard<std::mutex> lock(bufferMutex);
+	std::lock_guard<std::mutex> lock(rxMutex);
 	*len = deubug_kernel_num_chars_copied;  // Assignment operator does a full copy
 }
 

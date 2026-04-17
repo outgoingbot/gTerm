@@ -76,7 +76,7 @@ int terminal::handle_send_button() {
     }
 
     if (!toSend.empty()) {
-        serialManObj->queueForTransmit(toSend);
+        serialManObj->pushToTxQueue(toSend);
     }
 
     return 0;
@@ -97,7 +97,7 @@ int terminal::update(const char* title) {
     ImGui::Begin(title);
     
     //get the new characters pushed from the serial thread
-    size_t newCharCount = serialManObj->getNewData(_Term_rxBufferQueue);
+    size_t newCharCount = serialManObj->getNewDataFromRxQueue(_Term_rxBufferQueue);
     //Send the buffer and number of new chars to be displayed
     term_out.update(_Term_rxBufferQueue, newCharCount, serialManObj->isConnected());
     
