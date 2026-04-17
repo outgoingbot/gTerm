@@ -89,9 +89,6 @@ void ConfigManager::ShowOpenDiag() {
     }
 }
 
-void ConfigManager::HandleDialogs() {
-    // no-op for native blocking dialogs
-}
 
 void ConfigManager::CopyConfigToVars() {
     nlohmann::json j = GetConfig();   // convert struct back to json
