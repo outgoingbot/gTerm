@@ -175,7 +175,7 @@ int main() {
         }
         
         //Debug window
-        ImVec2 windowSize(400, 600);
+        ImVec2 windowSize(400, 400);
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 20); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);

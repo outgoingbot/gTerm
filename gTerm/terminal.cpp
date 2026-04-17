@@ -2,39 +2,12 @@
 //#define IMPLOT_IMPLEMENTATION //<is this needed by implot?
 
 terminal::terminal(int width, int height, AppConfig& cfg) : configRef(cfg) {
-    //why are we putting this on the heap?
-    //TODO: Move this to stack
-    serialManObj = new serialManager();
+
 }
 
 
 terminal::~terminal(void) {
-    delete serialManObj; // Cleanup
-}
-
-
-void terminal::ApplyConfig()
-{
-    serialManObj->setCommPort(configRef.comm_port);
-    serialManObj->setBaudRate(configRef.comm_baud);
-    //ser_buff_num_chars = configRef.ser_buff_num_chars;
-    // add every variable you need copied
-}
-
-
-void terminal::StoreConfig()
-{
-    configRef.comm_port = serialManObj->getCommPort();
-    configRef.comm_baud = serialManObj->getBaudRate();
-    //ser_buff_num_chars = configRef.ser_buff_num_chars;
-    // add every variable you need copied
-}
-
-
-//Method to expose thread safe access to rx buffer
-const std::deque<char>& terminal::getSafeRxQueue() const
-{
-    return _Term_rxQueue;
+    
 }
 
 
@@ -44,9 +17,9 @@ int terminal::update(const char* title) {
     ImGui::Begin(title);
     
     //get the new characters pushed from the serial thread
-    size_t newCharCount = serialManObj->getNewDataFromRxQueue(_Term_rxQueue);
+    size_t newCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);
     //Send the buffer and number of new chars to be displayed
-    term_out.update(_Term_rxQueue, newCharCount, serialManObj->isConnected());
+    term_out.update(_Term_rxQueue, newCharCount, serialManObj.isConnected());
     
 
 
@@ -57,22 +30,22 @@ int terminal::update(const char* title) {
             //-----------------------------Comm Port Entry Text-----------------------------|
             ImGui::Text("Comm Port:");
             ImGui::SameLine(); // Place the next widget on the same line
-            strncpy(ui.input_buffer_Port, serialManObj->getCommPort().c_str(), IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
+            strncpy(ui.input_buffer_Port, serialManObj.getCommPort().c_str(), IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
             ui.input_buffer_Port[IM_ARRAYSIZE(ui.input_buffer_Port) - 1] = '\0';
             ImGui::SetNextItemWidth(100);  // Set width of the input field
             if (ImGui::InputText("##Comm_Port_Entry", ui.input_buffer_Port, IM_ARRAYSIZE(ui.input_buffer_Port))) {
-                serialManObj->setCommPort(ui.input_buffer_Port);
+                serialManObj.setCommPort(ui.input_buffer_Port);
             }
             //-----------------------------Comm Port Entry Text-----------------------------|
 
             ImGui::SameLine(); // Place the next widget on the same line 
 
             //------------------------------COM Port Drop Down-------------------------------|
-            if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+            if (serialManObj.isConnected() == false) {
                 // Button to trigger port scan and open popup
                 if (ImGui::Button("Open COM Ports")) {
-                    serialManObj->commPortNames.clear();
-                    serialManObj->listPorts(&serialManObj->commPortNames);
+                    serialManObj.commPortNames.clear();
+                    serialManObj.listPorts(&serialManObj.commPortNames);
                     ui.open_popup_port = true;
                     ImGui::OpenPopup("SerialPortPopup");
                 }
@@ -81,10 +54,10 @@ int terminal::update(const char* title) {
                 if (ImGui::BeginPopup("SerialPortPopup")) {
                     ImGui::Text("Select a COM port:");
                     ImGui::Separator();
-                    for (const auto& port : serialManObj->commPortNames) {
-                        bool isSelected = (serialManObj->getCommPort() == port);
+                    for (const auto& port : serialManObj.commPortNames) {
+                        bool isSelected = (serialManObj.getCommPort() == port);
                         if (ImGui::Selectable(port.c_str(), isSelected)) {
-                            serialManObj->setCommPort(port);
+                            serialManObj.setCommPort(port);
                             ui.open_popup_port = false;
                             ImGui::CloseCurrentPopup();
                         }
@@ -102,22 +75,22 @@ int terminal::update(const char* title) {
 
             //-----------------------------Comm Baud Entry Text-----------------------------|
             ImGui::Text("Baud Rate:");
-            strncpy(ui.input_buffer_Baud, serialManObj->getBaudRate().c_str(), IM_ARRAYSIZE(ui.input_buffer_Baud) - 1);
+            strncpy(ui.input_buffer_Baud, serialManObj.getBaudRate().c_str(), IM_ARRAYSIZE(ui.input_buffer_Baud) - 1);
             ui.input_buffer_Baud[IM_ARRAYSIZE(ui.input_buffer_Baud) - 1] = '\0';
             ImGui::SameLine(); // Place the next widget on the same line
             ImGui::SetNextItemWidth(100);  // Set width of the input field
             if (ImGui::InputText("##Comm_Baud_Entry", ui.input_buffer_Baud, IM_ARRAYSIZE(ui.input_buffer_Baud))) {
-                serialManObj->setBaudRate(ui.input_buffer_Baud);
+                serialManObj.setBaudRate(ui.input_buffer_Baud);
             }
             //-----------------------------Comm Baud Entry Text-----------------------------|
 
             ImGui::SameLine(); // Place the next widget on the same line
 
             //------------------------------BAUD Port Drop Down-------------------------------|
-            if (serialManObj != nullptr && serialManObj->isConnected() == false) {
+            if (serialManObj.isConnected() == false) {
                 if (ImGui::Button("Open BAUD Rates")) {
-                    serialManObj->commBaudNames.clear();
-                    serialManObj->listBaudRates(&serialManObj->commBaudNames);
+                    serialManObj.commBaudNames.clear();
+                    serialManObj.listBaudRates(&serialManObj.commBaudNames);
                     ui.open_popup_baud = true;
                     ImGui::OpenPopup("SerialBaudPopup");
                 }
@@ -126,11 +99,11 @@ int terminal::update(const char* title) {
                     ImGui::Text("Select a BAUD rate:");
                     ImGui::Separator();
 
-                    for (const auto& baud : serialManObj->commBaudNames) {
-                        bool isSelected = (serialManObj->getBaudRate() == baud);
+                    for (const auto& baud : serialManObj.commBaudNames) {
+                        bool isSelected = (serialManObj.getBaudRate() == baud);
 
                         if (ImGui::Selectable(baud.c_str(), isSelected)) {
-                            serialManObj->setBaudRate(baud);
+                            serialManObj.setBaudRate(baud);
                             ui.open_popup_baud = false;
                             ImGui::CloseCurrentPopup();
                         }
@@ -149,7 +122,7 @@ int terminal::update(const char* title) {
 
             //-----------------------------Connect Button-----------------------------|
             bool connect_btn_style_pushed = false;
-            if (serialManObj->isConnected()) {
+            if (serialManObj.isConnected()) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
@@ -261,14 +234,35 @@ int terminal::update(const char* title) {
 }
 
 
+//Method to expose thread safe access to rx buffer
+const std::deque<char>& terminal::getSafeRxQueue() const {
+    return _Term_rxQueue;
+}
+
+
+void terminal::ApplyConfig() {
+    serialManObj.setCommPort(configRef.comm_port);
+    serialManObj.setBaudRate(configRef.comm_baud);
+    //ser_buff_num_chars = configRef.ser_buff_num_chars;
+    // add every variable you need copied
+}
+
+
+void terminal::StoreConfig() {
+    configRef.comm_port = serialManObj.getCommPort();
+    configRef.comm_baud = serialManObj.getBaudRate();
+    //ser_buff_num_chars = configRef.ser_buff_num_chars;
+    // add every variable you need copied
+}
+
 
 int terminal::handle_connect_button() {
-    if (serialManObj->isConnected() == true) {
+    if (serialManObj.isConnected() == true) {
         std::cout << "[WARNING]: gTerm serialManager Port Already Connected" << std::endl;
         return -1;
     }
 
-    if (serialManObj->connect()) {
+    if (serialManObj.connect()) {
         std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
     }
     else {
@@ -281,17 +275,17 @@ int terminal::handle_connect_button() {
 
 
 int terminal::handle_disconnect_button() {
-    if (serialManObj->isConnected() == false) {
+    if (serialManObj.isConnected() == false) {
         std::cout << "[WARNING]: gTerm serialManager Port Already Disconnected" << std::endl;
         return -1;
     }
-    serialManObj->disconnect();
+    serialManObj.disconnect();
     return 0;
 }
 
 
 int terminal::handle_send_button() {
-    if (serialManObj->isConnected() == false) {
+    if (serialManObj.isConnected() == false) {
         std::cout << "[ERROR]: gTerm serialManager Port Not Connected" << std::endl;
         return -1;
     }
@@ -307,7 +301,7 @@ int terminal::handle_send_button() {
     }
 
     if (!toSend.empty()) {
-        serialManObj->pushToTxQueue(toSend);
+        serialManObj.pushToTxQueue(toSend);
     }
 
     return 0;
@@ -315,5 +309,5 @@ int terminal::handle_send_button() {
 
 
 void terminal::debug_getKernelcharCount(size_t* len) {
-    return serialManObj->debug_getKernelcharCount(len);
+    return serialManObj.debug_getKernelcharCount(len);
 }

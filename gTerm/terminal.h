@@ -6,19 +6,19 @@ parsing and plotting will be done in other classes
 
 #pragma once
 #include <imgui.h>
-#include "implot.h"
+#include <implot.h>
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <deque>
-
+#include <string_view>
+#include <vector>
 #include "ConfigManager.h"
 #include "serial/serialManager.h"
 #include "terminal_output.h" //Scolling Text Window
 
-#include <string_view>
-#include <vector>
+
 
 
 class terminal{
@@ -41,9 +41,8 @@ private:
 	//Manages the serial data terminal display window.
 	terminal_output term_out;
 
-	//Todo: make this private and create 'getter' to use in debugMenu
 	//serial Manager class that has all the buffers, and higher level serial data manipulation.
-	serialManager* serialManObj; //Serial Manager
+	serialManager serialManObj; //Serial Manager
 
 	AppConfig& configRef;
 	

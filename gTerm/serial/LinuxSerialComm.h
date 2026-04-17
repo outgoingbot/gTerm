@@ -2,7 +2,6 @@
 #ifndef LINUXSERIALCOMM_H
 #define LINUXSERIALCOMM_H
 
-#include "virtualComm.h"
 #include <filesystem>
 #include <fcntl.h>
 #include <termios.h>
@@ -11,7 +10,7 @@
 #include <deque>
 #include <vector>
 #include <iostream>
-
+#include "virtualComm.h"
 
 class LinuxSerialComm : public virtualComm {
 private:

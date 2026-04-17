@@ -16,8 +16,8 @@ Data parsing class.
 #include <string>
 #include <optional>
 #include <cctype>
-
 #include "ConfigManager.h"
+
 struct ParsedSample {
 	std::vector<double> values;   // one value per field in the format string
 };
@@ -77,9 +77,6 @@ public:
 	
 private:
 	
-	//char _buffer[128]; // Buffer to store the text input
-	bool _autoScroll;                // Controls auto-scrolling behavior
-
 	AppConfig& configRef;
 	
 	std::vector<char> channelSelected;
@@ -105,9 +102,8 @@ private:
 	std::optional<double> parse_token(const std::string& token, const FormatSpecifier& spec) const;
 	std::vector<ParsedSample> lastSamples;   // add this
 
-
-
-	std::deque<std::deque<char>> float_buffer_2d;
-
-	char input_text[64]; // Buffer to store the text input
+	//char _buffer[128]; // Buffer to store the text input
+	//bool _autoScroll;                // Controls auto-scrolling behavior
+	//std::deque<std::deque<char>> float_buffer_2d;
+	//char input_text[64]; // Buffer to store the text input
 };

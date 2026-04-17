@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
-
 #include <deque>
 #include "virtualComm.h"
 

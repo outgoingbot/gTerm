@@ -1,16 +1,16 @@
 #pragma once
 #include <imgui.h>
 #include <string>
-#include "external/json.hpp"
 #include <iostream> //for cout debuggins
+#include "external/json.hpp"
 
-//TODO: Going to need to add saved variables here
+//struct used in json file
 struct AppConfig {
     std::string comm_port = R"(\\.\COM11)";
     std::string comm_baud = "115200";
     std::string d_parser_format = R"(%f,%f,%f)";
     std::vector<char> p_channelSelected;
-    // add your variables here
+    // add variables here
 };
 
 //This list must be kept updated with the AppConfig struct for some dumb reason
@@ -22,16 +22,10 @@ public:
 
     void ShowSaveDiag();
     void ShowOpenDiag();
-    void HandleDialogs();
 
     AppConfig& GetConfig() { return config; }
     const AppConfig& GetConfig() const { return config; }
     
-    void CopyConfigToVars();
-
-    //Debugging function to print json key/values to terminal
-    void PrintConfigDebug() const;
-
     //used to trigger json save/load after copy operations
     bool config_need_update = false;
     bool app_config_need_update = false;
@@ -39,6 +33,12 @@ public:
 private:
     AppConfig config;
     std::string lastPath = ".";
+
+    //copy the loaded json to our class members
+    void CopyConfigToVars();
+
+    //Debugging function to print json key/values to terminal
+    void PrintConfigDebug() const;
 
     std::string OpenNativeSaveDialog(const std::string& defaultName = "gTerm_config.json");
     std::string OpenNativeLoadDialog();

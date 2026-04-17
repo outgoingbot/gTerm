@@ -3,13 +3,13 @@
 dataParser::dataParser(AppConfig& cfg) : configRef(cfg) {
     compile();  // compile default format
 
-    memset(input_text, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
+    //memset(input_text, '\0', sizeof(char)); //this makes no sense. memset one char? sizeof(char) * LEN_BUFF
     _window_params.min_height = 100.0f;
     _window_params.width; // Window width
     _window_params.height = 600.f; // Window height
 
     _window_params.drag_bar_height = 20.f;
-    _autoScroll = true;
+    //_autoScroll = true;
 }
 
 

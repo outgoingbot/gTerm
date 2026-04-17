@@ -4,8 +4,8 @@
 #include <deque>
 #include <string>
 #include <vector>
-#include "imgui.h"
-#include "implot.h"
+#include <imgui.h>
+#include <implot.h>
 #include "dataParser.h"
 
 class dataPlotter {

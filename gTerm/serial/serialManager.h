@@ -4,9 +4,9 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include "virtualComm.h"
 #include <algorithm>
 #include <queue>
+#include "virtualComm.h"
 
 //Choose what Serial Driver Header to #include. ifdef Variables defined in CMakeLists
 #ifdef IS_WINDOWS

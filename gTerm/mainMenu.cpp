@@ -83,6 +83,4 @@ void mainMenu::update() {
 
     ImGui::EndMainMenuBar(); // End the top menu bar
 
-    //handle config manager updates
-    cfgManagerP.HandleDialogs();
 }

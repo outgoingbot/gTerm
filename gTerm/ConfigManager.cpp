@@ -3,24 +3,31 @@
 #include <sstream>
 #include <filesystem>
 
-ConfigManager::ConfigManager() {}
+ConfigManager::ConfigManager() {
+}
 
-void ConfigManager::SaveToFile(const std::string& filepath) {
-    std::ofstream file(filepath);
-    if (file) {
-        nlohmann::json j = config;
-        file << j.dump(4);
+
+void ConfigManager::ShowSaveDiag() {
+    std::string path = OpenNativeSaveDialog("gTerm_config.json");
+    if (!path.empty()) {
+        SaveToFile(path);
     }
 }
 
-bool ConfigManager::LoadFromFile(const std::string& filepath) {
-    std::ifstream file(filepath);
-    if (!file) return false;
-    nlohmann::json j;
-    file >> j;
-    config = j.get<AppConfig>();
-    return true;
+
+void ConfigManager::ShowOpenDiag() {
+    std::string path = OpenNativeLoadDialog();
+    if (!path.empty()) {
+        bool success = LoadFromFile(path);
+        if (success) {
+            CopyConfigToVars();
+            PrintConfigDebug();
+            config_need_update = true;
+        }
+
+    }
 }
+
 
 std::string ConfigManager::OpenNativeSaveDialog(const std::string& defaultName) {
     std::string cmd = "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; $sfd = New-Object System.Windows.Forms.SaveFileDialog; $sfd.Filter = 'JSON files (*.json)|*.json|All files (*.*)|*.*'; $sfd.FileName = '" + defaultName + "'; $sfd.InitialDirectory = '" + lastPath + "'; if ($sfd.ShowDialog() -eq 'OK') { $sfd.FileName } else { '' }\"";
@@ -41,6 +48,7 @@ std::string ConfigManager::OpenNativeSaveDialog(const std::string& defaultName) 
     return result;
 }
 
+
 std::string ConfigManager::OpenNativeLoadDialog() {
     std::string cmd = "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; $ofd = New-Object System.Windows.Forms.OpenFileDialog; $ofd.Filter = 'JSON files (*.json)|*.json|All files (*.*)|*.*'; $ofd.InitialDirectory = '" + lastPath + "'; if ($ofd.ShowDialog() -eq 'OK') { $ofd.FileName } else { '' }\"";
 
@@ -60,29 +68,23 @@ std::string ConfigManager::OpenNativeLoadDialog() {
     return result;
 }
 
-void ConfigManager::ShowSaveDiag() {
-        std::string path = OpenNativeSaveDialog("gTerm_config.json");
-        if (!path.empty()) {
-            SaveToFile(path);
-        }
+void ConfigManager::SaveToFile(const std::string& filepath) {
+    std::ofstream file(filepath);
+    if (file) {
+        nlohmann::json j = config;
+        file << j.dump(4);
+    }
 }
 
-void ConfigManager::ShowOpenDiag() {
-        std::string path = OpenNativeLoadDialog();
-        if (!path.empty()) {
-            bool success = LoadFromFile(path);
-            if (success){
-                CopyConfigToVars();
-                PrintConfigDebug();
-                config_need_update = true;
-            }
-
-        }
+bool ConfigManager::LoadFromFile(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file) return false;
+    nlohmann::json j;
+    file >> j;
+    config = j.get<AppConfig>();
+    return true;
 }
 
-void ConfigManager::HandleDialogs() {
-    // no-op
-}
 
 
 void ConfigManager::CopyConfigToVars(){

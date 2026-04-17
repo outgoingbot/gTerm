@@ -2,9 +2,8 @@
 #define DEBUG_MENU_H
 
 #include <imgui.h>
-#include "implot.h"
+#include <implot.h>
 #include <iostream>
-//#include "serial/serialManager.h"
 #include "terminal.h"
 
 struct VersionInfo {
@@ -20,9 +19,6 @@ public:
     DebugMenu(const VersionInfo& versions);
     void update(terminal&); // Render the debug menu
 private:
-    //serialManager* debugserialManObj; //Serial Manager
-    //GLuint DebugMenu::loadTexture(const char* filename);
-
     VersionInfo m_versions;
 
 };
