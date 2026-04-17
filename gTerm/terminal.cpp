@@ -2,10 +2,8 @@
 //#define IMPLOT_IMPLEMENTATION //<is this needed by implot?
 
 terminal::terminal(int width, int height, AppConfig& cfg) : configRef(cfg) {
-    _width = width;
-    _height = height;
-    //_window = window;
-
+    //why are we putting this on the heap?
+    //TODO: Move this to stack
     serialManObj = new serialManager();
 }
 
@@ -33,61 +31,10 @@ void terminal::StoreConfig()
 }
 
 
-int terminal::handle_connect_button() {
-    if (serialManObj->isConnected() == true) {
-        std::cout << "[WARNING]: gTerm serialManager Port Already Connected" << std::endl;
-        return -1;
-    }
-    
-    if (serialManObj->connect()) {
-        std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
-    } else {
-        std::cout << "[ERROR]: gTerm serialManager Port Failed To Connect!" << std::endl;
-        return -1;
-    }
-    
-    return 0;
-}
-
-
-int terminal::handle_disconnect_button() {
-    if (serialManObj->isConnected() == false) {
-        std::cout << "[WARNING]: gTerm serialManager Port Already Disconnected" << std::endl;
-        return -1;
-    }
-    serialManObj->disconnect();
-    return 0;
-}
-
-int terminal::handle_send_button() {
-    if (serialManObj->isConnected() == false) {
-        std::cout << "[ERROR]: gTerm serialManager Port Not Connected" << std::endl;
-        return -1;
-    }
-
-    std::string toSend = ui.inputBuffer;   // copy the current text
-
-    // Append EOL only once, on this send
-    if (controls.tx_eol_cr) {
-        toSend += '\r';
-    }
-    if (controls.tx_eol_lf) {
-        toSend += '\n';
-    }
-
-    if (!toSend.empty()) {
-        serialManObj->pushToTxQueue(toSend);
-    }
-
-    return 0;
-}
-
-
-
 //Method to expose thread safe access to rx buffer
-const std::deque<char>& terminal::getRxBuffer() const
+const std::deque<char>& terminal::getSafeRxQueue() const
 {
-    return _Term_rxBufferQueue;
+    return _Term_rxQueue;
 }
 
 
@@ -97,9 +44,9 @@ int terminal::update(const char* title) {
     ImGui::Begin(title);
     
     //get the new characters pushed from the serial thread
-    size_t newCharCount = serialManObj->getNewDataFromRxQueue(_Term_rxBufferQueue);
+    size_t newCharCount = serialManObj->getNewDataFromRxQueue(_Term_rxQueue);
     //Send the buffer and number of new chars to be displayed
-    term_out.update(_Term_rxBufferQueue, newCharCount, serialManObj->isConnected());
+    term_out.update(_Term_rxQueue, newCharCount, serialManObj->isConnected());
     
 
 
@@ -210,7 +157,6 @@ int terminal::update(const char* title) {
             }
 
             if (ImGui::Button("Connect")) {
-                //ui.ConnectisClicked = true;
                 if (this->handle_connect_button() == 0) {
                     std::cout << "[SUCCESS]: gTerm Terminal Class Connected!" << std::endl;
                 }
@@ -227,7 +173,6 @@ int terminal::update(const char* title) {
             //-----------------------------Disconnect Button--------------------------|
             if (ImGui::Button("Disconnect")) {
                 if (this->handle_disconnect_button() == 0) {
-                    //ui.ConnectisClicked = false;
                 }
             }
             //-----------------------------Disconnect Button--------------------------|
@@ -255,8 +200,8 @@ int terminal::update(const char* title) {
 
             //-----------------------------Clear Serial Buffer--------------------------|
             if (ImGui::Button("Clear Serial Buffer")) {
-                _Term_rxBufferQueue.clear();
-                _Term_rxBufferQueue.shrink_to_fit();
+                _Term_rxQueue.clear();
+                _Term_rxQueue.shrink_to_fit();
             }
             //-----------------------------Clear Serial Buffer--------------------------|
 
@@ -275,7 +220,7 @@ int terminal::update(const char* title) {
         if (ImGui::BeginTabItem("Send")) {
             //----------------------------- TX Data Entry Text-----------------------------|
             // Put content for Tab 3 here
-            ImGui::InputTextMultiline("##terminal_input", ui.inputBuffer, IM_ARRAYSIZE(ui.inputBuffer),
+            ImGui::InputTextMultiline("##terminal_input", ui.input_buffer_Tx_Data, IM_ARRAYSIZE(ui.input_buffer_Tx_Data),
                 ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 5),
                 ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CtrlEnterForNewLine | ImGuiInputTextFlags_WordWrap);
             //----------------------------- TX Data Entry Text-----------------------------|
@@ -290,7 +235,7 @@ int terminal::update(const char* title) {
             ImGui::SameLine();
             //-----------------------------Clear Button--------------------------|
             if (ImGui::Button("Clear") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter, false))) {
-                ui.inputBuffer[0] = '\0'; //used to make the char buff 'empty'
+                ui.input_buffer_Tx_Data[0] = '\0'; //used to make the char buff 'empty'
             }
             //-----------------------------Clear Button--------------------------|
 
@@ -310,10 +255,65 @@ int terminal::update(const char* title) {
         ImGui::EndTabBar();
     }
 
-
-    //ImGui::EndChild();
     ImGui::End();
 
 	return 0;
 }
 
+
+
+int terminal::handle_connect_button() {
+    if (serialManObj->isConnected() == true) {
+        std::cout << "[WARNING]: gTerm serialManager Port Already Connected" << std::endl;
+        return -1;
+    }
+
+    if (serialManObj->connect()) {
+        std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
+    }
+    else {
+        std::cout << "[ERROR]: gTerm serialManager Port Failed To Connect!" << std::endl;
+        return -1;
+    }
+
+    return 0;
+}
+
+
+int terminal::handle_disconnect_button() {
+    if (serialManObj->isConnected() == false) {
+        std::cout << "[WARNING]: gTerm serialManager Port Already Disconnected" << std::endl;
+        return -1;
+    }
+    serialManObj->disconnect();
+    return 0;
+}
+
+
+int terminal::handle_send_button() {
+    if (serialManObj->isConnected() == false) {
+        std::cout << "[ERROR]: gTerm serialManager Port Not Connected" << std::endl;
+        return -1;
+    }
+
+    std::string toSend = ui.input_buffer_Tx_Data;   // copy the current text
+
+    // Append EOL only once, on this send
+    if (controls.tx_eol_cr) {
+        toSend += '\r';
+    }
+    if (controls.tx_eol_lf) {
+        toSend += '\n';
+    }
+
+    if (!toSend.empty()) {
+        serialManObj->pushToTxQueue(toSend);
+    }
+
+    return 0;
+}
+
+
+void terminal::debug_getKernelcharCount(size_t* len) {
+    return serialManObj->debug_getKernelcharCount(len);
+}

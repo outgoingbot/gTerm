@@ -171,6 +171,8 @@ int dataParser::update()
         formatBuf[sizeof(formatBuf) - 1] = '\0';
     }
 
+    //TODO: If parser is enabled and the serial data is junk it kills the FPS.
+    //Something in parser is trying really hard to find numerical data in fuzzer text
     if (dataParse_enable) {
         ImGui::TextUnformatted("Format string (e.g. %f,%i,%f,%d)");
         ImGui::PushItemWidth(200.0f);

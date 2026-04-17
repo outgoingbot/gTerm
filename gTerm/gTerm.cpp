@@ -171,7 +171,7 @@ int main() {
         if (dParser.dataParse_enable && dParser.send_to_plot) {
             ImGui::SetNextWindowPos(ImVec2(1000, 20), ImGuiCond_FirstUseEver); // initial position only once
             ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
-            dPlotter.update(term.getRxBuffer());
+            dPlotter.update(term.getSafeRxQueue());
         }
         
         //Debug window
@@ -179,7 +179,7 @@ int main() {
         ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 20); // top-right
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
-        debugMenu.update(term.serialManObj); //shows fps and mouse position
+        debugMenu.update(term); //shows fps and mouse position
 
         // Rendering
         ImGui::Render();

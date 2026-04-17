@@ -17,7 +17,6 @@ parsing and plotting will be done in other classes
 #include "serial/serialManager.h"
 #include "terminal_output.h" //Scolling Text Window
 
-//testing imguitextselect library
 #include <string_view>
 #include <vector>
 
@@ -30,56 +29,43 @@ public:
 
 	int update(const char* title);
 
+	//public method to share thread safe rxQueue copy
+	const std::deque<char>& getSafeRxQueue() const;
+	
+	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
+	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
+
+	void debug_getKernelcharCount(size_t* len);
+
+private:
 	//Manages the serial data terminal display window.
 	terminal_output term_out;
-	
+
+	//Todo: make this private and create 'getter' to use in debugMenu
 	//serial Manager class that has all the buffers, and higher level serial data manipulation.
 	serialManager* serialManObj; //Serial Manager
 
-	//public method to share thread safe rx deque buffer
-	const std::deque<char>& getRxBuffer() const;
-	
-	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
-	
-	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
-
-private:
-
-	int _width;          // Window width //unused?
-	int _height;         // Window height //unused?
-	
 	AppConfig& configRef;
-
 	
-	struct terminal_ui
-	{
-		char input_buffer_Port[64] = { 0 };   // Buffer for COM port
-		char input_buffer_Baud[64] = { 0 };  // Buffer for baud rate
+	struct terminal_ui {
+		char input_buffer_Port[64] = { 0 };   // Buffer for COM port from user entry in text box
+		char input_buffer_Baud[64] = { 0 };  // Buffer for baud rate from user entry in text box
 		char input_buffer_scrollback_len[64] = { 0 };  // Buffer for scroll back
-		char inputBuffer[4096] = { 0 }; //todo: rename this to like tx input buffer
-		bool ConnectisClicked = false; //used to lock Connect button on click
+		char input_buffer_Tx_Data[4096] = { 0 }; //Buffer for tx Data from user entry in text box
 		bool open_popup_port = false; //use for comm port popup
 		bool open_popup_baud = false; //use for baudrate popup
 	} ui;
 	
-
-	struct controls
-	{
+	struct controls {
 		bool tx_eol_cr = false; //use for addeding eol to tx strings
 		bool tx_eol_lf = false; //use for addeding eol to tx strings
 	} controls;
+
 
 	int handle_connect_button();
 	int handle_disconnect_button();
 	int handle_send_button();
 
-	//this will hold a copy of the serial Manager RX deque. this copy does not need to be mutex locked when accessed.
-	std::deque<char> _Term_rxBufferQueue;
-	//this will hold a copy of the serial Manager RX deque.
-	//std::deque<char> _Term_txBufferQueue;
-
-
-	//lines vector control for term output
-//	std::string _displayLines; 
-	std::string _currentPartialLine;
+	//holds a copy of the serial Manager rxQueue.
+	std::deque<char> _Term_rxQueue;
 };

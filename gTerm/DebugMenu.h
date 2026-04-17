@@ -4,7 +4,8 @@
 #include <imgui.h>
 #include "implot.h"
 #include <iostream>
-#include "serial/serialManager.h"
+//#include "serial/serialManager.h"
+#include "terminal.h"
 
 struct VersionInfo {
     std::string imgui;
@@ -17,9 +18,9 @@ struct VersionInfo {
 class DebugMenu {
 public:
     DebugMenu(const VersionInfo& versions);
-    void update(serialManager*); // Render the debug menu
+    void update(terminal&); // Render the debug menu
 private:
-    serialManager* debugserialManObj; //Serial Manager
+    //serialManager* debugserialManObj; //Serial Manager
     //GLuint DebugMenu::loadTexture(const char* filename);
 
     VersionInfo m_versions;

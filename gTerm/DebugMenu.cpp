@@ -1,11 +1,11 @@
 #include "DebugMenu.h"
 
 DebugMenu::DebugMenu(const VersionInfo& versions) : m_versions(versions) {
-    debugserialManObj = nullptr;
+//    debugserialManObj = nullptr;
 }
 
 
-void DebugMenu::update(serialManager* sermanobj){
+void DebugMenu::update(terminal& terminalObj){
     // Start the debug menu window
     //ImGui::Begin("Debug Menu");
     ImGui::Begin("Debug Menu", nullptr,
@@ -32,7 +32,7 @@ void DebugMenu::update(serialManager* sermanobj){
     //ImGui::Image((ImTextureID)(intptr_t)myTexture, ImVec2(256, 256)); // Display the texture
 
     //copy the used serial manager address
-    debugserialManObj = sermanobj;
+    //debugserialManObj = sermanobj;
     ImGui::Separator();
     // Frame Rate debug plot ================================= START
     ImGui::BeginChild("Debug Frame Rate", ImVec2(0, 150));
@@ -66,10 +66,8 @@ void DebugMenu::update(serialManager* sermanobj){
 
     static float history[1000] = { 0 };
     size_t len = 0;
-
-    if (debugserialManObj) {
-        debugserialManObj->debug_getKernelcharCount(&len);
-    }
+    terminalObj.debug_getKernelcharCount(&len);
+    
 
     // Shift and insert data
     memmove(&history[0], &history[1], sizeof(float) * 999);
