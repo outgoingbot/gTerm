@@ -4,7 +4,6 @@
 
 dataPlotter::dataPlotter(const dataParser& p) : parser(p) {
     // Initialize buffers if necessary
-    //memset(samples, 0, sizeof(samples));
 }
 
 void dataPlotter::update(const std::deque<char>& rxDeque)
@@ -81,10 +80,7 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     //if (plotSize.x < 100) plotSize.x = 100;
     if (plotSize.y < 100) plotSize.y = 100;
 
-
     bool anyPlotDrawn = false;
-
-    
 
     for (int p = 0; p < numPlots; ++p) {
         const auto& group = activeGroups[p];
