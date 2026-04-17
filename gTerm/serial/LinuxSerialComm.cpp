@@ -78,6 +78,25 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
 }
 #endif
 
+bool LinuxSerialComm::WriteData(const char* buffer, unsigned int nbChar)
+{
+    if (!buffer || nbChar == 0 || serialPort == -1 || !connected) {
+        return false;
+    }
+
+    ssize_t bytesWritten = write(serialPort, buffer, nbChar);
+    if (bytesWritten < 0) {
+        perror("write");
+        return false;
+    }
+
+    // Optional: flush to make sure data is sent immediately
+     tcdrain(serialPort);  // uncomment if you want blocking until all data transmitted
+
+    return (static_cast<unsigned int>(bytesWritten) == nbChar);
+}
+
+
 //Check if we are actually connected
 bool LinuxSerialComm::IsConnected() {
     return this->connected;
@@ -135,7 +154,7 @@ bool LinuxSerialComm::connect() {
     tty.c_iflag = 0;
     //Adding a Timout
     tty.c_cc[VMIN] = 0;
-    tty.c_cc[VTIME] = 10; //1000ms Timeout
+    tty.c_cc[VTIME] = 1; //1000ms Timeout //reduced to 100ms = 1
 
     std::cout << "VMIN: " << (int)tty.c_cc[VMIN] << ", VTIME: " << (int)tty.c_cc[VTIME] << std::endl;
 
