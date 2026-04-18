@@ -7,19 +7,27 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ─── OS Detection ────────────────────────────────────────────────────────────────
+# ─── OS & Platform Detection ─────────────────────────────────────────────────────
 if(WIN32)
     message(STATUS "Detected Windows OS")
     add_compile_definitions(IS_WINDOWS)
     set(SERIAL_SRC serial/RS232Comm.cpp)
     set(SERIAL_INC serial/RS232Comm.h)
     set(RC_FILE "${CMAKE_SOURCE_DIR}/gTerm.rc")
+
 elseif(UNIX)
     message(STATUS "Detected Unix/Linux OS")
     add_compile_definitions(IS_LINUX)
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|armv7l")
+        message(STATUS "Detected Raspberry Pi / ARM Linux")
+        add_compile_definitions(IS_PI4)
+    endif()
+
     set(SERIAL_SRC serial/LinuxSerialComm.cpp)
     set(SERIAL_INC serial/LinuxSerialComm.h)
     set(RC_FILE "")
+
 else()
     message(FATAL_ERROR "Unsupported OS")
 endif()

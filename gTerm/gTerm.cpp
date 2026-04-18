@@ -20,11 +20,20 @@ int main() {
         return -1;
     }
 
-    // Configure OpenGL version and profile
-    //glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API); //Uncomment for Pi 4 build
+    // Configure OpenGL version and profile based on OS and Hardware
+#ifdef IS_PI4
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API); //Uncomment for Pi 4 build
+#endif
+    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+
+#if defined(IS_WINDOWS) || defined(IS_LINUX)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); //use this if building on pi 4
+#elif defined(IS_PI4)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#endif
+
+
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
 
@@ -70,8 +79,13 @@ int main() {
 
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
+#if defined(IS_WINDOWS) || defined(IS_LINUX)
     ImGui_ImplOpenGL3_Init("#version 330");
-    //ImGui_ImplOpenGL3_Init("#version 300 es"); //use this if building on pi 4
+#elif defined(IS_PI4)
+    ImGui_ImplOpenGL3_Init("#version 300 es"); //use this if building on pi 4
+#endif
+
+
     glEnable(GL_MULTISAMPLE); //enable the 4x MSAA anti-aliasing set above
     //Scale the entire glfw window with this function
     glfwSetWindowSize(window, WINDOW_WIDTH * SCALE_FACTOR, WINDOW_HEIGHT * SCALE_FACTOR);
