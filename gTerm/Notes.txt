@@ -63,7 +63,7 @@ Ive decreased the serialManager char buffer size. this reduced scrolling activit
 //------------------------------------------Solve all these before moving forward----------------------------------
 some issues and things to do next.
 buffer issues:
-copying the deque in terminal is needed. its a thread safe way to get the data and is fine. <--only copy new data per frame
+copying the deque in terminal is needed. its a thread safe way to get the data and is fine. <--fixed only copy new data per frame. Done
 whats not great ins build the std::string lines for the terminal output display. <-fixed
 also, the buffers in dataPlotter need to be looked at (size, name, reason) //<-done
 
@@ -77,7 +77,7 @@ to be blocking (set timeouts and other params) and work like the windows rs232 /
 bugs:
 the dataplotter slider number of smaples to view, need to set it max value based on the data to be plotted, not the deque
 buffer size. the reason is that ascii to float conversion can be like 10 chars per 1 float sample (atof() type conversion)
-if you slide to the right too far the plot bugs out at x=0
+if you slide to the right too far the plot bugs out at x=0 <-- Fixed. Done
 
 need to modify ConfigManager_linux.cpp to support the file laoding that i have on windows <--Done
 -better option would be to use an abstract class?
@@ -92,7 +92,7 @@ fix these things. test a bunch, then merge into master
 TODO:
 Terminal -> SerialManager -> virtualComm -> RS232/LinuxSerial
 	- Need to add Serial Transmitting! <--Done
-	- Need a 'Pause button' (pause term_out prints and dataPlotter scrolling)
+	- Need a 'Pause button' (pause term_out prints and dataPlotter scrolling) <-- Done
 	- Need to add port modes (Databits, Parity, StopBits) [8N1]
 
 Terminal <-> SerialManager <-> virtualComm <-> RS232/LinuxSerial
@@ -103,7 +103,7 @@ dataParser <-> ConfigManager
 
 ConfigManager
 	- Change File I/O to improve latency
-	- auto-disconnect on file load/save
+	- auto-disconnect on file load/save <-- Done, does it on ApplyConfig()
 
 UI
 	- Need to improve window control (layout and positioning)

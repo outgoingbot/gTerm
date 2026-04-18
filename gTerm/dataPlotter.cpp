@@ -59,13 +59,14 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     for (size_t i = 0; i < displayCount; ++i) {
         x_data[i] = static_cast<float>(i);
     }
-    ImGui::Text("maxDisplayable: %zu | pointsToDisplay: %d", maxDisplayable, pointsToDisplay);
-    //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
 
     // Build groups - one channel can now be on multiple plots
     const auto& map = parser.getChannelToPlotMap();
     int numPlots = parser.getPlotCount();
+
+    ImGui::Text("pointsToDisplay: %d | maxDisplayable: %zu | pointsToDisplay: %d", numPlots, maxDisplayable, pointsToDisplay);
+    //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
 
     std::vector<std::vector<int>> activeGroups(numPlots);
 

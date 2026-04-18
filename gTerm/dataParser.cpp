@@ -310,6 +310,7 @@ void dataParser::removeChannelFromPlot(int channelIndex, int plotIndex)
 
 void dataParser::ApplyConfig()
 {
+    channelToPlotMap.clear();
     format = configRef.d_parser_format;
     compile();
     channelSelected = configRef.p_channelSelected; //this may copy wrong. might be vect<int> -> vect<char>.
