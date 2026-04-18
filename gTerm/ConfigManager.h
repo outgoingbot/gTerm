@@ -5,6 +5,7 @@
 #include "external/json.hpp"
 #include "logger.h"
 
+
 //struct used in json file
 struct AppConfig {
     std::string comm_port = R"(\\.\COM11)";
@@ -21,6 +22,8 @@ class ConfigManager {
 public:
     ConfigManager();
 
+    void update();
+
     void ShowSaveDiag();
     void ShowOpenDiag();
 
@@ -30,6 +33,9 @@ public:
     //used to trigger json save/load after copy operations
     bool config_need_update = false;
     bool app_config_need_update = false;
+
+    bool open_diag = false;
+    bool open_diag_config_flag = true;
 
 private:
     AppConfig config;

@@ -49,6 +49,7 @@ set(SOURCES
     dataPlotter.cpp dataPlotter.h
     ${CONFIG_SRC} ConfigManager.h
     external/json.hpp
+    external/ImGuiFileDialog/ImGuiFileDialog.cpp
     ${SERIAL_SRC}
     ${SERIAL_INC}
     ${RC_FILE}

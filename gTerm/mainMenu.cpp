@@ -20,7 +20,8 @@ void mainMenu::update() {
         }
         if (ImGui::MenuItem("Open")) {
             // Handle "Open" action
-            cfgManagerP.ShowOpenDiag();
+            //cfgManagerP.ShowOpenDiag();
+            cfgManagerP.open_diag = true;
         }
         if (ImGui::MenuItem("Save")) {
             // Handle "Save" action

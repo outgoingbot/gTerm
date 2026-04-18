@@ -6,6 +6,7 @@
 #include "gTerm.h"
 #include "ConfigManager.h"
 
+//#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 1
 #define WINDOW_WIDTH 1920
@@ -187,6 +188,33 @@ int main() {
         ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
         debugMenu.update(term); //shows fps and mouse position
+
+        cfgManager.update();
+
+
+        //Testing ImGuiFileDiag
+        //prob need to disable thumbnail features to prevent the stb_image include
+        //ImGui::Begin("file diag");
+        //// open Dialog Simple
+        //if (ImGui::Button("Open File Dialog")) {
+        //    ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
+        //    IGFD::FileDialogConfig config;
+        //    config.path = ".";
+        //    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", config);
+        //}
+        //// display
+        //if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        //    if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+        //        std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+        //        std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+        //        // action
+        //    }
+
+        //    // close
+        //    ImGuiFileDialog::Instance()->Close();
+        //}
+        //ImGui::End();
+
 
         // Rendering
         ImGui::Render();
