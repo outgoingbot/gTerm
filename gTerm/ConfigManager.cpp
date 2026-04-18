@@ -112,10 +112,9 @@ void ConfigManager::CopyConfigToVars(){
 void ConfigManager::PrintConfigDebug() const {
     nlohmann::json j = config;   // convert struct to json
 
-    std::cout << "json loaded" << std::endl;
-    std::cout << "=== ConfigManager Debug ===" << std::endl;
+    LOG_INFO("json loaded");
+    LOG_INFO("Printing Keys = values");
     for (auto& [key, value] : j.items()) {
-        std::cout << key << " = " << value << std::endl;
+        LOG_INFO(key << " = " << value);
     }
-    std::cout << "===========================" << std::endl;
 }

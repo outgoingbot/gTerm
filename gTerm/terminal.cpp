@@ -135,10 +135,10 @@ int terminal::update(const char* title) {
 
             if (ImGui::Button("Connect")) {
                 if (this->handle_connect_button() == 0) {
-                    std::cout << "[SUCCESS]: gTerm Terminal Class Connected!" << std::endl;
+                    LOG_SUCCESS("gTerm Terminal Class Connected!");
                 }
                 else {
-                    std::cout << "[ERROR]: gTerm Terminal Class Not Connected!" << std::endl;
+                    LOG_ERROR("gTerm Terminal Class Not Connected!");
                 }
             }
 
@@ -179,7 +179,7 @@ int terminal::update(const char* title) {
             ImGui::Text("Char Buffer Size:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);  // Set width of the input field
-            ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len));
+            ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len), ImGuiInputTextFlags_ReadOnly);
             if (ImGui::IsItemDeactivatedAfterEdit())
             {
                 size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
@@ -281,22 +281,22 @@ void terminal::clearRxQueue() {
     _Term_rxQueue.clear();
     _Term_rxQueue.shrink_to_fit();
     clear_samples = true;
-    std::cout << "[INFO]: gTerm terminal rxQueue Cleared" << std::endl;
+    LOG_INFO("gTerm terminal rxQueue Cleared");
 }
 
 
 int terminal::handle_connect_button() {
     if (serialManObj.isConnected() == true) {
-        std::cout << "[WARNING]: gTerm serialManager Port Already Connected" << std::endl;
+        LOG_WARN("gTerm serialManager Port Already Connected");
         return -1;
     }
 
     if (serialManObj.connect()) {
-        std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
+        LOG_SUCCESS("gTerm serialManager Connected!");
         clearRxQueue(); //I think i want to clear the thread safe txQueue here too
     }
     else {
-        std::cout << "[ERROR]: gTerm serialManager Port Failed To Connect!" << std::endl;
+        LOG_ERROR("gTerm serialManager Port Failed To Connect!");
         return -1;
     }
 
@@ -306,7 +306,7 @@ int terminal::handle_connect_button() {
 
 int terminal::handle_disconnect_button() {
     if (serialManObj.isConnected() == false) {
-        std::cout << "[WARNING]: gTerm serialManager Port Already Disconnected" << std::endl;
+        LOG_WARN("gTerm serialManager Port Already Disconnected");
         return -1;
     }
     serialManObj.disconnect();
@@ -316,7 +316,7 @@ int terminal::handle_disconnect_button() {
 
 int terminal::handle_send_button() {
     if (serialManObj.isConnected() == false) {
-        std::cout << "[ERROR]: gTerm serialManager Port Not Connected" << std::endl;
+        LOG_ERROR("gTerm serialManager Port Not Connected");
         return -1;
     }
 

@@ -15,7 +15,7 @@ using namespace std;
 int main() {
     // Initialize GLFW
     if (!glfwInit()) {
-        cerr << "Failed to initialize GLFW" << endl;
+        LOG_ERROR_SYS("Failed to initialize GLFW");
         return -1;
     }
 
@@ -29,7 +29,7 @@ int main() {
     // Create a window
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "gTerm", nullptr, nullptr);
     if (!window) {
-        cerr << "Failed to create GLFW window" << endl;
+        LOG_ERROR_SYS("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -48,7 +48,7 @@ int main() {
 
     // Initialize GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        cerr << "Failed to initialize GLAD" << endl;
+        LOG_ERROR_SYS("Failed to initialize GLAD");
         return -1;
     }
 

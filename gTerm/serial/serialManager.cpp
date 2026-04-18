@@ -28,15 +28,15 @@ bool serialManager::connect() {
 	//Start the RS232 or Linux Serial port (hosted by vComPort virtual class)
 	if (_vComPort->connect()) {
 		//create the nonstop thread to keep reading the seria port if connect retruns true
-		std::cout << "[INFO]: gTerm serialManager Comm: " << getCommPort() << std::endl;
-		std::cout << "[INFO]: gTerm serialManager Baud: " << getBaudRate() << std::endl;
-		std::cout << "[SUCCESS]: gTerm seriManager Thread Started" << std::endl;
+		LOG_INFO("gTerm serialManager Comm : " << getCommPort());
+		LOG_INFO("gTerm serialManager Baud : " << getBaudRate());
+		LOG_SUCCESS("gTerm seriManager Thread Started");
 		serial_IO_Thread = new std::thread(&serialManager::serial_IO_Loop, this); ///retrieve buffer
 		threadIsRunning = true;
 		return true;
 	}
 	else {
-		std::cout << "[ERROR]: gTerm seriManager Thread Failed To Start" << std::endl;
+		LOG_ERROR("gTerm seriManager Thread Failed To Start");
 		return false;
 	}
 }
@@ -95,7 +95,6 @@ void serialManager::pushToRxQueue(const char* data, size_t length) {
 
 	const size_t maxSize = MAX_CHAR_COUNT;
 	if (rxQueue.size() > maxSize) {
-		//std::cout << "ERROR: MAX_LINE_COUNT Limit" << std::endl;
 		size_t toRemove = rxQueue.size() - maxSize;
 		rxQueue.erase(rxQueue.begin(), rxQueue.begin() + toRemove);
 	}
@@ -167,11 +166,11 @@ void serialManager::serial_IO_Loop() {
 #endif
 		}
 		else if (bytesRead == -1) {
-			perror("Serial read failed");
+			LOG_ERROR_ERRNO("Serial read failed");
 			//TODO: Do something here to handle error?
 		}
 	}
-	std::cout << "[INFO]: gTerm serilManager readLoop Thread Exiting Cleanly" << std::endl;
+	LOG_INFO("gTerm serialManager serial_IO_Thread Thread Exiting Cleanly");
 }
 #else
 //may test txQueue "Chunking here"
@@ -186,14 +185,14 @@ void serialManager::stopThread() {
 	deubug_kernel_num_chars_copied = 0;
 	if (serial_IO_Thread) {
 		if (std::this_thread::get_id() == serial_IO_Thread->get_id()) {
-			std::cerr << "[ERROR]: gTerm serialManager Attempted to join thread from itself!" << std::endl;
+			LOG_ERROR("gTerm serialManager Attempted to join thread from itself!");
 			return;
 		}
 
 		if (serial_IO_Thread->joinable()) {
 			serial_IO_Thread->join();
 		}
-		std::cout << "[SUCCESS]: gTerm seriManager serial_IO_Thread Joined" << std::endl;
+		LOG_SUCCESS("gTerm seriManager serial_IO_Thread Joined");
 		delete serial_IO_Thread;
 		serial_IO_Thread = nullptr;
 	}

@@ -183,8 +183,7 @@ int dataParser::update()
             if (newFormat != format) {
                 format = std::move(newFormat);
                 compile();
-                printf("Format updated to: '%s'  (%zu channels)\n",
-                    format.c_str(), getChannelCount());
+                LOG_INFO("Format updated to: " << format << " : " << getChannelCount() << " channels");
             }
         }
 

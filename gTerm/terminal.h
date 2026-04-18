@@ -17,7 +17,7 @@ parsing and plotting will be done in other classes
 #include "ConfigManager.h"
 #include "serial/serialManager.h"
 #include "terminal_output.h" //Scolling Text Window
-
+#include "logger.h"
 
 
 

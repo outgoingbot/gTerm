@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <queue>
 #include "virtualComm.h"
+#include "../logger.h"
 
 //Choose what Serial Driver Header to #include. ifdef Variables defined in CMakeLists
 #ifdef IS_WINDOWS

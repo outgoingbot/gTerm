@@ -15,3 +15,5 @@
 
 #include "dataParser.h"
 #include "dataPlotter.h"
+
+#include "logger.h"

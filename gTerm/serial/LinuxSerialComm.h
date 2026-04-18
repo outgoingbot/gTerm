@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include "virtualComm.h"
+#include "../logger.h"
 
 class LinuxSerialComm : public virtualComm {
 private:

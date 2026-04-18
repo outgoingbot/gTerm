@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream> //for cout debuggins
 #include "external/json.hpp"
+#include "logger.h"
 
 //struct used in json file
 struct AppConfig {

@@ -40,7 +40,8 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
             *returnVal = static_cast<int>(bytesRead);
         }
         else {
-            perror("read");
+            //perror("read");
+            LOG_ERROR_ERRNO("read");
             *returnVal = -1;
         }
     }
@@ -50,7 +51,8 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
     }
     else {
         // Error in select
-        perror("select");
+        //perror("select");
+        LOG_ERROR_ERRNO("select");
         *returnVal = -1;
     }
 }
@@ -72,7 +74,8 @@ void LinuxSerialComm::ReadData(char* buffer, unsigned int nbChar, int* returnVal
         *returnVal = 0;        // timeout or no data
     }
     else {
-        perror("read");
+        //perror("read");
+        LOG_ERROR_ERRNO("read");
         *returnVal = -1;
     }
 }
@@ -86,7 +89,8 @@ bool LinuxSerialComm::WriteData(const char* buffer, unsigned int nbChar)
 
     ssize_t bytesWritten = write(serialPort, buffer, nbChar);
     if (bytesWritten < 0) {
-        perror("write");
+        //perror("write");
+        LOG_ERROR_ERRNO("write");
         return false;
     }
 
@@ -111,13 +115,13 @@ bool LinuxSerialComm::connect() {
     strncpy(portName, vSerialParams.port.c_str(), sizeof(portName) - 1);
     portName[sizeof(portName) - 1] = '\0';
 
-    std::cout << "connecting to: " << portName << std::endl;
+    LOG_INFO("connecting to: " << portName);
 
     serialPort = open(portName, O_RDWR | O_NOCTTY);
     //serialPort = open(portName, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
     if (serialPort == -1) {
-        std::cout << "ERROR: Could not open port: " << portName << std::endl;
+        LOG_ERROR_SYS("Could not open port : " << portName);
         return false;
     }
 
@@ -136,7 +140,7 @@ bool LinuxSerialComm::connect() {
     else if (baud == 57600)  speed = B57600;
     else if (baud == 115200) speed = B115200;
     else {
-        std::cout << "ERROR: Bad Baud: " << baud << std::endl;
+        LOG_ERROR("Bad Baud : " << baud);
         return false;
     }
 
@@ -156,15 +160,15 @@ bool LinuxSerialComm::connect() {
     tty.c_cc[VMIN] = 0;
     tty.c_cc[VTIME] = 1; //1000ms Timeout //reduced to 100ms = 1
 
-    std::cout << "VMIN: " << (int)tty.c_cc[VMIN] << ", VTIME: " << (int)tty.c_cc[VTIME] << std::endl;
+    LOG_INFO("VMIN: " << (int)tty.c_cc[VMIN] << ", VTIME: " << (int)tty.c_cc[VTIME]);
 
     if (tcsetattr(serialPort, TCSANOW, &tty) != 0) {
-        std::cout << "Failed to set linux com attributes" << std::endl;
+        LOG_ERROR_SYS("Failed to set linux com attributes");
         close(serialPort);
         serialPort = -1;
         return false;
     }
-    std::cout << "SUCCESS: Linux Serial Connected " << std::endl;
+    LOG_SUCCESS("Linux Serial Connected");
     this->connected = true;
     return true;
 }
@@ -206,16 +210,16 @@ bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
                         if (tcgetattr(fd, &tio) == 0) {
                             // tcgetattr success — it's a real serial device
                             ComPortNames->push_back(fullPath);
-                            std::cout << "Available: " << fullPath << std::endl;
+                            LOG_INFO("Available: " << fullPath);
                             gotPort = true;
                         }
                         else {
-                            std::cout << "Invalid serial device: " << fullPath << std::endl;
+                            LOG_ERROR_SYS("Invalid serial device: " << fullPath);
                         }
                         close(fd);
                     }
                     else {
-                        std::cout << "Cannot open: " << fullPath << std::endl;
+                        LOG_ERROR_SYS("Cannot open: " << fullPath);
                     }
 
                     break; // Already matched a pattern, no need to check others
@@ -224,10 +228,10 @@ bool LinuxSerialComm::ListComPorts(std::deque<std::string>* ComPortNames) {
         }
     }
     catch (const fs::filesystem_error& e) {
-        std::cerr << "Error listing serial ports: " << e.what() << std::endl;
+        LOG_ERROR_SYS("Error listing serial ports: " << e.what());
         return false;
     }
 
-    std::cout << "Leaving LinuxSerialComm::ListComPorts\n" << std::endl;
+    LOG_INFO("Leaving LinuxSerialComm::ListComPorts");
     return gotPort;
 }

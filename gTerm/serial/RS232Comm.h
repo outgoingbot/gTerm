@@ -11,6 +11,7 @@
 #include <string>
 #include <deque>
 #include "virtualComm.h"
+#include "../logger.h"
 
 
 class RS232Comm : public virtualComm {
@@ -36,7 +37,7 @@ public:
 	~RS232Comm();
 
 	bool connect();
-	bool openPort(const char* portName, DCB dcbSerialParams = { 0 });
+	bool openPort(const char* portName, COMMTIMEOUTS timeouts, DCB dcbSerialParams = { 0 });
 
 	bool disconnect();
 	bool closePort();

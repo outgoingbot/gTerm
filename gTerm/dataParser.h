@@ -17,6 +17,7 @@ Data parsing class.
 #include <optional>
 #include <cctype>
 #include "ConfigManager.h"
+#include "logger.h"
 
 struct ParsedSample {
 	std::vector<double> values;   // one value per field in the format string
