@@ -33,16 +33,6 @@ public:
 	serialManager();
 	~serialManager();
 
-	//TODO: Should use this struct for the public members
-	//typedef struct registers {
-	//	bool _connected = false;
-	//	//The are the queues that are indirectly accessed outside thie class from above.
-	//	std::deque<char> rx_char_que;
-	//	std::deque<char> tx_char_que;
-	//	std::deque<std::string> com_port_names_que;
-	//	std::deque<std::string> com_baud_rate_que;
-	//};
-
 	bool connect();
 	bool disconnect();
 

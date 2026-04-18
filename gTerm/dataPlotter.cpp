@@ -64,7 +64,7 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     const auto& map = parser.getChannelToPlotMap();
     int numPlots = parser.getPlotCount();
 
-    ImGui::Text("pointsToDisplay: %d | maxDisplayable: %zu | pointsToDisplay: %d", numPlots, maxDisplayable, pointsToDisplay);
+    ImGui::Text("numPlots: %d | maxDisplayable: %zu | pointsToDisplay: %d", numPlots, maxDisplayable, pointsToDisplay);
     //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
     ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
 
@@ -100,7 +100,7 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
         std::string title = "Plot " + std::to_string(p + 1);
         //TODO: DOnt think is actually changing the plot axis padding
-        ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(1, 1));   // left/right, top/bottom
+        //ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(1, 1));   // left/right, top/bottom
 
         if (ImPlot::BeginPlot(title.c_str(), plotSize, ImPlotFlags_Crosshairs)) {
             ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_NoLabel);

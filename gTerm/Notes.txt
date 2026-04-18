@@ -113,6 +113,8 @@ UI
 	- have a status bar at the bottom. kinda like moba does it for debug/status info
 	  - [FPS] [Port Name] [Baud] [IsConnected] [buffer count] [cpu %] [gpu %]
 
+	-Maybe have terminal output show special symbols character for control characters?
+		- so if we get a newline we can print the weird 
 Extras ideas:
 maybe add a trigger to the plots?
 add binary mode

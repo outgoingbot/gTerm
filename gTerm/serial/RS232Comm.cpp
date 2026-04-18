@@ -94,15 +94,6 @@ bool RS232Comm::openPort(const char* portName, COMMTIMEOUTS timeouts, DCB dcbSer
 	// Wait for MCU reset
 	Sleep(MCU_WAIT_TIME);
 
-	//TODO: Move timouts into connect and pass into openPort
-	// Set timeouts
-	//COMMTIMEOUTS timeouts;
-	//timeouts.ReadIntervalTimeout = MAXDWORD;
-	//timeouts.ReadTotalTimeoutMultiplier = MAXDWORD;
-	//timeouts.ReadTotalTimeoutConstant = 100;
-	//timeouts.WriteTotalTimeoutMultiplier = 0;
-	//timeouts.WriteTotalTimeoutConstant = 0;
-
 	if (!SetCommTimeouts(this->hSerial, &timeouts)) {
 		LOG_ERROR_WIN32("RS232comm Could not set Serial Port timeouts");
 		CloseHandle(this->hSerial);
