@@ -14,7 +14,6 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
     ImGui::SameLine();
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
 
     // ====================== Parser controls plot assignment ======================
     //ImGui::Separator();
@@ -41,9 +40,16 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         ImGui::End();
         return;
     }
+    
+    //Testing fix for X axis scaling
+    size_t numAvailable = currentSamples.size();
+    size_t maxDisplayable = std::min(MAX_SAMPLES, numAvailable - MAX_SAMPLES_OFFSET);
+    //Testing fix for X axis scaling
+
 
     size_t numChannels = parser.getChannelCount();
-    size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
+    //size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
+    size_t displayCount = std::min(numAvailable, static_cast<size_t>(pointsToDisplay)); //testing fix for x axis
     size_t startIdx = currentSamples.size() > displayCount ? currentSamples.size() - displayCount : 0;
 
     if (displayCount != lastPointsToDisplay) {
@@ -53,6 +59,9 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     for (size_t i = 0; i < displayCount; ++i) {
         x_data[i] = static_cast<float>(i);
     }
+    ImGui::Text("maxDisplayable: %zu | pointsToDisplay: %d", maxDisplayable, pointsToDisplay);
+    //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
 
     // Build groups - one channel can now be on multiple plots
     const auto& map = parser.getChannelToPlotMap();
@@ -75,7 +84,7 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
     plotSize.x = -FLT_MIN;
     if (numPlots > 0) {
-        plotSize.y = (plotSize.y / numPlots) - 5; //fill window with plots. -5 for float rounding error (removes scroll bar)
+        plotSize.y = (plotSize.y / numPlots) - 8; //fill window with plots. -8 for float rounding error (removes scroll bar)
     }
     //if (plotSize.x < 100) plotSize.x = 100;
     if (plotSize.y < 100) plotSize.y = 100;
@@ -141,4 +150,10 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     }
 
     ImGui::End();
+}
+
+void dataPlotter::clearSamples() {
+    currentSamples.clear();
+    currentSamples.shrink_to_fit();
+    pointsToDisplay = 128;
 }

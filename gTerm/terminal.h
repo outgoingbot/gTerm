@@ -35,6 +35,9 @@ public:
 	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
 	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
 
+	void clearRxQueue();
+	bool clear_samples = false;
+
 	void debug_getKernelcharCount(size_t* len);
 
 private:
@@ -53,6 +56,7 @@ private:
 		char input_buffer_Tx_Data[4096] = { 0 }; //Buffer for tx Data from user entry in text box
 		bool open_popup_port = false; //use for comm port popup
 		bool open_popup_baud = false; //use for baudrate popup
+		bool button_pause_serial = false; //use for pausing updating screen
 	} ui;
 	
 	struct controls {

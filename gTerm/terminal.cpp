@@ -16,11 +16,15 @@ int terminal::update(const char* title) {
     // Create ImGui window for terminal
     ImGui::Begin(title);
     
-    //get the new characters pushed from the serial thread
-    size_t newCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);
-    //Send the buffer and number of new chars to be displayed
-    term_out.update(_Term_rxQueue, newCharCount, serialManObj.isConnected());
-    
+    if (ui.button_pause_serial == false) {
+        //get the new characters pushed from the serial thread
+        size_t newCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);
+        //Send the buffer and number of new chars to be displayed
+        term_out.update(_Term_rxQueue, newCharCount, serialManObj.isConnected());
+    }
+    else {
+        term_out.update(_Term_rxQueue, 0, serialManObj.isConnected());
+    }
 
 
     if (ImGui::BeginTabBar("TermTabBar")) {
@@ -150,6 +154,21 @@ int terminal::update(const char* title) {
             }
             //-----------------------------Disconnect Button--------------------------|
 
+            ImGui::SameLine(); // Place the next widget on the same line
+
+            //-----------------------------Pause Button--------------------------|
+            if (!ui.button_pause_serial) {
+                if (ImGui::Button("Pause")) {
+                    ui.button_pause_serial = true;
+                }
+            }
+            else {
+                if (ImGui::Button("UnPause")) {
+                    ui.button_pause_serial = false;
+                }
+            }
+            //-----------------------------Pause Button--------------------------|
+
             ImGui::EndTabItem();
         }
 
@@ -173,8 +192,9 @@ int terminal::update(const char* title) {
 
             //-----------------------------Clear Serial Buffer--------------------------|
             if (ImGui::Button("Clear Serial Buffer")) {
-                _Term_rxQueue.clear();
-                _Term_rxQueue.shrink_to_fit();
+                clearRxQueue();
+                //_Term_rxQueue.clear();
+                //_Term_rxQueue.shrink_to_fit();
             }
             //-----------------------------Clear Serial Buffer--------------------------|
 
@@ -241,6 +261,8 @@ const std::deque<char>& terminal::getSafeRxQueue() const {
 
 
 void terminal::ApplyConfig() {
+    clearRxQueue();
+    handle_disconnect_button();
     serialManObj.setCommPort(configRef.comm_port);
     serialManObj.setBaudRate(configRef.comm_baud);
     //ser_buff_num_chars = configRef.ser_buff_num_chars;
@@ -255,6 +277,13 @@ void terminal::StoreConfig() {
     // add every variable you need copied
 }
 
+void terminal::clearRxQueue() {
+    _Term_rxQueue.clear();
+    _Term_rxQueue.shrink_to_fit();
+    clear_samples = true;
+    std::cout << "[INFO]: gTerm terminal rxQueue Cleared" << std::endl;
+}
+
 
 int terminal::handle_connect_button() {
     if (serialManObj.isConnected() == true) {
@@ -264,6 +293,7 @@ int terminal::handle_connect_button() {
 
     if (serialManObj.connect()) {
         std::cout << "[SUCCESS]: gTerm serialManager Connected!" << std::endl;
+        clearRxQueue(); //I think i want to clear the thread safe txQueue here too
     }
     else {
         std::cout << "[ERROR]: gTerm serialManager Port Failed To Connect!" << std::endl;
