@@ -91,7 +91,7 @@ fix these things. test a bunch, then merge into master
 
 TODO:
 Terminal -> SerialManager -> virtualComm -> RS232/LinuxSerial
-	- Need to add Serial Transmitting!
+	- Need to add Serial Transmitting! <--Done
 	- Need a 'Pause button' (pause term_out prints and dataPlotter scrolling)
 	- Need to add port modes (Databits, Parity, StopBits) [8N1]
 

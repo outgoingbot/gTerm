@@ -7,7 +7,7 @@
 #include "ConfigManager.h"
 
 using namespace std;
-#define IGNORE_SAVED_IMGUI_INI 0
+#define IGNORE_SAVED_IMGUI_INI 1
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 #define SCALE_FACTOR 1.0
@@ -161,6 +161,13 @@ int main() {
         ImGui::SetNextWindowPos(ImVec2(10, 20), ImGuiCond_FirstUseEver); // initial position only once
         ImGui::SetNextWindowSize(ImVec2(700, 800), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //"main" terminal (realTerm like)
+
+        //clear samples when file IO and connect()
+        if (term.clear_samples) {
+            dPlotter.clearSamples();
+            term.clear_samples = false;
+        }
+
 
         ImGui::SetNextWindowPos(ImVec2(700, 20), ImGuiCond_FirstUseEver); // initial position only once
         ImGui::SetNextWindowSize(ImVec2(250, 600), ImGuiCond_FirstUseEver); // optional size    
