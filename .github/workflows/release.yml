@@ -37,10 +37,15 @@ jobs:
             libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev \
             xorg-dev libglu1-mesa-dev libgl1-mesa-dev pkg-config
 
-          # Extra packages needed for arm64-linux cross-compile of glfw + X11
+          # Cross-compile dependencies for arm64-linux (glfw needs X11 headers/libs)
           if [[ "${{ matrix.triplet }}" == "arm64-linux" ]]; then
+            sudo apt-get install -y g++-aarch64-linux-gnu
+            sudo dpkg --add-architecture arm64
+            sudo sed -i 's|^deb http://archive.ubuntu.com/ubuntu|deb [arch=amd64] http://archive.ubuntu.com/ubuntu|' /etc/apt/sources.list
+            echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+            echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+            sudo apt-get update -y
             sudo apt-get install -y \
-              g++-aarch64-linux-gnu \
               libx11-dev:arm64 \
               libx11-xcb-dev:arm64 \
               libxcb1-dev:arm64 \
