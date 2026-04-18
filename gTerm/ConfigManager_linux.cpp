@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
-
+#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 ConfigManager::ConfigManager() {}
 
 void ConfigManager::SaveToFile(const std::string& filepath) {
@@ -87,6 +87,35 @@ void ConfigManager::ShowOpenDiag() {
         }
 
     }
+}
+
+void ConfigManager::update() {
+    //Testing ImGuiFileDiag
+    //prob need to disable thumbnail features to prevent the stb_image include
+    if (!open_diag) return;
+    //ImGui::Begin("file diag");
+    // open Dialog Simple
+    if (open_diag_config_flag) {
+        ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
+        IGFD::FileDialogConfig config;
+        config.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", config);
+        open_diag_config_flag = false;
+    }
+    // display
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+            // action
+        }
+
+        // close
+        ImGuiFileDialog::Instance()->Close();
+        open_diag = false;
+        open_diag_config_flag = true;
+    }
+    //ImGui::End();
 }
 
 

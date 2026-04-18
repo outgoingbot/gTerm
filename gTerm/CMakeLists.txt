@@ -13,14 +13,12 @@ if(WIN32)
     add_compile_definitions(IS_WINDOWS)
     set(SERIAL_SRC serial/RS232Comm.cpp)
     set(SERIAL_INC serial/RS232Comm.h)
-    set(CONFIG_SRC ConfigManager.cpp)
     set(RC_FILE "${CMAKE_SOURCE_DIR}/gTerm.rc")
 elseif(UNIX)
     message(STATUS "Detected Unix/Linux OS")
     add_compile_definitions(IS_LINUX)
     set(SERIAL_SRC serial/LinuxSerialComm.cpp)
     set(SERIAL_INC serial/LinuxSerialComm.h)
-    set(CONFIG_SRC ConfigManager_linux.cpp)
     set(RC_FILE "")
 else()
     message(FATAL_ERROR "Unsupported OS")
@@ -47,7 +45,7 @@ set(SOURCES
     serial/serialManager.cpp serial/serialManager.h
     serial/virtualComm.h
     dataPlotter.cpp dataPlotter.h
-    ${CONFIG_SRC} ConfigManager.h
+    ConfigManager.cpp ConfigManager.h
     external/json.hpp
     external/ImGuiFileDialog/ImGuiFileDialog.cpp
     ${SERIAL_SRC}

@@ -1,101 +1,70 @@
 #include "ConfigManager.h"
 #include <fstream>
-#include <sstream>
 #include <filesystem>
 #include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 
 ConfigManager::ConfigManager() {
 }
 
-
 void ConfigManager::ShowSaveDiag() {
-    std::string path = OpenNativeSaveDialog("gTerm_config.json");
-    if (!path.empty()) {
-        SaveToFile(path);
-    }
+    open_diag = true;
+    open_diag_config_flag = true;   // will trigger save dialog next update()
 }
 
-
 void ConfigManager::ShowOpenDiag() {
-    std::string path = OpenNativeLoadDialog();
-    if (!path.empty()) {
-        bool success = LoadFromFile(path);
-        if (success) {
-            CopyConfigToVars();
-            PrintConfigDebug();
-            config_need_update = true;
-        }
-
-    }
+    open_diag = true;
+    open_diag_config_flag = false;  // will trigger open dialog next update()
 }
 
 void ConfigManager::update() {
-    //Testing ImGuiFileDiag
-    //prob need to disable thumbnail features to prevent the stb_image include
     if (!open_diag) return;
-    //ImGui::Begin("file diag");
-    // open Dialog Simple
+
+    ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_FirstUseEver);
+
     if (open_diag_config_flag) {
-        ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
-        IGFD::FileDialogConfig config;
-        config.path = ".";
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", config);
-        open_diag_config_flag = false;
+        // Save dialog
+        IGFD::FileDialogConfig cfg;
+        cfg.path = lastPath;
+        ImGuiFileDialog::Instance()->OpenDialog("ConfigSaveDlgKey", "Save Config", ".json", cfg);
     }
-    // display
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
-        if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+    else {
+        // Open dialog
+        IGFD::FileDialogConfig cfg;
+        cfg.path = lastPath;
+        ImGuiFileDialog::Instance()->OpenDialog("ConfigOpenDlgKey", "Load Config", ".json", cfg);
+    }
+
+    // Display logic
+    const char* dlgKey = open_diag_config_flag ? "ConfigSaveDlgKey" : "ConfigOpenDlgKey";
+
+    if (ImGuiFileDialog::Instance()->Display(dlgKey)) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
             std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
             std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            // action
+
+            if (open_diag_config_flag) {
+                // Save
+                SaveToFile(filePathName);
+            }
+            else {
+                // Load
+                if (LoadFromFile(filePathName)) {
+                    CopyConfigToVars();
+                    PrintConfigDebug();
+                    config_need_update = true;
+                }
+            }
+
+            // remember last path
+            if (!filePath.empty()) {
+                lastPath = filePath;
+            }
         }
 
-        // close
         ImGuiFileDialog::Instance()->Close();
         open_diag = false;
-        open_diag_config_flag = true;
+        open_diag_config_flag = true;  // reset to default (save)
     }
-    //ImGui::End();
-}
-
-
-std::string ConfigManager::OpenNativeSaveDialog(const std::string& defaultName) {
-    std::string cmd = "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; $sfd = New-Object System.Windows.Forms.SaveFileDialog; $sfd.Filter = 'JSON files (*.json)|*.json|All files (*.*)|*.*'; $sfd.FileName = '" + defaultName + "'; $sfd.InitialDirectory = '" + lastPath + "'; if ($sfd.ShowDialog() -eq 'OK') { $sfd.FileName } else { '' }\"";
-
-    std::string result;
-    FILE* pipe = _popen(cmd.c_str(), "r");
-    if (pipe) {
-        std::stringstream ss;
-        char buffer[1024];
-        while (fgets(buffer, sizeof(buffer), pipe)) ss << buffer;
-        _pclose(pipe);
-        result = ss.str();
-        if (!result.empty() && result.back() == '\n') result.pop_back();
-    }
-    if (!result.empty()) {
-        lastPath = std::filesystem::path(result).parent_path().string();
-    }
-    return result;
-}
-
-
-std::string ConfigManager::OpenNativeLoadDialog() {
-    std::string cmd = "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; $ofd = New-Object System.Windows.Forms.OpenFileDialog; $ofd.Filter = 'JSON files (*.json)|*.json|All files (*.*)|*.*'; $ofd.InitialDirectory = '" + lastPath + "'; if ($ofd.ShowDialog() -eq 'OK') { $ofd.FileName } else { '' }\"";
-
-    std::string result;
-    FILE* pipe = _popen(cmd.c_str(), "r");
-    if (pipe) {
-        std::stringstream ss;
-        char buffer[1024];
-        while (fgets(buffer, sizeof(buffer), pipe)) ss << buffer;
-        _pclose(pipe);
-        result = ss.str();
-        if (!result.empty() && result.back() == '\n') result.pop_back();
-    }
-    if (!result.empty()) {
-        lastPath = std::filesystem::path(result).parent_path().string();
-    }
-    return result;
 }
 
 void ConfigManager::SaveToFile(const std::string& filepath) {
@@ -109,39 +78,29 @@ void ConfigManager::SaveToFile(const std::string& filepath) {
 bool ConfigManager::LoadFromFile(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file) return false;
+
     nlohmann::json j;
     file >> j;
     config = j.get<AppConfig>();
     return true;
 }
 
+void ConfigManager::CopyConfigToVars() {
+    nlohmann::json j = config;
 
-
-void ConfigManager::CopyConfigToVars(){
-    nlohmann::json j = GetConfig();   // convert struct back to json
-
-    // Example for your "_autoscroll" key
     if (j.contains("comm_port")) {
-        //dataPlotter.controls.autoscroll = j["_autoscroll"].get<bool>();
         config.comm_port = j["comm_port"].get<std::string>();
     }
-
-    // Other examples:
     if (j.contains("comm_baud")) {
-        //dataPlotter.some_int = j["some_int"].get<int>();
         config.comm_baud = j["comm_baud"].get<std::string>();
     }
-
     if (j.contains("d_parser_format")) {
         config.d_parser_format = j["d_parser_format"].get<std::string>();
     }
 }
 
-
-
 void ConfigManager::PrintConfigDebug() const {
-    nlohmann::json j = config;   // convert struct to json
-
+    nlohmann::json j = config;
     LOG_INFO("json loaded");
     LOG_INFO("Printing Keys = values");
     for (auto& [key, value] : j.items()) {

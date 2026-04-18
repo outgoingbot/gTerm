@@ -47,8 +47,8 @@ private:
     //Debugging function to print json key/values to terminal
     void PrintConfigDebug() const;
 
-    std::string OpenNativeSaveDialog(const std::string& defaultName = "gTerm_config.json");
-    std::string OpenNativeLoadDialog();
+    //std::string OpenNativeSaveDialog(const std::string& defaultName = "gTerm_config.json");
+    //std::string OpenNativeLoadDialog();
     void SaveToFile(const std::string& filepath);
     bool LoadFromFile(const std::string& filepath);
 };

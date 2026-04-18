@@ -159,7 +159,7 @@ int main() {
         ImGui::GetStyle().FontSizeBase = main_menu.currentFontSize;
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
         
-        ImGui::SetNextWindowPos(ImVec2(10, 20), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver); // initial position only once
         ImGui::SetNextWindowSize(ImVec2(700, 800), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //"main" terminal (realTerm like)
 
