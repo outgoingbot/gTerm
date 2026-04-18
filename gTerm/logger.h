@@ -21,7 +21,15 @@
         if (lpMsgBuf) LocalFree(lpMsgBuf); \
     } while(0)
 #elif defined(IS_LINUX)
+//TODO: Need to test this on Linux
+//#include <cstring>   // for strerror()
+//#include <cerrno>    // for errno
 
+#define LOG_ERROR_UNIX(msg) do { \
+        int err = errno; \
+        std::cout << "[ERROR]: " << msg << " (code " << err << "): " \
+                  << (err != 0 ? strerror(err) : "Unknown error") << std::endl; \
+    } while(0)
 #endif
 
 

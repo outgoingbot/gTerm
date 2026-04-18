@@ -109,7 +109,7 @@ bool LinuxSerialComm::IsConnected() {
 
 bool LinuxSerialComm::connect() {
     //vSerialParams.port = "/dev/ttyUSB0";
-    vSerialParams.baud = "115200";
+    //vSerialParams.baud = "115200";
 
     char portName[64];
     strncpy(portName, vSerialParams.port.c_str(), sizeof(portName) - 1);
