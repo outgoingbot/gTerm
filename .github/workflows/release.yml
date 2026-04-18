@@ -37,14 +37,25 @@ jobs:
             libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev \
             xorg-dev libglu1-mesa-dev libgl1-mesa-dev pkg-config
 
-          # Cross-compile dependencies for arm64-linux (glfw needs X11 headers/libs)
           if [[ "${{ matrix.triplet }}" == "arm64-linux" ]]; then
             sudo apt-get install -y g++-aarch64-linux-gnu
+
+            # Fix sources for multi-arch (amd64 + arm64)
+            sudo sed -i 's|^deb http|deb [arch=amd64] http|' /etc/apt/sources.list
+            sudo sed -i 's|^deb mirror|deb [arch=amd64] mirror|' /etc/apt/sources.list || true
+
+            # Add arm64 ports
+            cat <<EOF | sudo tee /etc/apt/sources.list.d/arm64-ports.list
+            deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+            deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+            deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
+            deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+            EOF
+
             sudo dpkg --add-architecture arm64
-            sudo sed -i 's|^deb http://archive.ubuntu.com/ubuntu|deb [arch=amd64] http://archive.ubuntu.com/ubuntu|' /etc/apt/sources.list
-            echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-            echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
             sudo apt-get update -y
+
+            # Install the needed :arm64 dev packages for glfw / X11 / OpenGL
             sudo apt-get install -y \
               libx11-dev:arm64 \
               libx11-xcb-dev:arm64 \
