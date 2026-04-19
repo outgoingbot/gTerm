@@ -21,16 +21,15 @@ int main() {
     }
 
     // Configure OpenGL version and profile based on OS and Hardware
-#ifdef IS_PI4
+#if defined(IS_PI4)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API); //Uncomment for Pi 4 build
 #endif
     
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-
-#if defined(IS_WINDOWS) || defined(IS_LINUX)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-#elif defined(IS_PI4)
+#if defined(IS_PI4)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#else
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 #endif
 
 
@@ -79,10 +78,10 @@ int main() {
 
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-#if defined(IS_WINDOWS) || defined(IS_LINUX)
-    ImGui_ImplOpenGL3_Init("#version 330");
-#elif defined(IS_PI4)
+#if defined(IS_PI4)
     ImGui_ImplOpenGL3_Init("#version 300 es"); //use this if building on pi 4
+#else
+    ImGui_ImplOpenGL3_Init("#version 330");
 #endif
 
 
