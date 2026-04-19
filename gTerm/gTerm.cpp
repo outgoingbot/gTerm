@@ -8,7 +8,7 @@
 
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
-#define IGNORE_SAVED_IMGUI_INI 1
+#define IGNORE_SAVED_IMGUI_INI 0
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 #define SCALE_FACTOR 1.0
