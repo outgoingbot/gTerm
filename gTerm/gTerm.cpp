@@ -73,9 +73,10 @@ int main() {
     #if IGNORE_SAVED_IMGUI_INI
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
-    
+    ImGuiStyle& style= ImGui::GetStyle();
     ImGui::StyleColorsDark();
-
+    //setgTermStyles(style);
+   
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
 #if defined(IS_PI4)
@@ -253,4 +254,48 @@ int main() {
     glfwTerminate();
 
     return 0;
+}
+
+
+
+
+void setgTermStyles(ImGuiStyle& style) {
+    // === Main accent color (change these 3 numbers to your desired color) ===
+    ImVec4 accent = ImVec4(0.26f, 0.59f, 0.58f, 1.0f);   // ← change to red, purple, green, etc.
+
+    // Combo, Text inputs, Scrollbars, Sliders, etc.
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.20f, 0.20f, 0.20f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+
+    style.Colors[ImGuiCol_Border] = ImVec4(0.30f, 0.30f, 0.30f, 0.6f);
+
+    // Combo box, Text input, Drag, etc.
+    style.Colors[ImGuiCol_Button] = accent;
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(accent.x * 1.1f, accent.y * 1.1f, accent.z * 1.1f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(accent.x * 0.9f, accent.y * 0.9f, accent.z * 0.9f, 1.0f);
+
+    // Tabs
+    style.Colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
+    style.Colors[ImGuiCol_TabHovered] = accent;
+    style.Colors[ImGuiCol_TabActive] = accent;
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(accent.x * 0.85f, accent.y * 0.85f, accent.z * 0.85f, 1.0f);
+
+    // Plot borders / lines / frames
+    style.Colors[ImGuiCol_PlotLines] = accent;
+    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent.x * 1.2f, accent.y * 1.2f, accent.z * 1.2f, 1.0f);
+    style.Colors[ImGuiCol_PlotHistogram] = accent;
+    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(accent.x * 1.2f, accent.y * 1.2f, accent.z * 1.2f, 1.0f);
+    //style.Colors[ImGuiCol_PlotBorder] = ImVec4(0.40f, 0.40f, 0.40f, 0.8f);  // or use accent if you want
+
+    // Text input fields (InputText, Combo, etc.)
+    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(accent.x * 0.5f, accent.y * 0.5f, accent.z * 0.5f, 0.5f);
+
+    // Checkmark / Slider grab (to match)
+    style.Colors[ImGuiCol_CheckMark] = accent;
+    style.Colors[ImGuiCol_SliderGrab] = accent;
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(accent.x * 1.1f, accent.y * 1.1f, accent.z * 1.1f, 1.0f);
+
+
 }

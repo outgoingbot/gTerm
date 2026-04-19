@@ -17,3 +17,5 @@
 #include "dataPlotter.h"
 
 #include "logger.h"
+
+void setgTermStyles(ImGuiStyle& style);
