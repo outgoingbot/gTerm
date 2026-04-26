@@ -159,7 +159,7 @@ void serialManager::serial_IO_Loop() {
 			//push the kernel char buffer into the serialManager Dequeue<std::char>
 			pushToRxQueue(buffer, bytesRead); //Serial manager method to copy the local buffer into the deque
 			//DEBUG Keep track of the char copied from the kernel driver
-			deubug_kernel_num_chars_copied = bytesRead;
+			//deubug_kernel_num_chars_copied = bytesRead;
 #if DEBUG_TO_TERMINAL
 			//std::cout is slowwwww
 			for (int i = 0; i < bytesRead; ++i)	std::cout << buffer[i]; //also print serial data to open debug cmd console
@@ -169,6 +169,8 @@ void serialManager::serial_IO_Loop() {
 			LOG_ERROR_ERRNO("Serial read failed");
 			//TODO: Do something here to handle error?
 		}
+		//DEBUG Keep track of the char copied from the kernel driver
+		deubug_kernel_num_chars_copied = bytesRead;
 	}
 	LOG_INFO("gTerm serialManager serial_IO_Thread Thread Exiting Cleanly");
 }

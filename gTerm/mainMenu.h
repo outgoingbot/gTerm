@@ -9,7 +9,7 @@ public:
     void update(); // Render the debug menu
     bool frame_rate_capped = false;
     bool v_sync_enabled = true;
-    float currentFontSize = 18.0f;
+    float currentFontSize = 12.0f;
     bool fontNeedsRebuild = false;
     bool show_debug = false;
     bool show_ball = false;

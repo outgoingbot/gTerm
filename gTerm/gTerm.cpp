@@ -195,7 +195,7 @@ int main() {
         //Plotter Window
         if (dParser.dataParse_enable && dParser.send_to_plot) {
             ImGui::SetNextWindowPos(ImVec2(350, 30), ImGuiCond_FirstUseEver); // initial position only once
-            ImGui::SetNextWindowSize(ImVec2(1500, 1000), ImGuiCond_FirstUseEver); // optional size
+            ImGui::SetNextWindowSize(ImVec2(1500, 800), ImGuiCond_FirstUseEver); // optional size
             dPlotter.update(term.getSafeRxQueue());
         }
         

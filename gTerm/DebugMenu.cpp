@@ -91,6 +91,8 @@ void DebugMenu::update(terminal& terminalObj)
 {
 #define DEBUG_BAR_HEIGHT  68
 #define PLOT_HEIGHT       42
+    
+    size_t Klen = 0;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImVec2 pos = ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - DEBUG_BAR_HEIGHT);
@@ -121,6 +123,20 @@ void DebugMenu::update(terminal& terminalObj)
 
     ImGui::SameLine(0.0f, 4.0f);   // very tight
     ImGui::Text(" | %.1f FPS", ImGui::GetIO().Framerate);
+
+
+    //rx Queue size
+    ImGui::SameLine(0.0f, 4.0f);
+    char sizeBuf[32];
+    snprintf(sizeBuf, sizeof(sizeBuf), "%zu", terminalObj.getSafeRxQueue().size());
+    ImGui::Text(" | rxQueue size: %s", sizeBuf);
+
+
+    //kernel copy
+    ImGui::SameLine(0.0f, 4.0f);
+    snprintf(sizeBuf, sizeof(sizeBuf), "%.1f", (float)Klen);
+    ImGui::Text(" | Kernel Buffer copy size: %s", sizeBuf);
+
 
     ImGui::SameLine(0.0f, 4.0f);
     ImVec2 mouse = ImGui::GetIO().MousePos;
@@ -156,10 +172,10 @@ void DebugMenu::update(terminal& terminalObj)
     // Kernel Plot
     ImGui::BeginChild("KernelPlot", ImVec2(plotWidth, PLOT_HEIGHT), false, ImGuiWindowFlags_NoScrollbar);
     static float history[1000] = { 0 };
-    size_t len = 0;
-    terminalObj.debug_getKernelcharCount(&len);
+    //size_t len = 0;
+    terminalObj.debug_getKernelcharCount(&Klen);
     memmove(&history[0], &history[1], sizeof(float) * 999);
-    history[999] = (float)len;
+    history[999] = (float)Klen;
 
     if (ImPlot::BeginPlot("##KernelBuffer", ImVec2(-1, PLOT_HEIGHT),
         ImPlotFlags_NoTitle | ImPlotFlags_NoMenus | ImPlotFlags_NoFrame))
@@ -179,3 +195,4 @@ void DebugMenu::update(terminal& terminalObj)
     ImGui::PopFont();
     ImGui::End();
 }
+
