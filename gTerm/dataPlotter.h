@@ -25,7 +25,7 @@ public:
     // UI / settings
     int pointsToDisplay = 128; //default value. may consider adjusting dynamically based on currentSamples size
     size_t lastPointsToDisplay = 0;
-
+    const size_t minDisplayable = 8;
 
     void update(const std::deque<char>& rxDeque);
     

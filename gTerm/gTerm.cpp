@@ -103,7 +103,7 @@ int main() {
 
     //------------------------------------- Font Setup ----------------------------------------|
     ImFontConfig config;
-    config.SizePixels = 18.0f; // Font starting size
+    config.SizePixels = 12.0f; // Font starting size
     io.Fonts->AddFontDefaultVector(&config); // Explicitly load modern font
     io.Fonts->Build();
     //------------------------------------- Font Setup ----------------------------------------|
@@ -177,7 +177,7 @@ int main() {
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
         
         ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver); // initial position only once
-        ImGui::SetNextWindowSize(ImVec2(700, 800), ImGuiCond_FirstUseEver); // optional size
+        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver); // optional size
         term.update("Terminal"); //"main" terminal (realTerm like)
 
         //clear samples when file IO and connect()
@@ -187,50 +187,22 @@ int main() {
         }
 
 
-        ImGui::SetNextWindowPos(ImVec2(700, 20), ImGuiCond_FirstUseEver); // initial position only once
-        ImGui::SetNextWindowSize(ImVec2(250, 600), ImGuiCond_FirstUseEver); // optional size    
+        ImGui::SetNextWindowPos(ImVec2(10, 450), ImGuiCond_FirstUseEver); // initial position only once
+        ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_FirstUseEver); // optional size    
         //Parser Window
         dParser.update();
         
         //Plotter Window
         if (dParser.dataParse_enable && dParser.send_to_plot) {
-            ImGui::SetNextWindowPos(ImVec2(1000, 20), ImGuiCond_FirstUseEver); // initial position only once
-            ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
+            ImGui::SetNextWindowPos(ImVec2(350, 30), ImGuiCond_FirstUseEver); // initial position only once
+            ImGui::SetNextWindowSize(ImVec2(1500, 1000), ImGuiCond_FirstUseEver); // optional size
             dPlotter.update(term.getSafeRxQueue());
         }
         
-        //Debug window
-        ImVec2 windowSize(400, 400);
-        ImVec2 windowPos(ImGui::GetIO().DisplaySize.x - windowSize.x, 20); // top-right
-        ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
-        ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
-        debugMenu.update(term); //shows fps and mouse position
-
+        if (main_menu.show_debug) {
+            debugMenu.update(term); //shows fps and mouse position
+        }
         cfgManager.update();
-
-
-        //Testing ImGuiFileDiag
-        //prob need to disable thumbnail features to prevent the stb_image include
-        //ImGui::Begin("file diag");
-        //// open Dialog Simple
-        //if (ImGui::Button("Open File Dialog")) {
-        //    ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver); // optional size
-        //    IGFD::FileDialogConfig config;
-        //    config.path = ".";
-        //    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", config);
-        //}
-        //// display
-        //if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
-        //    if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
-        //        std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-        //        std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-        //        // action
-        //    }
-
-        //    // close
-        //    ImGuiFileDialog::Instance()->Close();
-        //}
-        //ImGui::End();
 
 
         // Rendering

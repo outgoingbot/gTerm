@@ -73,9 +73,12 @@ int terminal::update(const char* title) {
 
                     ImGui::EndPopup();
                 }
+            }else{
+                ImGui::NewLine();
             }
             //------------------------------COM Port Drop Down-------------------------------|
 
+            
 
             //-----------------------------Comm Baud Entry Text-----------------------------|
             ImGui::Text("Baud Rate:");
@@ -119,6 +122,8 @@ int terminal::update(const char* title) {
 
                     ImGui::EndPopup();
                 }
+            }else {
+                //ImGui::NewLine(); I kinda like the buttons shifitng up
             }
             //------------------------------BAUD Port Drop Down-------------------------------|
 

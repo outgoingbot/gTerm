@@ -32,7 +32,7 @@ public:
 
 	//int update(std::deque<char> charArray);
 	int update();
-#ifndef DEBUG
+#ifdef DEBUG
 	std::string format = "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f";   // User can change this at runtime
 #else
 	std::string format = "%f,%f,%f";   // User can change this at runtime

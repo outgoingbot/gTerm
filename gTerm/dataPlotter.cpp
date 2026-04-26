@@ -41,14 +41,10 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         return;
     }
     
-    //Testing fix for X axis scaling
+
     size_t numAvailable = currentSamples.size();
     size_t maxDisplayable = std::min(MAX_SAMPLES, numAvailable - MAX_SAMPLES_OFFSET);
-    //Testing fix for X axis scaling
-
-
     size_t numChannels = parser.getChannelCount();
-    //size_t displayCount = std::min(currentSamples.size(), static_cast<size_t>(pointsToDisplay));
     size_t displayCount = std::min(numAvailable, static_cast<size_t>(pointsToDisplay)); //testing fix for x axis
     size_t startIdx = currentSamples.size() > displayCount ? currentSamples.size() - displayCount : 0;
 
@@ -66,7 +62,7 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
     ImGui::Text("numPlots: %d | maxDisplayable: %zu | pointsToDisplay: %d", numPlots, maxDisplayable, pointsToDisplay);
     //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(maxDisplayable)); //Testing fix for X axis
+    ImGui::SliderInt("Points to Display", &pointsToDisplay, static_cast<int>(minDisplayable), static_cast<int>(maxDisplayable)); //Testing fix for X axis
 
     std::vector<std::vector<int>> activeGroups(numPlots);
 
@@ -99,10 +95,9 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         anyPlotDrawn = true;
 
         std::string title = "Plot " + std::to_string(p + 1);
-        //TODO: DOnt think is actually changing the plot axis padding
-        //ImPlot::PushStyleVar(ImPlotStyleVar_LabelPadding, ImVec2(1, 1));   // left/right, top/bottom
 
         if (ImPlot::BeginPlot(title.c_str(), plotSize, ImPlotFlags_Crosshairs)) {
+            ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0.0, (double)maxDisplayable + 8);
             ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_NoLabel);
 
             if (follow_x) {

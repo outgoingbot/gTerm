@@ -69,7 +69,16 @@ void mainMenu::update() {
         {
             //something else of needed
         }
+        
+        if (ImGui::Checkbox("Show Ball", &show_ball))
+        {
+            //something else of needed
+        }
 
+        if (ImGui::Checkbox("Show Debug Bar", &show_debug))
+        {
+            //something else of needed
+        }
 
         ImGui::Separator();
 

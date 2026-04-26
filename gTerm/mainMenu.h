@@ -11,6 +11,8 @@ public:
     bool v_sync_enabled = true;
     float currentFontSize = 18.0f;
     bool fontNeedsRebuild = false;
+    bool show_debug = false;
+    bool show_ball = false;
 
     bool exit_app = false;
     ConfigManager& cfgManagerP;

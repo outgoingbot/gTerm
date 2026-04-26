@@ -151,7 +151,7 @@ std::optional<double> dataParser::parse_token(const std::string& token, const Fo
 
 int dataParser::update()
 {
-    ImGui::Begin("Data_Manipulation_Region");
+    ImGui::Begin("Data Parser");
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
 
@@ -175,9 +175,20 @@ int dataParser::update()
     //Something in parser is trying really hard to find numerical data in fuzzer text
     if (dataParse_enable) {
         ImGui::TextUnformatted("Format string (e.g. %f,%i,%f,%d)");
-        ImGui::PushItemWidth(200.0f);
-        ImGui::InputText("Input String", formatBuf, sizeof(formatBuf));
+        ImGui::PushItemWidth(500.0f);
+        //ImGui::InputText("##Input String", formatBuf, sizeof(formatBuf));
+        //Testing multiline input here:
+        // Example with vertical scrollbar (and optional horizontal)
+        ImGui::InputTextMultiline("##Input String",
+            formatBuf,
+            sizeof(formatBuf),
+            ImVec2(200.0f, 100.0f),
+            ImGuiInputTextFlags_WordWrap |
+            ImGuiInputTextFlags_NoHorizontalScroll | // disables horizontal scrollbar
+            ImGuiInputTextFlags_EnterReturnsTrue | //enter means done
+            ImGuiInputTextFlags_CtrlEnterForNewLine); //ctrl + enter can add 
         
+        ImGui::PopItemWidth();
         if (ImGui::IsItemDeactivatedAfterEdit()) {
             std::string newFormat = formatBuf;
             if (newFormat != format) {
@@ -205,6 +216,7 @@ int dataParser::update()
     // ====================== Per-Plot Channel Selection (Add + Remove) ======================
     //static std::vector<char> channelSelected;
     //std::vector<bool> checked;
+    ImGui::PushItemWidth(200.0f);
     size_t numChannels = getChannelCount();
     if (numChannels == 0) return 0;
 
@@ -241,7 +253,7 @@ int dataParser::update()
             ImGui::EndCombo();
         }
     }
-
+    ImGui::PopItemWidth();
     ImGui::End();
 
     return 0;
