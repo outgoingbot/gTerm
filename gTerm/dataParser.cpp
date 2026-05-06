@@ -8,7 +8,7 @@ dataParser::dataParser(AppConfig& cfg) : configRef(cfg) {
     _window_params.width; // Window width
     _window_params.height = 600.f; // Window height
 
-    _window_params.drag_bar_height = 20.f;
+    //_window_params.drag_bar_height = 20.f;
 }
 
 

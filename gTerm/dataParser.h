@@ -86,7 +86,7 @@ private:
 		float min_height = 100.0f;
 		float width = 600.0f; // Window width
 		float height = 600.f; // Window height
-		float drag_bar_height = 20.f;
+		//float drag_bar_height = 20.f;
 	} window_params_t;
 
 	window_params_t _window_params;

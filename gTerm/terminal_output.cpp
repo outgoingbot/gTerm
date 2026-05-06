@@ -4,11 +4,10 @@
 terminal_output::terminal_output() {
     _autoScroll = true;
     _showControlChars = false;
-
 }
 
-terminal_output::~terminal_output() {}
 
+terminal_output::~terminal_output() {}
 
 
 int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCharCount, bool isConnected) {
@@ -26,8 +25,6 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     float deltaTime = ImGui::GetIO().DeltaTime;
     UpdateBall(deltaTime, region, childMin, isConnected);
     
-
-
     //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
     for (size_t i = 0; i < newCharCount; ++i){
         char c = _Term_rxBufferQueue[_Term_rxBufferQueue.size() - newCharCount + i];
@@ -58,7 +55,6 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
         //_autoScroll = false; //HACK: hacky way to fix the scroll back bug (cant scroll up)
     }
 
-
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));     // fully transparent
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -69,21 +65,21 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
         ImVec2(-FLT_MIN, -FLT_MIN),
         ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrap | ImGuiInputTextFlags_NoHorizontalScroll
     );
+
     ImGui::PopStyleColor(3);
     ImGui::PopFont();
 
-    //if current num chars >= display_buff_num_chars then _autoscroll = false;
+    //Having to use this strange method to autoscroll the InputTextMultiline
     if (_autoScroll) {
-        // 1. Get the current window where the widget lives
+        //Get the current window where the widget lives
         ImGuiWindow* window = ImGui::GetCurrentWindow();
 
-        // 2. Locate the child window by its auto-generated name
-        // Format is: "ParentWindowName/Label_ID" (ID in hex)
+        // Locate the child window by its auto-generated name (Format is: "ParentWindowName/Label_ID" (ID in hex))
         char child_name[128];
         ImFormatString(child_name, IM_ARRAYSIZE(child_name), "%s/##terminal_output_%08X", window->Name, ImGui::GetID("##terminal_output"));
 
         if (ImGuiWindow* child_window = ImGui::FindWindowByName(child_name)) {
-            // 3. Directly set the scroll of that internal child
+            //set the scroll of that internal child
             child_window->Scroll.y = child_window->ScrollMax.y;
         }
     }
@@ -122,7 +118,7 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
         //this is a little buggy. sometimes need to left click once if selection has been made, even if not visible
         // Register a context menu (optional)
-        if (ImGui::BeginPopupContextItem("##terminal_output2")){
+        if (ImGui::BeginPopupContextItem("##terminal_output_popup")){
 
             //------------------------------set the text color-------------------------------|
             // Local static values so sliders remember their positions
@@ -134,7 +130,7 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
             // Wrap in a collapsible header or your own UI block
             ImGui::Separator();
-            ImGui::Text("Text Color Controls");
+            ImGui::Text("Text Controls");
             ImGui::PushItemWidth(150.0f);
             // Four sliders (each 0.0 -> 1.0)
             ImGui::SliderFloat("Red", &r, 0.0f, 1.0f, "%.3f");
@@ -162,7 +158,7 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 
-    ImGui::Button("|||", ImVec2(ImGui::GetContentRegionAvail().x, _window_params.drag_bar_height));
+    ImGui::Button("|DRAG|", ImVec2(ImGui::GetContentRegionAvail().x, _window_params.drag_bar_height));
 
     ImGui::PopStyleColor(3);
 
@@ -177,8 +173,9 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
 void terminal_output::clearDisplayText() {
     _displayLines.clear();
-
 }
+
+
 void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected) {
 #define BALL_SPEED_SCALE 3.0f
 
@@ -210,15 +207,13 @@ void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin
     draw_list->AddCircleFilled(ballScreenPos, ball.radius, ballColor);
 }
 
-void terminal_output::SetTextColor(float r, float g, float b, float a)
-{
+void terminal_output::SetTextColor(float r, float g, float b, float a) {
     mTextColorR = r;
     mTextColorG = g;
     mTextColorB = b;
     mTextColorA = a;
 }
 
-void terminal_output::SetTextSize(float sz)
-{
+void terminal_output::SetTextSize(float sz) {
     localFontSize = sz;
 }
