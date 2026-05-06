@@ -210,7 +210,12 @@ int terminal::update(const char* title) {
                 term_out.clearDisplayText();
             }
             //-----------------------------Clear Terminal Text--------------------------|
-
+            
+            ImGui::NewLine();
+            if (ImGui::Checkbox("Auto Scroll", &term_out._autoScroll))
+            {
+                //something else if needed
+            }
 
             ImGui::EndTabItem();
         }

@@ -9,9 +9,16 @@
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 0
+#define MONITOR_4K 1
+
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
+
+#if MONITOR_4K
+#define SCALE_FACTOR 1.5
+#else
 #define SCALE_FACTOR 1.0
+#endif
 
 int main() {
     // Initialize GLFW
@@ -103,7 +110,11 @@ int main() {
 
     //------------------------------------- Font Setup ----------------------------------------|
     ImFontConfig config;
+#if MONITOR_4K
+    config.SizePixels = 18.0f; // Font starting size
+#else
     config.SizePixels = 12.0f; // Font starting size
+#endif
     io.Fonts->AddFontDefaultVector(&config); // Explicitly load modern font
     io.Fonts->Build();
     //------------------------------------- Font Setup ----------------------------------------|
@@ -113,6 +124,7 @@ int main() {
     // Create config manager to handle json load/save
     ConfigManager cfgManager;
 
+
     // Create Custom GUI Object
     mainMenu main_menu(cfgManager);
     DebugMenu debugMenu(versions);
@@ -121,6 +133,11 @@ int main() {
     dataPlotter dPlotter(dParser);
     //------------------------------------ Create the Objects ---------------------------------| 
 
+#if MONITOR_4K
+    main_menu.currentFontSize = 18.0f; // Font starting size
+#else
+    main_menu.currentFontSize = 12.0f; // Font starting size
+#endif
 
     // Main loop
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {

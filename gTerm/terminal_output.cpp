@@ -55,6 +55,7 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     // limit total size of the string
     if (_displayLines.size() > display_buff_num_chars){
         _displayLines.erase(0, _displayLines.size() - display_buff_num_chars);
+        //_autoScroll = false; //HACK: hacky way to fix the scroll back bug (cant scroll up)
     }
 
 
@@ -70,6 +71,8 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     );
     ImGui::PopStyleColor(3);
     ImGui::PopFont();
+
+    //if current num chars >= display_buff_num_chars then _autoscroll = false;
     if (_autoScroll) {
         // 1. Get the current window where the widget lives
         ImGuiWindow* window = ImGui::GetCurrentWindow();

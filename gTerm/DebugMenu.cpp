@@ -1,91 +1,9 @@
 #include "DebugMenu.h"
 
 DebugMenu::DebugMenu(const VersionInfo& versions) : m_versions(versions) {
-//    debugserialManObj = nullptr;
+
 }
 
-/*
-void DebugMenu::update(terminal& terminalObj){
-    // Start the debug menu window
-    ImGui::Begin("Debug Menu", nullptr,
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove);
-    ImGui::PushFont(nullptr, ImGui::GetFontSize() / 1.5);
-    ImGui::Text("ImGui Version: %s", m_versions.imgui.c_str());
-    ImGui::Text("ImPlot Version: %s", m_versions.implot.c_str());
-    ImGui::Text("GLFW Version: %s", m_versions.glfw.c_str());
-    ImGui::Text("OpenGL Version: %s", m_versions.opengl.c_str());
-    ImGui::Text("GLSL Version: %s", m_versions.glsl.c_str());
-    // Display the frame rate
-    ImGui::Text("Frame Rate: %.1f FPS", ImGui::GetIO().Framerate);
-
-    // Get mouse position
-    ImVec2 mousePos = ImGui::GetIO().MousePos;
-    ImGui::Text("Mouse Position: (%.1f, %.1f)", mousePos.x, mousePos.y);
-
-    ImGui::Separator();
-    // Frame Rate debug plot ================================= START
-    ImGui::BeginChild("Debug Frame Rate", ImVec2(0, 100));
-    static float fpsHistory[1000] = { 0 };
-
-    // Insert new value at the end and shift everything left (same as kernel buffer)
-    float currentFPS = ImGui::GetIO().Framerate;
-    memmove(&fpsHistory[0], &fpsHistory[1], sizeof(float) * 999);
-    fpsHistory[999] = currentFPS;
-
-    //ImVec2 fill_size_fps = ImVec2(-1, -1);
-    if (ImPlot::BeginPlot("Frame Rate History", ImVec2(-1, 100))) {
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
-        //ImPlot::SetupAxis(ImAxis_X1, "Samples");
-        ImPlot::SetupAxis(ImAxis_Y1, "FPS", ImPlotAxisFlags_AutoFit);
-        ImPlotSpec spec;
-        spec.LineColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-        spec.LineWeight = 1.0f;
-        ImPlot::PlotLine("FPS", fpsHistory, 1000, 1.0, 0.0, spec);
-        ImPlot::EndPlot();
-    }
-    ImGui::EndChild();
-    // Frame Rate debug plot ================================= END
-
-    ImGui::Separator();
-    
-    //Buffer size debug plot ================================= START
-    ImGui::BeginChild("Debug Kernel Buffer", ImVec2(0, 100));
-    static float history[1000] = { 0 };
-    size_t len = 0;
-    terminalObj.debug_getKernelcharCount(&len);
-    // Shift and insert data
-    memmove(&history[0], &history[1], sizeof(float) * 999);
-    history[999] = (float)len;
-
-    if (ImPlot::BeginPlot("Kernel Buffer chars copied per thread loop", ImVec2(-1, 100))) {
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, 1000, ImGuiCond_Always);
-
-        //ImPlot::SetupAxis(ImAxis_X1, "Samples");
-        // Auto-scale Y based on the 1000 points currently in history
-        ImPlot::SetupAxis(ImAxis_Y1, "Bytes", ImPlotAxisFlags_AutoFit);
-        // New ImPlot 1.0 way
-        ImPlotSpec spec2;
-        spec2.LineColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-        spec2.LineWeight = 1.0f;
-        ImPlot::PlotLine("Bytes", history, 1000, 1.0, 0.0, spec2);
-        ImPlot::EndPlot();
-    }
-    ImGui::EndChild();
-    //Buffer size debug plot ================================= END
-        //text with the fps
-    char fpsBuf[32];
-    snprintf(fpsBuf, sizeof(fpsBuf), "%.1f", (float)len);
-    ImGui::Text("Kernel Buffer copy size: %s", fpsBuf);
-
-    char sizeBuf[32];
-    snprintf(sizeBuf, sizeof(sizeBuf), "%zu", terminalObj.getSafeRxQueue().size());
-    ImGui::Text("rxQueue size: %s", sizeBuf);
-    ImGui::PopFont();
-    ImGui::End();
-    
-}
-*/
 
 void DebugMenu::update(terminal& terminalObj)
 {
@@ -93,6 +11,7 @@ void DebugMenu::update(terminal& terminalObj)
 #define PLOT_HEIGHT       42
     
     size_t Klen = 0;
+    terminalObj.debug_getKernelcharCount(&Klen);
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImVec2 pos = ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - DEBUG_BAR_HEIGHT);
@@ -173,7 +92,7 @@ void DebugMenu::update(terminal& terminalObj)
     ImGui::BeginChild("KernelPlot", ImVec2(plotWidth, PLOT_HEIGHT), false, ImGuiWindowFlags_NoScrollbar);
     static float history[1000] = { 0 };
     //size_t len = 0;
-    terminalObj.debug_getKernelcharCount(&Klen);
+    //terminalObj.debug_getKernelcharCount(&Klen);
     memmove(&history[0], &history[1], sizeof(float) * 999);
     history[999] = (float)Klen;
 

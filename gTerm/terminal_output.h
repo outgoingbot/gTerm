@@ -25,9 +25,10 @@ public:
     size_t display_buff_num_chars = 10000; //TODO: Some resize bug crashes gTerm when this is too large
 
     void clearDisplayText();
+    bool _autoScroll;
 
 private:
-    bool _autoScroll;
+
     bool _showControlChars;
 
     typedef struct window_params_t {

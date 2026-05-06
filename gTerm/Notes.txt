@@ -106,16 +106,22 @@ ConfigManager
 	- auto-disconnect on file load/save <-- Done, does it on ApplyConfig()
 
 UI
-	- Need to improve window control (layout and positioning)
+	- Need to improve window control (layout and positioning) <-- made some progress
 	- maybe cap frame rate when serial disconnected to save on cpu usage
 	- Dont let user uncheck vync anymore?
 	- have 'Dock' button that alligns the various windows
-	- have a status bar at the bottom. kinda like moba does it for debug/status info
+	- have a status bar at the bottom. kinda like moba does it for debug/status info <-done (hard to fit graphs)
 	  - [FPS] [Port Name] [Baud] [IsConnected] [buffer count] [cpu %] [gpu %]
 
 	-Maybe have terminal output show special symbols character for control characters?
 		- so if we get a newline we can print the weird 
 
+- Terminal Output scroll back is buggy. cant scroll up
+
+- DAta plotter seems to struggle when its getting bad data. no crash but bad fps drop.
+  -may need to dump bad data from queue
+
+- remove configManager_linux.cpp (No longer using native file system explorer)
 Extras ideas:
 maybe add a trigger to the plots?
 add binary mode
