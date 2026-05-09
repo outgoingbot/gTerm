@@ -40,6 +40,8 @@ public:
 
 	void debug_getKernelcharCount(size_t* len);
 
+	bool isConnected = false;
+
 private:
 	//Manages the serial data terminal display window.
 	terminal_output term_out;

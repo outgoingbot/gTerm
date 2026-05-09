@@ -302,6 +302,7 @@ int terminal::handle_connect_button() {
     }
 
     if (serialManObj.connect()) {
+        isConnected = true;
         LOG_SUCCESS("gTerm serialManager Connected!");
         clearRxQueue(); //I think i want to clear the thread safe txQueue here too
     }
@@ -320,6 +321,7 @@ int terminal::handle_disconnect_button() {
         return -1;
     }
     serialManObj.disconnect();
+    isConnected = false;
     return 0;
 }
 

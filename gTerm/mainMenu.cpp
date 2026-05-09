@@ -67,6 +67,7 @@ void mainMenu::update() {
 
         if (ImGui::Checkbox("Enable V-Sync", &v_sync_enabled))
         {
+            v_sync_need_update = true;
             //something else of needed
         }
         

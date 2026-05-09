@@ -9,7 +9,7 @@
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 0
-#define MONITOR_4K 1
+#define MONITOR_4K 0
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
@@ -144,15 +144,24 @@ int main() {
         
         //----------------------------- Update glfw from main menu settings -----------------------|
         if(main_menu.frame_rate_capped){
-            glfwWaitEventsTimeout(0.004);        // ~240 FPS max
+            if (term.isConnected == true) {
+                glfwWaitEventsTimeout(0.008);        // ~120 FPS max
+            }
+            else {
+                glfwWaitEvents();
+            }
         }else {
             glfwPollEvents();                    // Stay fully responsive
         }
 
-        if (main_menu.v_sync_enabled) {
-            glfwSwapInterval(1);   // VSync ON  (locked to monitor refresh rate)
-        }else {
-            glfwSwapInterval(0);   // VSync OFF (uncapped)
+        if (main_menu.v_sync_need_update) {
+            main_menu.v_sync_need_update = false;
+            if (main_menu.v_sync_enabled) {
+                glfwSwapInterval(1);   // VSync ON  (locked to monitor refresh rate)
+            }
+            else {
+                glfwSwapInterval(0);   // VSync OFF (uncapped)
+            }
         }
         //----------------------------- Update glfw from main menu settings -----------------------|
 

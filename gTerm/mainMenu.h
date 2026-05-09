@@ -7,8 +7,9 @@ class mainMenu {
 public:
     mainMenu(ConfigManager& cfgManager);
     void update(); // Render the debug menu
-    bool frame_rate_capped = false;
-    bool v_sync_enabled = true;
+    bool frame_rate_capped = true;
+    bool v_sync_enabled = false;
+    bool v_sync_need_update = true;
     float currentFontSize = 12.0f;
     bool fontNeedsRebuild = false;
     bool show_debug = false;
