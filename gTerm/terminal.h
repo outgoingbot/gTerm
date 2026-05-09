@@ -41,6 +41,7 @@ public:
 	void debug_getKernelcharCount(size_t* len);
 
 	bool isConnected = false;
+	bool draw_ball = false;
 
 private:
 	//Manages the serial data terminal display window.

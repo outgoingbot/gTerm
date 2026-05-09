@@ -14,11 +14,16 @@ using namespace std;
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
+#define DEFAULT_FRAME_RATE 120.0f
+
 #if MONITOR_4K
 #define SCALE_FACTOR 1.5
 #else
 #define SCALE_FACTOR 1.0
 #endif
+
+float globalFrametime = 1 / DEFAULT_FRAME_RATE;
+
 
 int main() {
     // Initialize GLFW
@@ -143,17 +148,19 @@ int main() {
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
         
         //----------------------------- Update glfw from main menu settings -----------------------|
-        if(main_menu.frame_rate_capped){
-            if (term.isConnected == true) {
-                glfwWaitEventsTimeout(0.008);        // ~120 FPS max
-            }
-            else {
-                glfwWaitEvents();
-            }
-        }else {
+
+        if (main_menu.low_power_on_disconnect && term.isConnected == false) {
+            glfwWaitEvents();
+        }
+        else if (!main_menu.turbo_mode) {
+            globalFrametime = 1 / main_menu.frame_rate_slider_val;
+            glfwWaitEventsTimeout(globalFrametime); // ~ 5 to 240 fps FPS max (timout is non-liner and non anything. this method is weird)
+        }
+        else {
             glfwPollEvents();                    // Stay fully responsive
         }
-
+        
+        
         if (main_menu.v_sync_need_update) {
             main_menu.v_sync_need_update = false;
             if (main_menu.v_sync_enabled) {
@@ -200,6 +207,7 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::GetStyle().FontSizeBase = main_menu.currentFontSize;
+        term.draw_ball = main_menu.show_ball;
         main_menu.update(); //gTerm Top Bar Menu Items (File, Edit, etc..)
         
         ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver); // initial position only once

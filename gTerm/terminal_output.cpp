@@ -23,7 +23,7 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
     // Draw bouncing ball
     float deltaTime = ImGui::GetIO().DeltaTime;
-    UpdateBall(deltaTime, region, childMin, isConnected);
+    if(draw_ball) UpdateBall(deltaTime, region, childMin, isConnected);
     
     //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
     for (size_t i = 0; i < newCharCount; ++i){

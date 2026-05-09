@@ -57,27 +57,35 @@ void mainMenu::update() {
     }
 
 
-    if (ImGui::BeginMenu("Settings"))
-    {
-        if (ImGui::Checkbox("Cap Frame Rate", &frame_rate_capped))
-        {
-            //something else of needed
+    if (ImGui::BeginMenu("Settings")){
+        
+        if (ImGui::Checkbox("Enable V-Sync (caps frame rate)", &v_sync_enabled)){
+            v_sync_need_update = true;
         }
 
-
-        if (ImGui::Checkbox("Enable V-Sync", &v_sync_enabled))
-        {
-            v_sync_need_update = true;
+        if (ImGui::Checkbox("Low Power on Disconnect", &low_power_on_disconnect)){
             //something else of needed
         }
         
-        if (ImGui::Checkbox("Show Ball", &show_ball))
-        {
+        if (ImGui::Checkbox("Turbo Mode", &turbo_mode)){
+            //something else of needed
+        }
+        
+        ImGui::Separator();
+        
+        if (!turbo_mode) {
+            ImGui::SliderFloat("Min FPS (experimental)", &frame_rate_slider_val, frame_rate_min_val, frame_rate_max_val, "%.0f");
+
+            if (ImGui::IsItemDeactivatedAfterEdit()) {
+                //do something
+            }
+        }
+        
+        if (ImGui::Checkbox("Show Ball", &show_ball)) {
             //something else of needed
         }
 
-        if (ImGui::Checkbox("Show Debug Bar", &show_debug))
-        {
+        if (ImGui::Checkbox("Show Debug Bar", &show_debug)){
             //something else of needed
         }
 

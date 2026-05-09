@@ -16,6 +16,8 @@ int terminal::update(const char* title) {
     // Create ImGui window for terminal
     ImGui::Begin(title);
     
+    term_out.draw_ball = draw_ball;
+
     if (ui.button_pause_serial == false) {
         //get the new characters pushed from the serial thread
         size_t newCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);

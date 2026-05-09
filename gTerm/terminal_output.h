@@ -26,6 +26,7 @@ public:
 
     void clearDisplayText();
     bool _autoScroll;
+    bool draw_ball = false;
 
 private:
 
