@@ -86,8 +86,10 @@ int main() {
     io.IniFilename = nullptr; // disables loading/saving window layout
     #endif
     ImGuiStyle& style= ImGui::GetStyle();
-    ImGui::StyleColorsDark();
-   
+    ImGui::StyleColorsDark(); //Set theme base Dark
+    ImVec4 accent = ImVec4(0.65f, 0.35f, 0.00f, 1.00f); //add Orange Accent
+    setgTermStyles(style, accent);
+
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
 #if defined(IS_PI4)
@@ -146,12 +148,13 @@ int main() {
     // Main loop
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
 
-        //----------------------------- TESTING THEME COLORS -----------------------|
-        //Testing colors here. no plans to kepp this in the while loop
-        //ImVec4 accent = ImVec4(0.26f, 0.59f, 0.58f, 1.0f);
-        ImVec4 accent = ImVec4(main_menu.globalColors.red, main_menu.globalColors.green, main_menu.globalColors.blue, main_menu.globalColors.alpha);
-        setgTermStyles(style, accent);
-        //----------------------------- TESTING THEME COLORS -----------------------|
+        //----------------------------- DEBUG THEME COLORS -----------------------|
+        //update theme colors if debug enabled
+        if (main_menu.show_debug) {
+            ImVec4 accent = ImVec4(main_menu.globalColors.red, main_menu.globalColors.green, main_menu.globalColors.blue, main_menu.globalColors.alpha);
+            setgTermStyles(style, accent);
+        }
+        //----------------------------- DEBUG THEME COLORS -----------------------|
 
 
 

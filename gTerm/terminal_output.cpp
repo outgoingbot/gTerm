@@ -207,6 +207,7 @@ void terminal_output::UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin
     draw_list->AddCircleFilled(ballScreenPos, ball.radius, ballColor);
 }
 
+/*
 void terminal_output::SetTextColor(float r, float g, float b, float a) {
     mTextColorR = r;
     mTextColorG = g;
@@ -217,3 +218,4 @@ void terminal_output::SetTextColor(float r, float g, float b, float a) {
 void terminal_output::SetTextSize(float sz) {
     localFontSize = sz;
 }
+*/

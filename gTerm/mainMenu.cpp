@@ -68,7 +68,7 @@ void mainMenu::update() {
             //something else of needed
         }
 
-        ImGui::Separator();
+        //ImGui::Separator();
 
         ImGui::SliderFloat("Font Size", &currentFontSize, 8.0f, 60.0f, "%.0f px");
         if (ImGui::IsItemDeactivatedAfterEdit())        // alternative (more precise)
@@ -76,6 +76,7 @@ void mainMenu::update() {
             fontNeedsRebuild = true;
         }
 
+        ImGui::Separator();
 
         if (ImGui::Checkbox("Show Debug", &show_debug)) {
             //something else of needed
@@ -84,7 +85,6 @@ void mainMenu::update() {
 
 
         if (show_debug) {
-            ImGui::Separator();
             
             if (ImGui::Checkbox("Show Ball", &show_ball)) {
                 //something else of needed

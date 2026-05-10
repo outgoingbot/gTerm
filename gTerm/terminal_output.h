@@ -18,8 +18,8 @@ public:
     ~terminal_output();
 
     int update(std::deque<char>& fullBufferqueue, size_t newCharCount, bool isConnected);
-    void SetTextColor(float r, float g, float b, float a = 1.0f);
-    void SetTextSize(float sz);
+    //void SetTextColor(float r, float g, float b, float a = 1.0f);
+    //void SetTextSize(float sz);
 
     //make private if needed
     size_t display_buff_num_chars = 10000; //TODO: Some resize bug crashes gTerm when this is too large
