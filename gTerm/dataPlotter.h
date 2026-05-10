@@ -18,9 +18,7 @@ public:
 
     const dataParser& parser;
 
-    // Plotting buffers - these will be resized dynamically
-    std::vector<ParsedSample> currentSamples;
-    std::vector<float> x_data;
+
 
     // UI / settings
     int pointsToDisplay = 128; //default value. may consider adjusting dynamically based on currentSamples size
@@ -39,6 +37,12 @@ public:
 
 
 private:
+    
+    //effort to imrove perfmance
+    // Plotting buffers - these will be resized dynamically
+    std::vector<ParsedSample> currentSamples;
+    std::vector<float> x_data;
+    std::vector<float> y_data;
 
     // UI State
     bool autoScale = true;

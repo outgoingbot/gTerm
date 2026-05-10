@@ -158,6 +158,10 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         }
     }
 
+
+    // ====================== Apply Style ONCE per frame ======================
+    applyStyle();   // moved outside the plot loop
+
     // ====================== Plotting - ONLY plots with assigned channels ======================
     ImVec2 plotSize = ImGui::GetContentRegionAvail();
 
@@ -177,7 +181,6 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
         anyPlotDrawn = true;
 
         std::string title = "Plot " + std::to_string(p + 1);
-        applyStyle();
         if (ImPlot::BeginPlot(title.c_str(), plotSize, flags_begin)) {
             ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0.0, (double)maxDisplayable + 8);
             ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_NoLabel);
@@ -194,27 +197,24 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
             }
 
             for (int ch : group) {
-                std::vector<float> y(displayCount);
-                for (size_t i = 0; i < displayCount; ++i) {
-                    size_t idx = startIdx + i;
-                    y[i] = (ch < static_cast<int>(currentSamples[idx].values.size()))
-                        ? static_cast<float>(currentSamples[idx].values[ch])
-                        : 0.0f;
-                }
-
                 std::string label = "Channel " + std::to_string(ch + 1);
                 ImVec4 color = ImPlot::GetColormapColor(ch % 10);
 
-                // New ImPlot 1.0 way
                 ImPlotSpec spec;
                 spec.LineColor = color;
                 spec.LineWeight = plot_line_weight_slider_var;
 
-                ImPlot::PlotLine(label.c_str(),
-                    x_data.data(),
-                    y.data(),
-                    static_cast<int>(displayCount),
-                    spec);     // implot 1.0 takes spec argument
+                // Reuse buffer instead of allocating new one every time
+                y_data.resize(displayCount);
+
+                for (size_t i = 0; i < displayCount; ++i) {
+                    size_t idx = startIdx + i;
+                    y_data[i] = (ch < static_cast<int>(currentSamples[idx].values.size()))
+                        ? static_cast<float>(currentSamples[idx].values[ch])
+                        : 0.0f;
+                }
+
+                ImPlot::PlotLine(label.c_str(), x_data.data(), y_data.data(), static_cast<int>(displayCount), spec);
             }
 
             ImPlot::EndPlot();
@@ -226,9 +226,12 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     if (!anyPlotDrawn) {
         ImGui::Text("No channels assigned to any plot yet.\nUse the checkboxes in Data Parser to assign channels.");
     }
-
+    ImPlot::PopStyleVar(16);   // match your applyStyle() count
     ImGui::End();
 }
+
+
+
 
 void dataPlotter::clearSamples() {
     currentSamples.clear();
