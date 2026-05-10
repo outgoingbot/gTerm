@@ -154,13 +154,13 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
 
     // Resizable drag bar
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+    //ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+    //ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+    //ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 
     ImGui::Button("|DRAG|", ImVec2(ImGui::GetContentRegionAvail().x, _window_params.drag_bar_height));
 
-    ImGui::PopStyleColor(3);
+    //ImGui::PopStyleColor(3);
 
     if (ImGui::IsItemActive()) {
         ImVec2 delta = ImGui::GetIO().MouseDelta;
