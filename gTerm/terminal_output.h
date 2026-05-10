@@ -11,6 +11,7 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include "logger.h"
 
 class terminal_output {
 public:

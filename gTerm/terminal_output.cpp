@@ -26,27 +26,33 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
     if(draw_ball) UpdateBall(deltaTime, region, childMin, isConnected);
     
     //--------------------------------------- Print Serial Characters to Screen ---------------------------------------|
-    for (size_t i = 0; i < newCharCount; ++i){
+    for (size_t i = 0; i < newCharCount; ++i) {
         char c = _Term_rxBufferQueue[_Term_rxBufferQueue.size() - newCharCount + i];
         //Parse each character is you want to. InputTextMultiLine will obey control characters ao no need to check for new linea, etc
-        /*
+
         // control character checks
-        switch (c){
+        switch (c) {
         case '\0':
-        case '\r':
-        case '\n':
-            _displayLines += ','; // Append the modified character to string
+            LOG_DEBUG("NULL DETETCTED");
+            _displayLines += "ERROR NULL DETECTED\n";
             break;
-        case '\t':
-        case '\v':
-        case '\f':
-        case '\b':
+            //case '\r':
+            //    break;
+            //case '\n':
+            //    break;
+            //case '\t':
+            //    break;
+            //case '\v':
+            //    break;
+            //case '\f':
+            //    break;
+            //case '\b':
+            //    break;
         default:
             _displayLines += c; // Append the new character directly to string
-            break;    
+            break;
         }
-        */
-        _displayLines += c; // Append only new characters directly to string
+
     }
 
     // limit total size of the string
