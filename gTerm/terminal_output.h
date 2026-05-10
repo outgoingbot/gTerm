@@ -49,10 +49,9 @@ private:
 
     void UpdateBall(float deltaTime, ImVec2 region, ImVec2 childMin, bool connected);
 
-
     float mTextColorR = 0.0f;
-    float mTextColorG = 0.8f;
-    float mTextColorB = 0.3f;
+    float mTextColorG = 0.7f;
+    float mTextColorB = 0.0f;
     float mTextColorA = 1.0f;
     float localFontSize = 0.0f;
 

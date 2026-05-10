@@ -122,25 +122,25 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
 
             //------------------------------set the text color-------------------------------|
             // Local static values so sliders remember their positions
-            static float r = 0.0f;
-            static float g = 0.8f;
-            static float b = 0.3f;
-            static float a = 1.0f;
-            static float sz = 0.0f;
+            //static float r = 0.0f;
+            //static float g = 0.8f;
+            //static float b = 0.3f;
+            //static float a = 1.0f;
+            //static float sz = 0.0f;
 
             // Wrap in a collapsible header or your own UI block
             ImGui::Separator();
             ImGui::Text("Text Controls");
             ImGui::PushItemWidth(150.0f);
             // Four sliders (each 0.0 -> 1.0)
-            ImGui::SliderFloat("Red", &r, 0.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("Green", &g, 0.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("Blue", &b, 0.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("Alpha", &a, 0.0f, 1.0f, "%.3f");
-            ImGui::SliderFloat("Size", &sz, -20.f, 20.0f, "%.0f");
+            ImGui::SliderFloat("Red", &mTextColorR, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Green", &mTextColorG, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Blue", &mTextColorB, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Alpha", &mTextColorA, 0.0f, 1.0f, "%.3f");
+            ImGui::SliderFloat("Size", &localFontSize, -20.f, 20.0f, "%.0f");
             ImGui::PopItemWidth();
-            SetTextColor(r, g, b, a);
-            SetTextSize(sz);
+            //SetTextColor(r, g, b, a);
+            //SetTextSize(sz);
             //END ------------------------------set the text color-------------------------------|
 
             ImGui::EndPopup();

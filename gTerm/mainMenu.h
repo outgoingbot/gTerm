@@ -25,6 +25,14 @@ public:
     bool show_debug = false;
     bool show_ball = false;
 
+
+    struct globalColors {
+        float red = 0.65f;
+        float green = 0.35f;
+        float blue = 0.03f;
+        float alpha = 1.0f;
+    } globalColors;
+
     bool exit_app = false;
     ConfigManager& cfgManagerP;
 };

@@ -9,7 +9,7 @@
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 0
-#define MONITOR_4K 0
+#define MONITOR_4K 1
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
@@ -87,7 +87,6 @@ int main() {
     #endif
     ImGuiStyle& style= ImGui::GetStyle();
     ImGui::StyleColorsDark();
-    //setgTermStyles(style);
    
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -146,6 +145,17 @@ int main() {
 
     // Main loop
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
+
+        //----------------------------- TESTING THEME COLORS -----------------------|
+        //Testing colors here. no plans to kepp this in the while loop
+        //ImVec4 accent = ImVec4(0.26f, 0.59f, 0.58f, 1.0f);
+        ImVec4 accent = ImVec4(main_menu.globalColors.red, main_menu.globalColors.green, main_menu.globalColors.blue, main_menu.globalColors.alpha);
+        setgTermStyles(style, accent);
+        //----------------------------- TESTING THEME COLORS -----------------------|
+
+
+
+
         
         //----------------------------- Update glfw from main menu settings -----------------------|
 
@@ -265,43 +275,57 @@ int main() {
 
 
 
-void setgTermStyles(ImGuiStyle& style) {
-    // === Main accent color (change these 3 numbers to your desired color) ===
-    ImVec4 accent = ImVec4(0.26f, 0.59f, 0.58f, 1.0f);   // ← change to red, purple, green, etc.
+void setgTermStyles(ImGuiStyle& style, ImVec4 accent) {
+    // === Scaling constants ===
+    const float hovered = 1.2f;
+    const float active = 0.9f;
+    const float strong_hovered = 1.5f;
+    const float dimmed = 0.85f;
 
-    // Combo, Text inputs, Scrollbars, Sliders, etc.
+    // === WINDOWS (semi-transparent) ===
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.12f, 0.12f, 0.12f, 0.94f);
+    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.10f, 0.10f, 0.10f, 0.90f);
+
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
+    style.Colors[ImGuiCol_TitleBgActive] = accent;
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.08f, 0.08f, 0.08f, 0.8f);
+
+    // === MENU BAR + MENUS ===
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.10f, 0.10f, 0.10f, 0.94f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.12f, 0.12f, 0.12f, 0.94f);
+
+    style.Colors[ImGuiCol_Header] = ImVec4(0.20f, 0.20f, 0.20f, 1.0f);
+    style.Colors[ImGuiCol_HeaderHovered] = accent;
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(accent.x * active, accent.y * active, accent.z * active, 1.0f);
+
+    // === FRAMES / INPUTS ===
     style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
     style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.20f, 0.20f, 0.20f, 1.0f);
     style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
 
     style.Colors[ImGuiCol_Border] = ImVec4(0.30f, 0.30f, 0.30f, 0.6f);
 
-    // Combo box, Text input, Drag, etc.
+    // === BUTTONS ===
     style.Colors[ImGuiCol_Button] = accent;
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(accent.x * 1.1f, accent.y * 1.1f, accent.z * 1.1f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(accent.x * 0.9f, accent.y * 0.9f, accent.z * 0.9f, 1.0f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(accent.x * hovered, accent.y * hovered, accent.z * hovered, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(accent.x * active, accent.y * active, accent.z * active, 1.0f);
 
-    // Tabs
+    // === TABS ===
     style.Colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
     style.Colors[ImGuiCol_TabHovered] = accent;
     style.Colors[ImGuiCol_TabActive] = accent;
     style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
-    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(accent.x * 0.85f, accent.y * 0.85f, accent.z * 0.85f, 1.0f);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(accent.x * dimmed, accent.y * dimmed, accent.z * dimmed, 1.0f);
 
-    // Plot borders / lines / frames
+    // === PLOTS ===
     style.Colors[ImGuiCol_PlotLines] = accent;
-    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent.x * 1.2f, accent.y * 1.2f, accent.z * 1.2f, 1.0f);
+    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent.x * strong_hovered, accent.y * strong_hovered, accent.z * strong_hovered, 1.0f);
     style.Colors[ImGuiCol_PlotHistogram] = accent;
-    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(accent.x * 1.2f, accent.y * 1.2f, accent.z * 1.2f, 1.0f);
-    //style.Colors[ImGuiCol_PlotBorder] = ImVec4(0.40f, 0.40f, 0.40f, 0.8f);  // or use accent if you want
+    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(accent.x * strong_hovered, accent.y * strong_hovered, accent.z * strong_hovered, 1.0f);
 
-    // Text input fields (InputText, Combo, etc.)
+    // === OTHER ===
     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(accent.x * 0.5f, accent.y * 0.5f, accent.z * 0.5f, 0.5f);
-
-    // Checkmark / Slider grab (to match)
     style.Colors[ImGuiCol_CheckMark] = accent;
     style.Colors[ImGuiCol_SliderGrab] = accent;
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(accent.x * 1.1f, accent.y * 1.1f, accent.z * 1.1f, 1.0f);
-
-
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(accent.x * hovered, accent.y * hovered, accent.z * hovered, 1.0f);
 }

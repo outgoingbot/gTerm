@@ -151,43 +151,45 @@ std::optional<double> dataParser::parse_token(const std::string& token, const Fo
 int dataParser::update()
 {
     ImGui::Begin("Data Parser");
-
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
-
-    ImVec2 region = ImGui::GetContentRegionAvail();
-    ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x);
-
-    // ==================== Parser Controls ====================
     ImGui::Checkbox("Parser Enabled", &dataParse_enable);
-    ImGui::Checkbox("Plots Enabled", &send_to_plot);
-
-    // ====================== Format String Input ======================
-    static char formatBuf[256] = { 0 };
-
-    // Sync buffer with current format (only when they differ)
-    if (strcmp(formatBuf, format.c_str()) != 0) {
-        strncpy(formatBuf, format.c_str(), sizeof(formatBuf) - 1);
-        formatBuf[sizeof(formatBuf) - 1] = '\0';
-    }
-
     //TODO: If parser is enabled and the serial data is junk it kills the FPS.
     //Something in parser is trying really hard to find numerical data in fuzzer text
     if (dataParse_enable) {
+        ImVec2 region = ImGui::GetContentRegionAvail();
+        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + region.x);
+
+        // ==================== Parser Controls ====================
+
+        ImGui::Checkbox("Plots Enabled", &send_to_plot);
+
+        // ====================== Format String Input ======================
+        static char formatBuf[256] = { 0 };
+
+        // Sync buffer with current format (only when they differ)
+        if (strcmp(formatBuf, format.c_str()) != 0) {
+            strncpy(formatBuf, format.c_str(), sizeof(formatBuf) - 1);
+            formatBuf[sizeof(formatBuf) - 1] = '\0';
+        }
+
+
         ImGui::TextUnformatted("Format string (e.g. %f,%i,%f,%d)");
-        ImGui::PushItemWidth(500.0f);
+        //ImGui::PushItemWidth(500.0f);
         //ImGui::InputText("##Input String", formatBuf, sizeof(formatBuf));
         //Testing multiline input here:
         // Example with vertical scrollbar (and optional horizontal)
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
         ImGui::InputTextMultiline("##Input String",
             formatBuf,
             sizeof(formatBuf),
-            ImVec2(200.0f, 100.0f),
+            ImVec2(-FLT_MIN, 100.0f),
             ImGuiInputTextFlags_WordWrap |
             ImGuiInputTextFlags_NoHorizontalScroll | // disables horizontal scrollbar
             ImGuiInputTextFlags_EnterReturnsTrue | //enter means done
             ImGuiInputTextFlags_CtrlEnterForNewLine); //ctrl + enter can add 
-        
-        ImGui::PopItemWidth();
+        ImGui::PopStyleColor(1);
+        //ImGui::PopItemWidth();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.65f, 0.35f, 0.0f, 1.0f));
         if (ImGui::IsItemDeactivatedAfterEdit()) {
             std::string newFormat = formatBuf;
             if (newFormat != format) {
@@ -202,57 +204,60 @@ int dataParser::update()
         ImGui::Text("Channels: %zu", getChannelCount());
 
         // Optional: Show current active format below
-        ImGui::Text("Active format: %s", format.c_str());
-    }
-    // ==================== Your existing placeholder / debug text ====================
-    //std::string tempString = dataParse_enable ? "True" : "False";
-    //ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());
+        ImGui::Text("Active format:");
+        ImGui::Text("%s", format.c_str());
+        ImGui::PopStyleColor(1);
 
-    ImGui::PopTextWrapPos();
-    ImGui::PopStyleColor(1);
- 
+        // ==================== Your existing placeholder / debug text ====================
+        //std::string tempString = dataParse_enable ? "True" : "False";
+        //ImGui::TextUnformatted(tempString.c_str(), tempString.c_str() + tempString.size());
 
-    // ====================== Per-Plot Channel Selection (Add + Remove) ======================
-    //static std::vector<char> channelSelected;
-    //std::vector<bool> checked;
-    ImGui::PushItemWidth(200.0f);
-    size_t numChannels = getChannelCount();
-    if (numChannels == 0) return 0;
+        ImGui::PopTextWrapPos();
 
-    size_t totalSize = numChannels * numChannels;
-    if (channelSelected.size() != totalSize) {
-        channelSelected.resize(totalSize, 0);
-    }
+        if (send_to_plot) {
+            // ====================== Per-Plot Channel Selection (Add + Remove) ======================
+            //static std::vector<char> channelSelected;
+            //std::vector<bool> checked;
+            ImGui::PushItemWidth(200.0f);
+            size_t numChannels = getChannelCount();
+            if (numChannels == 0) return 0;
 
-    for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
-        std::string comboLabel = "##Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
-        std::string preview = "Plot " + std::to_string(plot_idx + 1) + " channels";
-
-        if (ImGui::BeginCombo(comboLabel.c_str(), preview.c_str())) {
-
-            for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
-                size_t idx = plot_idx * numChannels + chn_idx;
-
-                bool isChecked = (channelSelected[idx] != 0);
-
-                if (ImGui::Checkbox(("Channel " + std::to_string(chn_idx + 1)).c_str(), &isChecked)) {
-                    channelSelected[idx] = isChecked ? 1 : 0;
-
-                    if (isChecked) {
-                        // Add channel to this plot
-                        setChannelToPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
-                    }
-                    else {
-                        // REMOVE channel from this plot
-                        removeChannelFromPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
-                    }
-                }
+            size_t totalSize = numChannels * numChannels;
+            if (channelSelected.size() != totalSize) {
+                channelSelected.resize(totalSize, 0);
             }
 
-            ImGui::EndCombo();
+            for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
+                std::string comboLabel = "##Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
+                std::string preview = "Plot " + std::to_string(plot_idx + 1) + " channels";
+
+                if (ImGui::BeginCombo(comboLabel.c_str(), preview.c_str())) {
+
+                    for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
+                        size_t idx = plot_idx * numChannels + chn_idx;
+
+                        bool isChecked = (channelSelected[idx] != 0);
+
+                        if (ImGui::Checkbox(("Channel " + std::to_string(chn_idx + 1)).c_str(), &isChecked)) {
+                            channelSelected[idx] = isChecked ? 1 : 0;
+
+                            if (isChecked) {
+                                // Add channel to this plot
+                                setChannelToPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+                            }
+                            else {
+                                // REMOVE channel from this plot
+                                removeChannelFromPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+                            }
+                        }
+                    }
+
+                    ImGui::EndCombo();
+                }
+            }
+            ImGui::PopItemWidth();
         }
     }
-    ImGui::PopItemWidth();
     ImGui::End();
 
     return 0;

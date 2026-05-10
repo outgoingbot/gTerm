@@ -57,22 +57,22 @@ void mainMenu::update() {
     }
 
 
-    if (ImGui::BeginMenu("Settings")){
-        
-        if (ImGui::Checkbox("Enable V-Sync (caps frame rate)", &v_sync_enabled)){
+    if (ImGui::BeginMenu("Settings")) {
+
+        if (ImGui::Checkbox("Enable V-Sync (caps frame rate)", &v_sync_enabled)) {
             v_sync_need_update = true;
         }
 
-        if (ImGui::Checkbox("Low Power on Disconnect", &low_power_on_disconnect)){
+        if (ImGui::Checkbox("Low Power on Disconnect", &low_power_on_disconnect)) {
             //something else of needed
         }
-        
-        if (ImGui::Checkbox("Turbo Mode", &turbo_mode)){
+
+        if (ImGui::Checkbox("Turbo Mode", &turbo_mode)) {
             //something else of needed
         }
-        
+
         ImGui::Separator();
-        
+
         if (!turbo_mode) {
             ImGui::SliderFloat("Min FPS (experimental)", &frame_rate_slider_val, frame_rate_min_val, frame_rate_max_val, "%.0f");
 
@@ -80,12 +80,12 @@ void mainMenu::update() {
                 //do something
             }
         }
-        
+
         if (ImGui::Checkbox("Show Ball", &show_ball)) {
             //something else of needed
         }
 
-        if (ImGui::Checkbox("Show Debug Bar", &show_debug)){
+        if (ImGui::Checkbox("Show Debug", &show_debug)) {
             //something else of needed
         }
 
@@ -97,6 +97,13 @@ void mainMenu::update() {
             fontNeedsRebuild = true;
         }
 
+        if (show_debug) {
+            ImGui::Separator();
+            ImGui::SliderFloat("red", &globalColors.red, 0.0f, 1.0f, "%.2f");
+            ImGui::SliderFloat("green", &globalColors.green, 0.0f, 1.0f, "%.2f");
+            ImGui::SliderFloat("blue", &globalColors.blue, 0.0f, 1.0f, "%.2f");
+            ImGui::SliderFloat("alpha", &globalColors.alpha, 0.0f, 1.0f, "%.2f");
+        }
         ImGui::EndMenu();
     }
 

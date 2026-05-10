@@ -18,4 +18,4 @@
 
 #include "logger.h"
 
-void setgTermStyles(ImGuiStyle& style);
+void setgTermStyles(ImGuiStyle& style, ImVec4 accent);

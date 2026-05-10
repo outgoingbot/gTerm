@@ -39,9 +39,11 @@ int terminal::update(const char* title) {
             strncpy(ui.input_buffer_Port, serialManObj.getCommPort().c_str(), IM_ARRAYSIZE(ui.input_buffer_Port) - 1);
             ui.input_buffer_Port[IM_ARRAYSIZE(ui.input_buffer_Port) - 1] = '\0';
             ImGui::SetNextItemWidth(100);  // Set width of the input field
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.70f, 0.0f, 1.0f));  // green
             if (ImGui::InputText("##Comm_Port_Entry", ui.input_buffer_Port, IM_ARRAYSIZE(ui.input_buffer_Port))) {
                 serialManObj.setCommPort(ui.input_buffer_Port);
             }
+            ImGui::PopStyleColor();
             //-----------------------------Comm Port Entry Text-----------------------------|
 
             ImGui::SameLine(); // Place the next widget on the same line 
@@ -88,9 +90,11 @@ int terminal::update(const char* title) {
             ui.input_buffer_Baud[IM_ARRAYSIZE(ui.input_buffer_Baud) - 1] = '\0';
             ImGui::SameLine(); // Place the next widget on the same line
             ImGui::SetNextItemWidth(100);  // Set width of the input field
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.70f, 0.0f, 1.0f));  // green
             if (ImGui::InputText("##Comm_Baud_Entry", ui.input_buffer_Baud, IM_ARRAYSIZE(ui.input_buffer_Baud))) {
                 serialManObj.setBaudRate(ui.input_buffer_Baud);
             }
+            ImGui::PopStyleColor();
             //-----------------------------Comm Baud Entry Text-----------------------------|
 
             ImGui::SameLine(); // Place the next widget on the same line
@@ -134,9 +138,9 @@ int terminal::update(const char* title) {
             //-----------------------------Connect Button-----------------------------|
             bool connect_btn_style_pushed = false;
             if (serialManObj.isConnected()) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));  // green
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 1.0f, 0.3f, 1.0f));  // lighter green
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));  // darker green
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.70f, 0.0f, 1.0f));  // green
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.7f, 0.3f, 1.0f));  // lighter green
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));  // darker green
                 connect_btn_style_pushed = true;
             }
 
@@ -186,7 +190,9 @@ int terminal::update(const char* title) {
             ImGui::Text("Char Buffer Size:");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(100);  // Set width of the input field
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.70f, 0.0f, 1.0f));  // green
             ImGui::InputText("##Scroll_Back_Entry", ui.input_buffer_scrollback_len, IM_ARRAYSIZE(ui.input_buffer_scrollback_len), ImGuiInputTextFlags_ReadOnly);
+            ImGui::PopStyleColor();
             if (ImGui::IsItemDeactivatedAfterEdit())
             {
                 size_t new_value = strtoul(ui.input_buffer_scrollback_len, nullptr, 10);
@@ -225,9 +231,11 @@ int terminal::update(const char* title) {
         if (ImGui::BeginTabItem("Send")) {
             //----------------------------- TX Data Entry Text-----------------------------|
             // Put content for Tab 3 here
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.70f, 0.0f, 1.0f));  // green
             ImGui::InputTextMultiline("##terminal_input", ui.input_buffer_Tx_Data, IM_ARRAYSIZE(ui.input_buffer_Tx_Data),
                 ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 5),
                 ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CtrlEnterForNewLine | ImGuiInputTextFlags_WordWrap);
+            ImGui::PopStyleColor();
             //----------------------------- TX Data Entry Text-----------------------------|
 
             //-----------------------------Send Button--------------------------|
