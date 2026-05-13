@@ -33,8 +33,8 @@ int terminal_output::update(std::deque<char>& _Term_rxBufferQueue, size_t newCha
         // control character checks
         switch (c) {
         case '\0':
-            LOG_DEBUG("NULL DETETCTED");
-            _displayLines += "ERROR NULL DETECTED\n";
+            LOG_ERROR("NULL DETECTED");
+            _displayLines += "ERROR: NULL DETECTED\n";
             break;
             //case '\r':
             //    break;
