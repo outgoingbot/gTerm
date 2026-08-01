@@ -11,7 +11,7 @@
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 0
-#define MONITOR_4K 1
+#define MONITOR_4K 0
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
