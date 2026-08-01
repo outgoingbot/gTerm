@@ -76,6 +76,21 @@ target_link_libraries(gTerm PRIVATE
     implot::implot
 )
 
+if(BUILD_TESTING)
+    add_executable(gTerm_data_parser_tests
+        tests/dataParserTests.cpp
+        dataParser.cpp
+    )
+    target_include_directories(gTerm_data_parser_tests PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+    target_link_libraries(gTerm_data_parser_tests PRIVATE
+        glfw
+        imgui::imgui
+    )
+    add_test(NAME gTerm.dataParser COMMAND gTerm_data_parser_tests)
+endif()
+
 # ─── Copy res folder next to the exe on every build ─────────────────────────────
 add_custom_command(
     TARGET gTerm POST_BUILD

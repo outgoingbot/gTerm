@@ -64,8 +64,16 @@ void mainMenu::update() {
             //something else of needed
         }
 
-        if (ImGui::Checkbox("Turbo Mode", &turbo_mode)) {
+        if (ImGui::Checkbox("Turbo Mode (uncapped)", &turbo_mode)) {
             //something else of needed
+        }
+
+        if (!turbo_mode && !v_sync_enabled) {
+            ImGui::SliderFloat("Frame Rate Limit", &frame_rate_slider_val,
+                frame_rate_min_val, frame_rate_max_val, "%.0f FPS");
+        }
+        else if (v_sync_enabled) {
+            ImGui::TextDisabled("Frame pacing: monitor V-Sync");
         }
 
         //ImGui::Separator();
@@ -88,13 +96,6 @@ void mainMenu::update() {
             
             if (ImGui::Checkbox("Show Ball", &show_ball)) {
                 //something else of needed
-            }
-            if (!turbo_mode) {
-                ImGui::SliderFloat("Min FPS (experimental)", &frame_rate_slider_val, frame_rate_min_val, frame_rate_max_val, "%.0f");
-
-                if (ImGui::IsItemDeactivatedAfterEdit()) {
-                    //do something
-                }
             }
             ImGui::Text("Theme Colors:");
             ImGui::SliderFloat("red", &globalColors.red, 0.0f, 1.0f, "%.2f");

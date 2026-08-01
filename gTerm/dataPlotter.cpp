@@ -1,18 +1,48 @@
 #include "dataPlotter.h"
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <iterator>
+#include <utility>
 
-dataPlotter::dataPlotter(const dataParser& p) : parser(p) {
-    // Initialize buffers if necessary
+dataPlotter::dataPlotter(dataParser& p) : parser(p), parserFormatRevision(p.getFormatRevision()) {
+    newSamples.reserve(256);
+    x_data.reserve(MAX_SAMPLES);
+    y_data.reserve(MAX_SAMPLES);
 }
 
-void dataPlotter::update(const std::deque<char>& rxDeque)
+void dataPlotter::update(const std::deque<char>& rxDeque, size_t newCharCount)
 {
-    ImGui::Begin("Live Serial Plot");
+    // A format change starts a new capture because old samples may have a
+    // different channel layout.
+    if (parserFormatRevision != parser.getFormatRevision()) {
+        currentSamples.clear();
+        parserFormatRevision = parser.getFormatRevision();
+    }
+
+    parser.parse(rxDeque, newCharCount, newSamples);
+    for (auto& sample : newSamples) {
+        currentSamples.push_back(std::move(sample));
+    }
+    while (currentSamples.size() > MAX_SAMPLES) {
+        currentSamples.pop_front();
+    }
+
+    if (!ImGui::Begin("Live Serial Plot")) {
+        ImGui::End();
+        return;
+    }
 
     ImGui::Checkbox("Auto Y Scale", &autoScale);
     ImGui::SameLine();
     ImGui::Checkbox("Follow X", &follow_x);
+
+    verticalSeparator();
+
+    ImGui::Checkbox("Time X Axis", &timeDomain);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Off: sample number\nOn: elapsed host receive time");
+    }
     
     verticalSeparator();
     
@@ -115,8 +145,6 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
     ImGui::Separator();
 
-    // ====================== Parse Data ======================
-    parser.parse(rxDeque, currentSamples);
     if (currentSamples.empty()) {
         ImGui::Text("Waiting for valid data...");
         ImGui::End();
@@ -124,27 +152,54 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
     }
     
 
-    size_t numAvailable = currentSamples.size();
-    size_t maxDisplayable = std::min(MAX_SAMPLES, numAvailable - MAX_SAMPLES_OFFSET);
-    size_t numChannels = parser.getChannelCount();
-    size_t displayCount = std::min(numAvailable, static_cast<size_t>(pointsToDisplay)); //testing fix for x axis
-    size_t startIdx = currentSamples.size() > displayCount ? currentSamples.size() - displayCount : 0;
+    const size_t numAvailable = currentSamples.size();
+    const size_t numChannels = std::min(parser.getChannelCount(), MAX_CHANNELS);
+    size_t startIdx = 0;
+    size_t displayCount = 0;
+    const double nowSeconds = parser.currentTimestampSeconds();
 
-    if (displayCount != lastPointsToDisplay) {
-        x_data.resize(displayCount);
-        lastPointsToDisplay = displayCount;
+    if (timeDomain) {
+        ImGui::PushItemWidth(300.0f);
+        ImGui::SliderFloat("Time Window (s)", &timeWindowSeconds, 0.5f, 30.0f, "%.1f");
+        ImGui::PopItemWidth();
+
+        if (follow_x) {
+            const double oldestVisibleTime = nowSeconds - static_cast<double>(timeWindowSeconds);
+            auto firstVisible = std::lower_bound(
+                currentSamples.begin(), currentSamples.end(), oldestVisibleTime,
+                [](const ParsedSample& sample, double timestamp) {
+                    return sample.timestampSeconds < timestamp;
+                });
+            if (firstVisible != currentSamples.begin()) {
+                --firstVisible; // preserve line continuity at the left edge
+            }
+            startIdx = static_cast<size_t>(std::distance(currentSamples.begin(), firstVisible));
+        }
+        displayCount = currentSamples.size() - startIdx;
     }
+    else {
+        ImGui::PushItemWidth(300.0f);
+        ImGui::SliderInt("Points to Display", &pointsToDisplay,
+            static_cast<int>(minDisplayable), static_cast<int>(MAX_SAMPLES));
+        ImGui::PopItemWidth();
+
+        displayCount = std::min(numAvailable, static_cast<size_t>(pointsToDisplay));
+        startIdx = numAvailable - displayCount;
+    }
+
+    x_data.resize(displayCount);
     for (size_t i = 0; i < displayCount; ++i) {
-        x_data[i] = static_cast<float>(i);
+        x_data[i] = timeDomain
+            ? currentSamples[startIdx + i].timestampSeconds
+            : static_cast<double>(currentSamples[startIdx + i].sampleNumber);
     }
 
     // Build groups - one channel can now be on multiple plots
     const auto& map = parser.getChannelToPlotMap();
     int numPlots = parser.getPlotCount();
 
-    ImGui::Text("numPlots: %d | maxDisplayable: %zu | pointsToDisplay: %d", numPlots, maxDisplayable, pointsToDisplay);
-    //ImGui::SliderInt("Points to Display", &pointsToDisplay, 8, static_cast<int>(MAX_SAMPLES));
-    ImGui::SliderInt("Points to Display", &pointsToDisplay, static_cast<int>(minDisplayable), static_cast<int>(maxDisplayable)); //Testing fix for X axis
+    ImGui::Text("Plots: %d | Buffered samples: %zu / %zu | Visible: %zu",
+        numPlots, numAvailable, MAX_SAMPLES, displayCount);
 
     std::vector<std::vector<int>> activeGroups(numPlots);
 
@@ -182,18 +237,33 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
         std::string title = "Plot " + std::to_string(p + 1);
         if (ImPlot::BeginPlot(title.c_str(), plotSize, flags_begin)) {
-            ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0.0, (double)maxDisplayable + 8);
-            ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_NoLabel);
+            const char* xAxisLabel = timeDomain ? "Time (s)" : "Sample";
+            const ImPlotAxisFlags yAxisFlags = ImPlotAxisFlags_NoLabel |
+                (autoScale ? ImPlotAxisFlags_AutoFit : ImPlotAxisFlags_None);
+            ImPlot::SetupAxes(xAxisLabel, nullptr, ImPlotAxisFlags_None, yAxisFlags);
 
-            if (follow_x) {
-                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, static_cast<double>(displayCount) - 1.0, ImGuiCond_Always);
+            if (timeDomain) {
+                ImPlot::SetupAxisFormat(ImAxis_X1, "%.2f");
+                if (follow_x) {
+                    ImPlot::SetupAxisLimits(ImAxis_X1,
+                        nowSeconds - static_cast<double>(timeWindowSeconds), nowSeconds, ImGuiCond_Always);
+                }
+                else if (displayCount > 0) {
+                    const double firstTime = currentSamples[startIdx].timestampSeconds;
+                    const double lastTime = currentSamples[startIdx + displayCount - 1].timestampSeconds;
+                    ImPlot::SetupAxisLimits(ImAxis_X1, firstTime,
+                        std::max(lastTime, firstTime + 0.001), ImGuiCond_Once);
+                }
             }
             else {
-                ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, static_cast<double>(displayCount) - 1.0, ImGuiCond_Once);
-            }
-
-            if (autoScale) {
-                ImPlot::SetupAxis(ImAxis_Y1, NULL, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel);
+                const double firstBufferedSample = static_cast<double>(currentSamples.front().sampleNumber);
+                const double lastBufferedSample = static_cast<double>(currentSamples.back().sampleNumber);
+                ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, firstBufferedSample, lastBufferedSample + 8.0);
+                const double firstVisibleSample = static_cast<double>(currentSamples[startIdx].sampleNumber);
+                const double lastVisibleSample = static_cast<double>(currentSamples[startIdx + displayCount - 1].sampleNumber);
+                ImPlot::SetupAxisLimits(ImAxis_X1, firstVisibleSample,
+                    std::max(lastVisibleSample, firstVisibleSample + 1.0),
+                    follow_x ? ImGuiCond_Always : ImGuiCond_Once);
             }
 
             for (int ch : group) {
@@ -204,17 +274,18 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
                 spec.LineColor = color;
                 spec.LineWeight = plot_line_weight_slider_var;
 
-                // Reuse buffer instead of allocating new one every time
                 y_data.resize(displayCount);
 
                 for (size_t i = 0; i < displayCount; ++i) {
                     size_t idx = startIdx + i;
                     y_data[i] = (ch < static_cast<int>(currentSamples[idx].values.size()))
-                        ? static_cast<float>(currentSamples[idx].values[ch])
-                        : 0.0f;
+                        ? currentSamples[idx].values[ch]
+                        : 0.0;
                 }
 
-                ImPlot::PlotLine(label.c_str(), x_data.data(), y_data.data(), static_cast<int>(displayCount), spec);
+                if (displayCount > 0) {
+                    ImPlot::PlotLine(label.c_str(), x_data.data(), y_data.data(), static_cast<int>(displayCount), spec);
+                }
             }
 
             ImPlot::EndPlot();
@@ -235,7 +306,11 @@ void dataPlotter::update(const std::deque<char>& rxDeque)
 
 void dataPlotter::clearSamples() {
     currentSamples.clear();
-    currentSamples.shrink_to_fit();
+    newSamples.clear();
+    x_data.clear();
+    y_data.clear();
+    parser.resetStreamingState();
+    parserFormatRevision = parser.getFormatRevision();
     pointsToDisplay = 128;
 }
 

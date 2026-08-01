@@ -66,7 +66,7 @@ private:
 	virtualComm* _vComPort; //the virtualComport class is local to serialManager class.
 
 	std::thread* serial_IO_Thread = nullptr;
-	std::atomic<bool> threadIsRunning;
+	std::atomic<bool> threadIsRunning{ false };
 
 	std::deque<char> rxQueue; //this is the master rx buffer to be used by all other classes
 	std::mutex rxMutex;
@@ -76,5 +76,5 @@ private:
 
 	void serial_IO_Loop();
 
-	size_t deubug_kernel_num_chars_copied;	
+	std::atomic<size_t> deubug_kernel_num_chars_copied{ 0 };
 };

@@ -20,11 +20,12 @@ int terminal::update(const char* title) {
 
     if (ui.button_pause_serial == false) {
         //get the new characters pushed from the serial thread
-        size_t newCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);
+        newRxCharCount = serialManObj.getNewDataFromRxQueue(_Term_rxQueue);
         //Send the buffer and number of new chars to be displayed
-        term_out.update(_Term_rxQueue, newCharCount, serialManObj.isConnected());
+        term_out.update(_Term_rxQueue, newRxCharCount, serialManObj.isConnected());
     }
     else {
+        newRxCharCount = 0;
         term_out.update(_Term_rxQueue, 0, serialManObj.isConnected());
     }
 
@@ -300,6 +301,7 @@ void terminal::StoreConfig() {
 void terminal::clearRxQueue() {
     _Term_rxQueue.clear();
     _Term_rxQueue.shrink_to_fit();
+    newRxCharCount = 0;
     clear_samples = true;
     LOG_INFO("gTerm terminal rxQueue Cleared");
 }

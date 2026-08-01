@@ -14,7 +14,6 @@ serialManager::serialManager(){
 	setBaudRate("115200");
 #endif
 
-	deubug_kernel_num_chars_copied = 0;
 }
 
 
@@ -31,8 +30,8 @@ bool serialManager::connect() {
 		LOG_INFO("gTerm serialManager Comm : " << getCommPort());
 		LOG_INFO("gTerm serialManager Baud : " << getBaudRate());
 		LOG_SUCCESS("gTerm seriManager Thread Started");
-		serial_IO_Thread = new std::thread(&serialManager::serial_IO_Loop, this); ///retrieve buffer
 		threadIsRunning = true;
+		serial_IO_Thread = new std::thread(&serialManager::serial_IO_Loop, this); ///retrieve buffer
 		return true;
 	}
 	else {
@@ -170,7 +169,7 @@ void serialManager::serial_IO_Loop() {
 			//TODO: Do something here to handle error?
 		}
 		//DEBUG Keep track of the char copied from the kernel driver
-		deubug_kernel_num_chars_copied = bytesRead;
+		deubug_kernel_num_chars_copied = bytesRead > 0 ? static_cast<size_t>(bytesRead) : 0;
 	}
 	LOG_INFO("gTerm serialManager serial_IO_Thread Thread Exiting Cleanly");
 }
@@ -203,7 +202,8 @@ void serialManager::stopThread() {
 
 
 void serialManager::debug_getKernelcharCount(size_t* len) {
-	std::lock_guard<std::mutex> lock(rxMutex);
-	*len = deubug_kernel_num_chars_copied;  // Assignment operator does a full copy
+	if (len) {
+		*len = deubug_kernel_num_chars_copied.load();
+	}
 }
 

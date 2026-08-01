@@ -5,11 +5,13 @@
 #include "external/stb_image.h"
 #include "gTerm.h"
 #include "ConfigManager.h"
+#include <algorithm>
+#include <chrono>
 
 //#include "external/ImGuiFileDialog/ImGuiFileDialog.h"
 using namespace std;
 #define IGNORE_SAVED_IMGUI_INI 0
-#define MONITOR_4K 0
+#define MONITOR_4K 1
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
@@ -21,9 +23,6 @@ using namespace std;
 #else
 #define SCALE_FACTOR 1.0
 #endif
-
-float globalFrametime = 1 / DEFAULT_FRAME_RATE;
-
 
 int main() {
     // Initialize GLFW
@@ -89,6 +88,7 @@ int main() {
     ImGui::StyleColorsDark(); //Set theme base Dark
     ImVec4 accent = ImVec4(0.65f, 0.35f, 0.00f, 1.00f); //add Orange Accent
     setgTermStyles(style, accent);
+    ImVec4 appliedAccent = accent;
 
     // Set up platform/renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -145,14 +145,22 @@ int main() {
     main_menu.currentFontSize = 12.0f; // Font starting size
 #endif
 
+    using FrameClock = std::chrono::steady_clock;
+    auto nextFrameTime = FrameClock::now();
+    bool softwareFrameLimiterWasActive = false;
+
     // Main loop
     while (!glfwWindowShouldClose(window) && !main_menu.exit_app) {
 
         //----------------------------- DEBUG THEME COLORS -----------------------|
         //update theme colors if debug enabled
         if (main_menu.show_debug) {
-            ImVec4 accent = ImVec4(main_menu.globalColors.red, main_menu.globalColors.green, main_menu.globalColors.blue, main_menu.globalColors.alpha);
-            setgTermStyles(style, accent);
+            const ImVec4 newAccent = ImVec4(main_menu.globalColors.red, main_menu.globalColors.green, main_menu.globalColors.blue, main_menu.globalColors.alpha);
+            if (newAccent.x != appliedAccent.x || newAccent.y != appliedAccent.y ||
+                newAccent.z != appliedAccent.z || newAccent.w != appliedAccent.w) {
+                setgTermStyles(style, newAccent);
+                appliedAccent = newAccent;
+            }
         }
         //----------------------------- DEBUG THEME COLORS -----------------------|
 
@@ -162,15 +170,43 @@ int main() {
         
         //----------------------------- Update glfw from main menu settings -----------------------|
 
-        if (main_menu.low_power_on_disconnect && term.isConnected == false) {
+        const bool lowPowerIdle = main_menu.low_power_on_disconnect && !term.isConnected;
+        const bool useSoftwareFrameLimiter = !lowPowerIdle && !main_menu.turbo_mode && !main_menu.v_sync_enabled;
+
+        if (lowPowerIdle) {
             glfwWaitEvents();
+            softwareFrameLimiterWasActive = false;
         }
-        else if (!main_menu.turbo_mode) {
-            globalFrametime = 1 / main_menu.frame_rate_slider_val;
-            glfwWaitEventsTimeout(globalFrametime); // ~ 5 to 240 fps FPS max (timout is non-liner and non anything. this method is weird)
+        else if (useSoftwareFrameLimiter) {
+            const double targetFrameSeconds = 1.0 / std::max(main_menu.frame_rate_slider_val, 1.0f);
+            const auto targetFrameDuration = std::chrono::duration_cast<FrameClock::duration>(
+                std::chrono::duration<double>(targetFrameSeconds));
+            auto now = FrameClock::now();
+
+            if (!softwareFrameLimiterWasActive || now > nextFrameTime + targetFrameDuration) {
+                nextFrameTime = now;
+            }
+
+            bool waitedForEvents = false;
+            while (now < nextFrameTime) {
+                const double remainingSeconds = std::chrono::duration<double>(nextFrameTime - now).count();
+                glfwWaitEventsTimeout(remainingSeconds);
+                waitedForEvents = true;
+                now = FrameClock::now();
+            }
+            if (!waitedForEvents) {
+                glfwPollEvents();
+            }
+
+            nextFrameTime += targetFrameDuration;
+            softwareFrameLimiterWasActive = true;
         }
         else {
-            glfwPollEvents();                    // Stay fully responsive
+            // VSync already paces glfwSwapBuffers; adding another timer here
+            // causes uneven presentation and can cut the effective frame rate.
+            glfwPollEvents();
+            nextFrameTime = FrameClock::now();
+            softwareFrameLimiterWasActive = false;
         }
         
         
@@ -243,7 +279,7 @@ int main() {
         if (dParser.dataParse_enable && dParser.send_to_plot) {
             ImGui::SetNextWindowPos(ImVec2(350, 30), ImGuiCond_FirstUseEver); // initial position only once
             ImGui::SetNextWindowSize(ImVec2(1500, 800), ImGuiCond_FirstUseEver); // optional size
-            dPlotter.update(term.getSafeRxQueue());
+            dPlotter.update(term.getSafeRxQueue(), term.getNewRxCharCount());
         }
         
         if (main_menu.show_debug) {

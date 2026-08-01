@@ -10,19 +10,17 @@
 
 class dataPlotter {
 public:
-    dataPlotter(const dataParser& p);
+    dataPlotter(dataParser& p);
     ~dataPlotter() = default;
-    static constexpr size_t MAX_SAMPLES_OFFSET = 64; // hacky fix to give some headroom to number of samples to plot due to ascii conversion variation
     static constexpr size_t MAX_SAMPLES = 4096;   // default value
     static constexpr size_t MAX_CHANNELS = 128;    // safety limit
 
-    const dataParser& parser;
+    dataParser& parser;
 
 
 
     // UI / settings
     int pointsToDisplay = 128; //default value. may consider adjusting dynamically based on currentSamples size
-    size_t lastPointsToDisplay = 0;
     const size_t minDisplayable = 8;
     
 
@@ -31,7 +29,7 @@ public:
 
 
 
-    void update(const std::deque<char>& rxDeque);
+    void update(const std::deque<char>& rxDeque, size_t newCharCount);
     
     void clearSamples();
 
@@ -40,13 +38,17 @@ private:
     
     //effort to imrove perfmance
     // Plotting buffers - these will be resized dynamically
-    std::vector<ParsedSample> currentSamples;
-    std::vector<float> x_data;
-    std::vector<float> y_data;
+    std::deque<ParsedSample> currentSamples;
+    std::vector<ParsedSample> newSamples;
+    std::vector<double> x_data;
+    std::vector<double> y_data;
+	std::uint64_t parserFormatRevision = 0;
 
     // UI State
     bool autoScale = true;
     bool follow_x = true;
+    bool timeDomain = false;
+    float timeWindowSeconds = 10.0f;
     bool show_advanced_syle_setting = false;
     
     float plot_line_weight_slider_var = 4.00f;

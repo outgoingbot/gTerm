@@ -16,11 +16,15 @@ Data parsing class.
 #include <string>
 #include <optional>
 #include <cctype>
+#include <chrono>
+#include <cstdint>
 #include "ConfigManager.h"
 #include "logger.h"
 
 struct ParsedSample {
 	std::vector<double> values;   // one value per field in the format string
+	double timestampSeconds = 0.0; // monotonic host receive time, relative to the current capture
+	std::uint64_t sampleNumber = 0;
 };
 
 
@@ -45,9 +49,12 @@ public:
 	// Call this whenever the user changes format, delimiter, or eol
 	void compile();
 
-	// Main parsing function - replaces your old ParseData()
-	// Returns all successfully parsed samples from the deque
-	void parse(const std::deque<char>& deque, std::vector<ParsedSample>& outSamples) const;
+	// Parse only the newest bytes appended to deque. Incomplete lines are retained
+	// between calls so the render loop never needs to reparse the receive history.
+	void parse(const std::deque<char>& deque, size_t newCharCount, std::vector<ParsedSample>& outSamples);
+	void resetStreamingState();
+	double currentTimestampSeconds() const;
+	std::uint64_t getFormatRevision() const { return formatRevision; }
 
 	// Convenience: get current number of expected channels (after compile())
 	size_t getChannelCount() const;
@@ -97,6 +104,12 @@ private:
 	};
 
 	std::vector<FormatSpecifier> specifiers;
+	std::string pendingLine;
+	bool discardingOverlongLine = false;
+	std::uint64_t nextSampleNumber = 0;
+	std::uint64_t formatRevision = 0;
+	std::chrono::steady_clock::time_point timestampOrigin = std::chrono::steady_clock::now();
+	static constexpr size_t MAX_PENDING_LINE_LENGTH = 8192;
 
 	std::vector<FormatSpecifier> parse_specifiers(const std::string& fmt) const;
 	std::vector<std::string> split_line(const std::string& line) const;

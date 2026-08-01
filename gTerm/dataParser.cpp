@@ -1,4 +1,9 @@
 #include "dataParser.h"
+#include <cerrno>
+#include <charconv>
+#include <cstdlib>
+#include <system_error>
+#include <utility>
 
 dataParser::dataParser(AppConfig& cfg) : configRef(cfg) {
     compile();  // compile default format
@@ -18,32 +23,64 @@ dataParser::~dataParser(void) {
 
 void dataParser::compile() {
     specifiers = parse_specifiers(format);
+    resetStreamingState();
+    ++formatRevision;
 }
 
 size_t dataParser::getChannelCount() const {
     return specifiers.size();
 }
 
-void dataParser::parse(const std::deque<char>& deque, std::vector<ParsedSample>& outSamples) const
+void dataParser::resetStreamingState()
+{
+    pendingLine.clear();
+    discardingOverlongLine = false;
+    nextSampleNumber = 0;
+    timestampOrigin = std::chrono::steady_clock::now();
+}
+
+double dataParser::currentTimestampSeconds() const
+{
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - timestampOrigin).count();
+}
+
+void dataParser::parse(const std::deque<char>& deque, size_t newCharCount, std::vector<ParsedSample>& outSamples)
 {
     outSamples.clear();
 
-    if (deque.empty() || specifiers.empty()) return;
+    if (deque.empty() || newCharCount == 0 || specifiers.empty()) return;
 
-    std::string data(deque.begin(), deque.end());
-    std::vector<ParsedSample> samples;
+    // The terminal queue is bounded. If a single burst exceeded that bound,
+    // process the newest bytes that are still available instead of underflowing.
+    const size_t availableNewChars = std::min(newCharCount, deque.size());
+    const size_t firstNewChar = deque.size() - availableNewChars;
 
-    size_t pos = 0;
-    while (pos < data.size()) {
-        size_t nl_pos = data.find(eol, pos);
-        if (nl_pos == std::string::npos) break;
+    for (size_t i = firstNewChar; i < deque.size(); ++i) {
+        const char c = deque[i];
 
-        std::string line = data.substr(pos, nl_pos - pos);
-        pos = nl_pos + 1;
+        if (c != eol) {
+            if (!discardingOverlongLine) {
+                if (pendingLine.size() < MAX_PENDING_LINE_LENGTH) {
+                    pendingLine.push_back(c);
+                }
+                else {
+                    // Malformed/fuzz input without EOL must not grow memory forever.
+                    pendingLine.clear();
+                    discardingOverlongLine = true;
+                }
+            }
+            continue;
+        }
 
-        if (line.empty()) continue;
+        if (discardingOverlongLine) {
+            discardingOverlongLine = false;
+            continue;
+        }
 
-        auto tokens = split_line(line);
+        if (pendingLine.empty()) continue;
+
+        auto tokens = split_line(pendingLine);
+        pendingLine.clear();
         if (tokens.empty()) continue;
 
         ParsedSample sample;
@@ -55,11 +92,11 @@ void dataParser::parse(const std::deque<char>& deque, std::vector<ParsedSample>&
         }
 
         if (!sample.values.empty()) {
-            samples.push_back(std::move(sample));
+            sample.timestampSeconds = currentTimestampSeconds();
+            sample.sampleNumber = nextSampleNumber++;
+            outSamples.push_back(std::move(sample));
         }
     }
-
-    outSamples = std::move(samples);
 }
 
 std::vector<dataParser::FormatSpecifier> dataParser::parse_specifiers(const std::string& fmt) const {
@@ -128,23 +165,39 @@ std::vector<std::string> dataParser::split_line(const std::string& line) const {
 std::optional<double> dataParser::parse_token(const std::string& token, const FormatSpecifier& spec) const {
     if (token.empty()) return std::nullopt;
 
-    try {
-        if (spec.type == FormatSpecifier::Type::Float) {
-            return std::stod(token);
-        }
-        else if (spec.type == FormatSpecifier::Type::SignedInt) {
-            return static_cast<double>(std::stoll(token));
-        }
-        else if (spec.type == FormatSpecifier::Type::UnsignedInt) {
-            return static_cast<double>(std::stoull(token));
-        }
-        else if (spec.type == FormatSpecifier::Type::Hex) {
-            return static_cast<double>(std::stoull(token, nullptr, 16));
+    const char* begin = token.data();
+    const char* end = begin + token.size();
+
+    if (spec.type == FormatSpecifier::Type::Float) {
+        char* parsedEnd = nullptr;
+        errno = 0;
+        const double value = std::strtod(begin, &parsedEnd);
+        if (parsedEnd == end && parsedEnd != begin && errno != ERANGE) {
+            return value;
         }
     }
-    catch (...) {
-        // Failed to parse -> return 0.0 or you can change to NAN
+    else if (spec.type == FormatSpecifier::Type::SignedInt) {
+        long long value = 0;
+        const auto result = std::from_chars(begin, end, value, 10);
+        if (result.ec == std::errc{} && result.ptr == end) {
+            return static_cast<double>(value);
+        }
     }
+    else if (spec.type == FormatSpecifier::Type::UnsignedInt) {
+        unsigned long long value = 0;
+        const auto result = std::from_chars(begin, end, value, 10);
+        if (result.ec == std::errc{} && result.ptr == end) {
+            return static_cast<double>(value);
+        }
+    }
+    else if (spec.type == FormatSpecifier::Type::Hex) {
+        unsigned long long value = 0;
+        const auto result = std::from_chars(begin, end, value, 16);
+        if (result.ec == std::errc{} && result.ptr == end) {
+            return static_cast<double>(value);
+        }
+    }
+
     return std::nullopt;
 }
 
@@ -220,39 +273,42 @@ int dataParser::update()
             //std::vector<bool> checked;
             ImGui::PushItemWidth(200.0f);
             size_t numChannels = getChannelCount();
-            if (numChannels == 0) return 0;
-
-            size_t totalSize = numChannels * numChannels;
-            if (channelSelected.size() != totalSize) {
-                channelSelected.resize(totalSize, 0);
+            if (numChannels == 0) {
+                ImGui::TextUnformatted("Add at least one valid format specifier to configure plots.");
             }
+            else {
+                size_t totalSize = numChannels * numChannels;
+                if (channelSelected.size() != totalSize) {
+                    channelSelected.resize(totalSize, 0);
+                }
 
-            for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
-                std::string comboLabel = "##Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
-                std::string preview = "Plot " + std::to_string(plot_idx + 1) + " channels";
+                for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
+                    std::string comboLabel = "##Select Channels for Plot " + std::to_string(plot_idx + 1) + "##Plot" + std::to_string(plot_idx);
+                    std::string preview = "Plot " + std::to_string(plot_idx + 1) + " channels";
 
-                if (ImGui::BeginCombo(comboLabel.c_str(), preview.c_str())) {
+                    if (ImGui::BeginCombo(comboLabel.c_str(), preview.c_str())) {
 
-                    for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
-                        size_t idx = plot_idx * numChannels + chn_idx;
+                        for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
+                            size_t idx = plot_idx * numChannels + chn_idx;
 
-                        bool isChecked = (channelSelected[idx] != 0);
+                            bool isChecked = (channelSelected[idx] != 0);
 
-                        if (ImGui::Checkbox(("Channel " + std::to_string(chn_idx + 1)).c_str(), &isChecked)) {
-                            channelSelected[idx] = isChecked ? 1 : 0;
+                            if (ImGui::Checkbox(("Channel " + std::to_string(chn_idx + 1)).c_str(), &isChecked)) {
+                                channelSelected[idx] = isChecked ? 1 : 0;
 
-                            if (isChecked) {
-                                // Add channel to this plot
-                                setChannelToPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
-                            }
-                            else {
-                                // REMOVE channel from this plot
-                                removeChannelFromPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+                                if (isChecked) {
+                                    // Add channel to this plot
+                                    setChannelToPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+                                }
+                                else {
+                                    // REMOVE channel from this plot
+                                    removeChannelFromPlot(static_cast<int>(chn_idx), static_cast<int>(plot_idx));
+                                }
                             }
                         }
-                    }
 
-                    ImGui::EndCombo();
+                        ImGui::EndCombo();
+                    }
                 }
             }
             ImGui::PopItemWidth();
@@ -334,6 +390,7 @@ void dataParser::ApplyConfig()
     //TODO: shitty copy paste from combo box
     //needs to be a method. prob crash if there are wrong channels saved like this
     size_t numChannels = getChannelCount();
+    channelSelected.resize(numChannels * numChannels, 0);
     for (size_t plot_idx = 0; plot_idx < numChannels; ++plot_idx) {
         for (size_t chn_idx = 0; chn_idx < numChannels; ++chn_idx) {
             size_t idx = plot_idx * numChannels + chn_idx;

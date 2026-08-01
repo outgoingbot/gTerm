@@ -31,6 +31,7 @@ public:
 
 	//public method to share thread safe rxQueue copy
 	const std::deque<char>& getSafeRxQueue() const;
+	size_t getNewRxCharCount() const { return newRxCharCount; }
 	
 	void ApplyConfig(); //apply configs from json to class memebers "OPEN button in mainMenu"
 	void StoreConfig(); //save vars to AppConfig "SAVE button in mainMenu"
@@ -74,4 +75,5 @@ private:
 
 	//holds a copy of the serial Manager rxQueue.
 	std::deque<char> _Term_rxQueue;
+	size_t newRxCharCount = 0;
 };
