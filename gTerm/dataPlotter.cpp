@@ -11,8 +11,10 @@ dataPlotter::dataPlotter(dataParser& p) : parser(p), parserFormatRevision(p.getF
     y_data.reserve(MAX_SAMPLES);
 }
 
-void dataPlotter::update(const std::deque<char>& rxDeque, size_t newCharCount)
+void dataPlotter::update(const std::deque<char>& rxDeque, size_t newCharCount, bool captureRunning)
 {
+    parser.setTimestampClockRunning(captureRunning);
+
     // A format change starts a new capture because old samples may have a
     // different channel layout.
     if (parserFormatRevision != parser.getFormatRevision()) {

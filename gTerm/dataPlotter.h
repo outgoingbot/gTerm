@@ -29,7 +29,7 @@ public:
 
 
 
-    void update(const std::deque<char>& rxDeque, size_t newCharCount);
+    void update(const std::deque<char>& rxDeque, size_t newCharCount, bool captureRunning);
     
     void clearSamples();
 

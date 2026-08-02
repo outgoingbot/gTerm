@@ -53,6 +53,7 @@ public:
 	// between calls so the render loop never needs to reparse the receive history.
 	void parse(const std::deque<char>& deque, size_t newCharCount, std::vector<ParsedSample>& outSamples);
 	void resetStreamingState();
+	void setTimestampClockRunning(bool running);
 	double currentTimestampSeconds() const;
 	std::uint64_t getFormatRevision() const { return formatRevision; }
 
@@ -108,7 +109,9 @@ private:
 	bool discardingOverlongLine = false;
 	std::uint64_t nextSampleNumber = 0;
 	std::uint64_t formatRevision = 0;
-	std::chrono::steady_clock::time_point timestampOrigin = std::chrono::steady_clock::now();
+	bool timestampClockRunning = false;
+	double accumulatedTimestampSeconds = 0.0;
+	std::chrono::steady_clock::time_point timestampRunStartedAt = std::chrono::steady_clock::now();
 	static constexpr size_t MAX_PENDING_LINE_LENGTH = 8192;
 
 	std::vector<FormatSpecifier> parse_specifiers(const std::string& fmt) const;

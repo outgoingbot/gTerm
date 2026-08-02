@@ -36,12 +36,34 @@ void dataParser::resetStreamingState()
     pendingLine.clear();
     discardingOverlongLine = false;
     nextSampleNumber = 0;
-    timestampOrigin = std::chrono::steady_clock::now();
+    timestampClockRunning = false;
+    accumulatedTimestampSeconds = 0.0;
+    timestampRunStartedAt = std::chrono::steady_clock::now();
+}
+
+void dataParser::setTimestampClockRunning(bool running)
+{
+    if (running == timestampClockRunning) return;
+
+    const auto now = std::chrono::steady_clock::now();
+    if (running) {
+        timestampRunStartedAt = now;
+    }
+    else {
+        accumulatedTimestampSeconds +=
+            std::chrono::duration<double>(now - timestampRunStartedAt).count();
+    }
+    timestampClockRunning = running;
 }
 
 double dataParser::currentTimestampSeconds() const
 {
-    return std::chrono::duration<double>(std::chrono::steady_clock::now() - timestampOrigin).count();
+    if (!timestampClockRunning) {
+        return accumulatedTimestampSeconds;
+    }
+
+    return accumulatedTimestampSeconds +
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - timestampRunStartedAt).count();
 }
 
 void dataParser::parse(const std::deque<char>& deque, size_t newCharCount, std::vector<ParsedSample>& outSamples)

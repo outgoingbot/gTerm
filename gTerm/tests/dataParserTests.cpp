@@ -1,9 +1,11 @@
 #include "dataParser.h"
 
+#include <chrono>
 #include <cmath>
 #include <deque>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -28,6 +30,7 @@ int main()
 {
     AppConfig config;
     dataParser parser(config);
+    parser.setTimestampClockRunning(true);
     std::deque<char> receiveHistory;
     std::vector<ParsedSample> samples;
     bool passed = true;
@@ -44,6 +47,16 @@ int main()
     }
     const double firstTimestamp = samples.empty() ? 0.0 : samples[0].timestampSeconds;
 
+    parser.setTimestampClockRunning(false);
+    const double pausedTimestamp = parser.currentTimestampSeconds();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    passed &= expect(parser.currentTimestampSeconds() == pausedTimestamp,
+        "the timestamp clock must remain frozen while capture is paused");
+    parser.setTimestampClockRunning(true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    passed &= expect(parser.currentTimestampSeconds() > pausedTimestamp,
+        "the timestamp clock must continue from its frozen value after resume");
+
     parser.parse(receiveHistory, 0, samples);
     passed &= expect(samples.empty(), "a frame with no new bytes must not reparse receive history");
 
@@ -56,6 +69,9 @@ int main()
 
     parser.format = "%i,%x,%u";
     parser.compile();
+    passed &= expect(parser.currentTimestampSeconds() == 0.0,
+        "compiling a format must reset the capture clock in a paused state");
+    parser.setTimestampClockRunning(true);
     receiveHistory.clear();
     parser.parse(receiveHistory, append(receiveHistory, "-3,ff,7\n"), samples);
     passed &= expect(samples.size() == 1, "integer and hexadecimal formats must parse");

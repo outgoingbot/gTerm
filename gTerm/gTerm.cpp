@@ -279,7 +279,7 @@ int main() {
         if (dParser.dataParse_enable && dParser.send_to_plot) {
             ImGui::SetNextWindowPos(ImVec2(350, 30), ImGuiCond_FirstUseEver); // initial position only once
             ImGui::SetNextWindowSize(ImVec2(1500, 800), ImGuiCond_FirstUseEver); // optional size
-            dPlotter.update(term.getSafeRxQueue(), term.getNewRxCharCount());
+            dPlotter.update(term.getSafeRxQueue(), term.getNewRxCharCount(), term.isPlottingActive());
         }
         
         if (main_menu.show_debug) {
